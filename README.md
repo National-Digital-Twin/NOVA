@@ -1,6 +1,6 @@
 # README  
 
-**Repository:** `[archetypes]`  
+**Repository:** `NOVA`  
 **Description:** `[This repository has been put together to as a template repository, to support new repository creation]`  
 **SPDX-License-Identifier:** `Apache-2.0 AND OGL-UK-3.0 `  
 
@@ -81,8 +81,8 @@ Follow these steps to get started quickly with this repository. For detailed ins
 
 ### 1. Download and Build  
 ```sh  
-git clone https://github.com/[archetypes].git  
-cd [archetypes]  
+git clone https://github.com/NOVA.git  
+cd NOVA  
 ```
 
 ### 2. Run Build Version  

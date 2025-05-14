@@ -1,0 +1,16 @@
+{
+    "name": "nova",
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+    "build": "(cd ./frontend && npm run build)",
+    "dev:frontend": "npm run start --workspace frontend",
+    "lint": "npm run lint --workspace frontend",
+    "clean": "rm -rf ./**/*dist && rm -rf node_modules && rm -rf ./**/node_modules"
+  },
+    "workspaces": [
+      "frontend"
+    ],
+    "private": true
+  }
+  
