@@ -5,7 +5,7 @@ function App() {
   return (
     <div style={{ padding: '2rem' }}>
       <Typography variant="h4" gutterBottom>
-        Hello, World
+        NOVA
       </Typography>
     </div>
   );
