@@ -23,7 +23,7 @@ spec:
             Access-Control-Allow-Origin: "placeholder"
       route:
         - destination:
-            host: nova
+            host: nova-frontend
             port:
               number: 80
 
@@ -42,6 +42,6 @@ spec:
             Access-Control-Allow-Origin: "placeholder"
       route:
         - destination:
-            host: nova
+            host: nova-frontend
             port:
               number: 80
