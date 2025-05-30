@@ -4,7 +4,7 @@
     "type": "module",
     "scripts": {
     "build": "(cd ./frontend && npm run build)",
-    "dev:frontend": "npm run start --workspace frontend",
+    "dev:start": "npm run dev --workspace frontend",
     "lint": "npm run lint --workspace frontend",
     "clean": "rm -rf ./**/*dist && rm -rf node_modules && rm -rf ./**/node_modules"
   },

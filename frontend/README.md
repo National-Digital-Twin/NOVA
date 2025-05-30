@@ -14,13 +14,13 @@ This is a React + Vite application featuring a full-screen 3D map powered by Map
 
 1. Clone the repository
 2. Install dependencies:
-   ```
-   npm install
-   ```
+    ```
+    npm install
+    ```
 3. Create a `.env` file in the root of the frontend directory with your Mapbox access token:
-   ```
-   VITE_MAPBOX_ACCESS_TOKEN=your_mapbox_access_token
-   ```
+    ```
+    VITE_MAPBOX_ACCESS_TOKEN=your_mapbox_access_token
+    ```
 
 ## Getting a Mapbox Access Token
 
