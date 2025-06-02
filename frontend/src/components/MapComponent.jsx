@@ -66,9 +66,9 @@ function MapComponent() {
         <Box
             sx={{
                 width: '100vw',
-                height: 'calc(100vh - 30px)',
+                height: 'calc(100vh - var(--header-height))',
                 position: 'absolute',
-                top: '30px',
+                top: 'var(--header-height)',
                 left: 0,
             }}
         >

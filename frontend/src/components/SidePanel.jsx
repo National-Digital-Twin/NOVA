@@ -30,12 +30,17 @@ function SidePanel({ onLayerToggle, layerVisibility, onDrawerToggle, isOpen = tr
 
             <Drawer
                 sx={{
-                    top: 'var(--header-height)',
-                    display: 'grid',
-                    width: '320px',
-                    height: 'calc(100% - var(--header-height))',
-                    backgroundColor: 'var(--background-color-white)',
-                    boxShadow: 'var(--elevation-3)',
+                    '& .MuiDrawer-paper': {
+                        top: 'var(--header-height)',
+                        width: '320px',
+                        height: 'calc(100% - var(--header-height))',
+                        backgroundColor: 'var(--background-color-white)',
+                        boxShadow: 'var(--elevation-3)',
+                    },
+                    '& .MuiBackdrop-root': {
+                        top: 'var(--header-height)',
+                        height: 'calc(100% - var(--header-height))',
+                    },
                 }}
                 variant="temporary"
                 anchor="left"
