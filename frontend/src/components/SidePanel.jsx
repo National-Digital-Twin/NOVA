@@ -1,8 +1,8 @@
 import { ChevronLeft, LayersOutlined, Menu } from '@mui/icons-material';
-import { Box, Divider, Drawer, List, ListItem, ListItemText, Switch, Tab, Tabs, Typography } from '@mui/material';
+import { Box, Drawer, IconButton, List, ListItem, ListItemText, Switch, Tab, Tabs } from '@mui/material';
 import React, { useState } from 'react';
+import './SidePanel.scss';
 
-// TabPanel component to handle tab content
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
 
@@ -21,89 +21,41 @@ function SidePanel({ onLayerToggle, layerVisibility, onDrawerToggle, isOpen = tr
     };
 
     return (
-        <>
-            {/* Toggle button that appears when drawer is closed */}
+        <div className="side-panel">
             {!isOpen && (
-                <Box
-                    sx={{
-                        position: 'absolute',
-                        top: '10px',
-                        left: '10px',
-                        zIndex: 1200,
-                    }}
-                >
-                    <Box
-                        sx={{
-                            bgcolor: 'white',
-                            borderRadius: '4px',
-                            boxShadow: '0 0 0 2px rgba(0,0,0,.1)',
-                            p: 0.5,
-                            cursor: 'pointer',
-                            '&:hover': {
-                                bgcolor: '#f8f8f8',
-                            },
-                        }}
-                        onClick={onDrawerToggle}
-                    >
-                        <Menu />
-                    </Box>
+                <Box className="side-panel__menu-button" onClick={onDrawerToggle}>
+                    <Menu sx={{ color: 'primary.main' }} />
                 </Box>
             )}
 
             <Drawer
+                sx={{
+                    top: 'var(--header-height)',
+                    display: 'grid',
+                    width: '320px',
+                    height: 'calc(100% - var(--header-height))',
+                    backgroundColor: 'var(--background-color-white)',
+                    boxShadow: 'var(--elevation-3)',
+                }}
                 variant="temporary"
                 anchor="left"
                 open={isOpen}
                 onClose={onDrawerToggle}
-                ModalProps={{
-                    keepMounted: true, // Better open performance on mobile
-                }}
-                sx={{
-                    '& .MuiDrawer-paper': {
-                        width: 300,
-                        boxSizing: 'border-box',
-                        top: '30px', // Adjust to match header height
-                        height: 'calc(100% - 30px)', // Adjust to match header height
-                    },
-                }}
+                ModalProps={{ keepMounted: true }}
             >
                 <Box sx={{ overflow: 'auto' }}>
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            p: 1,
-                        }}
-                    >
-                        <Box sx={{ borderBottom: 1, borderColor: 'divider', flexGrow: 1 }}>
+                    <Box className="side-panel__header">
+                        <Box sx={{ flexGrow: 1 }}>
                             <Tabs value={tabValue} onChange={handleTabChange} aria-label="side panel tabs">
                                 <Tab icon={<LayersOutlined />} label="Layers" id="tab-0" aria-controls="tabpanel-0" />
                             </Tabs>
                         </Box>
-                        <Box
-                            sx={{
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                p: 0.5,
-                                borderRadius: '4px',
-                                '&:hover': {
-                                    bgcolor: 'rgba(0, 0, 0, 0.04)',
-                                },
-                            }}
-                            onClick={onDrawerToggle}
-                        >
+                        <IconButton onClick={onDrawerToggle} size="small" sx={{ margin: '1rem' }}>
                             <ChevronLeft />
-                        </Box>
+                        </IconButton>
                     </Box>
 
                     <TabPanel value={tabValue} index={0}>
-                        <Typography variant="h6" gutterBottom>
-                            Map Layers
-                        </Typography>
-                        <Divider />
                         <List>
                             <ListItem>
                                 <ListItemText primary="Protected Areas" />
@@ -111,9 +63,7 @@ function SidePanel({ onLayerToggle, layerVisibility, onDrawerToggle, isOpen = tr
                                     edge="end"
                                     checked={layerVisibility.protectedAreas}
                                     onChange={() => onLayerToggle('protectedAreas')}
-                                    inputProps={{
-                                        'aria-labelledby': 'switch-list-label-protected-areas',
-                                    }}
+                                    inputProps={{ 'aria-labelledby': 'switch-list-label-protected-areas' }}
                                 />
                             </ListItem>
                             <ListItem>
@@ -122,17 +72,14 @@ function SidePanel({ onLayerToggle, layerVisibility, onDrawerToggle, isOpen = tr
                                     edge="end"
                                     checked={layerVisibility.windTurbines}
                                     onChange={() => onLayerToggle('windTurbines')}
-                                    inputProps={{
-                                        'aria-labelledby': 'switch-list-label-wind-turbines',
-                                    }}
+                                    inputProps={{ 'aria-labelledby': 'switch-list-label-wind-turbines' }}
                                 />
                             </ListItem>
-                            {/* Additional layers can be added here */}
                         </List>
                     </TabPanel>
                 </Box>
             </Drawer>
-        </>
+        </div>
     );
 }
 
