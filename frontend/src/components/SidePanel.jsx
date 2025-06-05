@@ -24,7 +24,9 @@ function SidePanel({ onLayerToggle, layerVisibility, onDrawerToggle, isOpen = tr
         <div className="side-panel">
             {!isOpen && (
                 <Box className="side-panel__menu-button" onClick={onDrawerToggle}>
-                    <Menu sx={{ color: 'primary.main' }} />
+                    <IconButton aria-label="menu">
+                        <Menu sx={{ color: 'primary.main' }} />
+                    </IconButton>
                 </Box>
             )}
 

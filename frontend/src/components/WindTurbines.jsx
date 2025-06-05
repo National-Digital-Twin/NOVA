@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Layer, Source } from 'react-map-gl';
+import { Layer, Source } from 'react-map-gl/mapbox';
 
 const IOW_BOUNDS = { minLng: -1.5937, maxLng: -1.0623, minLat: 50.5761, maxLat: 50.7696 };
 
