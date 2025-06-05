@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import React, { useEffect, useRef, useState } from 'react';
-import Map, { NavigationControl } from 'react-map-gl';
+import Map, { NavigationControl } from 'react-map-gl/mapbox';
 import ProtectedAreas from './ProtectedAreas';
 import SidePanel from './SidePanel';
 import WindTurbines from './WindTurbines';
@@ -74,7 +74,7 @@ function MapComponent() {
         >
             <SidePanel onLayerToggle={handleLayerToggle} layerVisibility={layerVisibility} onDrawerToggle={handleDrawerToggle} isOpen={drawerOpen} />
 
-            <Box sx={{ width: '100%', height: '100%' }}>
+            <Box sx={{ width: '100%', height: '100%' }} data-testid="map-container">
                 <Map
                     ref={mapRef}
                     {...viewState}
