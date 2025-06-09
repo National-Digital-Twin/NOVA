@@ -1,0 +1,21 @@
+resources:
+  - ../../base
+
+namespace: nova
+
+patches:
+  - path: patches/deployment.yaml
+    target:
+      kind: Deployment
+      name: nova-frontend
+  - path: patches/service-account.yaml
+    target:
+      kind: ServiceAccount
+      name: nova-frontend-sa
+labels:
+  - pairs:
+      env: dev
+images:
+  - name: nova-frontend-image:template
+    newName: 503561419905.dkr.ecr.eu-west-2.amazonaws.com/nova/frontend
+    newTag: "remove-auth-2"
