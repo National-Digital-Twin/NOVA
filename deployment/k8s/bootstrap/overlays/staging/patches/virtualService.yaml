@@ -10,7 +10,7 @@
 
 - op: replace
   path: /spec/http/0/headers/response/add/Content-Security-Policy
-  value: "connect-src 'self' data: blob: wss://nova.staging.ndtp.co.uk ws://nova.staging.ndtp.co.uk https://nova.staging.ndtp.co.uk https://landing.staging.ndtp.co.uk https://access.staging.ndtp.co.uk https://api.os.uk https://nominatim.openstreetmap.org https://api.mapbox.com; worker-src 'self' blob: https://landing.staging.ndtp.co.uk https://access.staging.ndtp.co.uk; child-src 'self' blob: https://landing.staging.ndtp.co.uk https://access.staging.ndtp.co.uk; img-src 'self' data: blob:"
+  value: "connect-src 'self' data: blob: wss://nova.staging.ndtp.co.uk ws://nova.staging.ndtp.co.uk https://nova.staging.ndtp.co.uk https://landing.staging.ndtp.co.uk https://access.staging.ndtp.co.uk https://api.os.uk https://nominatim.openstreetmap.org https://api.mapbox.com https://api.maptiler.com; worker-src 'self' blob: https://landing.staging.ndtp.co.uk https://access.staging.ndtp.co.uk; child-src 'self' blob: https://landing.staging.ndtp.co.uk https://access.staging.ndtp.co.uk; img-src 'self' data: blob:"
 
 - op: replace
   path: /spec/http/0/headers/response/add/Access-Control-Allow-Origin
@@ -18,7 +18,7 @@
 
 - op: replace
   path: /spec/http/1/headers/response/add/Content-Security-Policy
-  value: "connect-src 'self' data: blob: wss://nova.staging.ndtp.co.uk ws://nova.staging.ndtp.co.uk https://nova.staging.ndtp.co.uk https://landing.staging.ndtp.co.uk https://access.staging.ndtp.co.uk https://api.os.uk https://api.mapbox.com https://nominatim.openstreetmap.org; worker-src 'self' blob: https://landing.staging.ndtp.co.uk https://access.staging.ndtp.co.uk; child-src 'self' blob: https://landing.staging.ndtp.co.uk https://access.staging.ndtp.co.uk; img-src 'self' data: blob:"
+  value: "connect-src 'self' data: blob: wss://nova.staging.ndtp.co.uk ws://nova.staging.ndtp.co.uk https://nova.staging.ndtp.co.uk https://landing.staging.ndtp.co.uk https://access.staging.ndtp.co.uk https://api.os.uk https://api.mapbox.com https://nominatim.openstreetmap.org https://api.maptiler.com; worker-src 'self' blob: https://landing.staging.ndtp.co.uk https://access.staging.ndtp.co.uk; child-src 'self' blob: https://landing.staging.ndtp.co.uk https://access.staging.ndtp.co.uk; img-src 'self' data: blob:"
 
 - op: replace
   path: /spec/http/1/headers/response/add/Access-Control-Allow-Origin
