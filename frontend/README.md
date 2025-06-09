@@ -1,6 +1,6 @@
 # NOVA 3D Map Application
 
-This is a React + Vite application featuring a full-screen 3D map powered by Mapbox GL JS.
+This is a React + Vite application featuring a full-screen 3D map powered by MapLibre GL JS.
 
 ## Features
 
@@ -17,19 +17,33 @@ This is a React + Vite application featuring a full-screen 3D map powered by Map
     ```
     npm install
     ```
-3. Create a `.env` file in the root of the frontend directory with your Mapbox access token:
+3. Create an `.env.local` file in the root of the frontend directory for your access tokens:
     ```
-    VITE_MAPBOX_ACCESS_TOKEN=your_mapbox_access_token
+    VITE_MAPTILER_API_KEY=your_maptiler_access_token
     ```
 
-## Getting a Mapbox Access Token
+## Getting a Maptiler Access Token
 
-To use this application, you need a Mapbox access token:
+To use this application, you need a Maptiler access token:
 
-1. Sign up for a free account at [Mapbox](https://www.mapbox.com/)
+1. Sign up for a free account at [Maptiler](https://www.maptiler.com)
 2. Navigate to your account page
-3. Create a new access token
-4. Copy the token to your `.env` file
+3. Create find or create your access token
+4. Copy the token value to your `.env.local` file
+
+## Testing
+
+Run the tests
+
+```
+npm test
+```
+
+Run the tests with coverage reporting
+
+```
+npm run test:coverage
+```
 
 ## Development
 
@@ -55,7 +69,7 @@ npm run preview
 
 ## Technologies Used
 
-- React 19
-- Vite 6
-- Mapbox GL JS
+- React
+- Vite
+- MapLibre GL JS
 - React Map GL
