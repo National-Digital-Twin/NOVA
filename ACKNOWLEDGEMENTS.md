@@ -1,6 +1,6 @@
 # Acknowledgements
 
-**Repository:** `[archetypes]`  
+**Repository:** `NOVA`  
 **Description:** `Recognises suppliers, partner organisations, and other contributors to the repository’s development.`  
 **SPDX-License-Identifier:** `OGL-UK-3.0`  
 

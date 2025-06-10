@@ -1,0 +1,17 @@
+:root {
+    /* LAYOUT */
+
+    --header-height: 3rem;
+
+    /* COLORS */
+
+    --background-color-white: rgb(255, 255, 255, 0.9);
+    --background-color-white-hover: rgb(255, 255, 255, 1);
+}
+
+#root {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-rows: max-content 1fr;
+}

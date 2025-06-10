@@ -1,6 +1,6 @@
 # Maintainers  
 
-**Repository:** `[archetypes]`  
+**Repository:** `NOVA`  
 **Description:** `Lists maintainers responsible for reviewing issues, security, and documentation updates.`  
 **SPDX-License-Identifier:** `OGL-UK-3.0`  
 
@@ -68,7 +68,7 @@ GUIDANCE: USE THIS IN PLACE OF THE ABOVE IF THE REPOSITORY IS IN TRANSITION. PLE
 
 # Maintainers  
 
-**Repository:** `[archetypes]`  
+**Repository:** `NOVA`  
 **Description:** `Lists maintainers responsible for reviewing issues, security, and documentation updates.`  
 **SPDX-License-Identifier: OGL-UK-3.0
 

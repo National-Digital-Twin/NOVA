@@ -1,6 +1,6 @@
 # Changelog 
 
-**Repository:** `[archetypes]`  
+**Repository:** `NOVA`  
 **Description:** `Tracks all notable changes, version history, and roadmap toward 1.0.0 following Semantic Versioning.`  
 **SPDX-License-Identifier:** `OGL-UK-3.0`  
 
