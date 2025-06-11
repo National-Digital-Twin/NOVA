@@ -1,8 +1,8 @@
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import React from 'react';
 import './App.scss';
-import Header from './components/Header';
-import MapComponent from './components/MapComponent';
+import Header from './components/header/Header';
+import MapComponent from './components/map/MapComponent';
 import theme from './theme';
 
 const App: React.FC = () => {
