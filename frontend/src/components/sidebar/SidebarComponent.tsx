@@ -15,10 +15,10 @@ const FloatingButton = styled(IconButton)(({ theme }) => ({
     top: theme.spacing(2),
     left: theme.spacing(2),
     zIndex: 1000,
-    backgroundColor: 'var(--background-color-white)',
+    backgroundColor: theme.palette.background.paper,
     boxShadow: theme.shadows[2],
     '&:hover': {
-        backgroundColor: 'var(--background-color-white-hover)',
+        backgroundColor: theme.palette.action.hover,
     },
 }));
 
@@ -37,7 +37,7 @@ const SidePanel = styled(Drawer)(({ theme }) => ({
 const DrawerContent = styled(Box)(({ theme }) => ({
     width: 320,
     padding: theme.spacing(2),
-    backgroundColor: 'var(--background-color-white)',
+    backgroundColor: theme.palette.background.paper,
 }));
 
 const LayerControls = styled(Box)(({ theme }) => ({
@@ -56,7 +56,7 @@ const SwitchControlLabel = styled(FormControlLabel)({
     },
 });
 
-const DrawerComponent = ({ layerVisibility, onToggleLayer }: DrawerComponentProps) => {
+const SidebarComponent = ({ layerVisibility, onToggleLayer }: DrawerComponentProps) => {
     const [isOpen, setIsOpen] = useState(false);
 
     const toggleDrawer = () => setIsOpen(!isOpen);
@@ -90,4 +90,4 @@ const DrawerComponent = ({ layerVisibility, onToggleLayer }: DrawerComponentProp
     );
 };
 
-export default DrawerComponent;
+export default SidebarComponent;

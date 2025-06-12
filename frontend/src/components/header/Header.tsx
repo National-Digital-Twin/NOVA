@@ -1,6 +1,6 @@
 import { AppBar, Box, styled } from '@mui/material';
 import React from 'react';
-import novaLogo from '../assets/nova-logo.svg';
+import novaLogo from '../../assets/nova-logo.svg';
 
 const Toolbar = styled(AppBar)(({ theme }) => ({
     height: 'var(--header-height)',

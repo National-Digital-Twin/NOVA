@@ -89,4 +89,8 @@ describe('RandomPolygonsLayer', () => {
             });
         });
     });
+
+    it('renders without crashing', () => {
+        render(<RandomPolygonsLayer />);
+    });
 });
