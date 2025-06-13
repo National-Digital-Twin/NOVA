@@ -1,0 +1,104 @@
+[
+  {
+    "id": "windTurbine",
+    "name": "Wind Turbine",
+      "variations": [
+        {
+          "name": "Vestas",
+          "specification": [
+            {
+              "key": "model",
+              "value": "V150-6.0",
+              "unit": "",
+              "displayName": "Model"
+            },
+            {
+              "key": "ratedPower",
+              "value": "6000",
+              "unit": "KW",
+              "displayName": "Rated Power"
+            },
+            {
+              "key": "cutin-speed",
+              "value": "3",
+              "unit": "m/s",
+              "displayName": "Cut-in speed"
+            },
+            {
+              "key": "cutout-speed",
+              "value": "25",
+              "unit": "m/s",
+              "displayName": "Cut-out speed"
+            },
+            {
+              "key": "rotorDiameter",
+              "value": "150",
+              "unit": "m",
+              "displayName": "Rotor diameter"
+            },
+            {
+              "key": "minHubHeight",
+              "value": "105",
+              "unit": "m",
+              "displayName": "Min hub height"
+            },
+            {
+              "key": "maxHubHeight",
+              "value": "166",
+              "unit": "m",
+              "displayName": "max hub height"
+            }
+          ]
+        },
+        {
+          "name": "Siemens Gamesa",
+          "specification": [
+            {
+              "key": "model",
+              "value": "SG 5.0-145 (2.0)",
+              "unit": "",
+              "displayName": "Model"
+            },
+            {
+              "key": "ratedPower",
+              "value": "5000",
+              "unit": "KW",
+              "displayName": "Rated Power"
+            },
+            {
+              "key": "cutin-speed",
+              "value": "3",
+              "unit": "m/s",
+              "displayName": "Cut-in speed"
+            },
+            {
+              "key": "cutout-speed",
+              "value": "20",
+              "unit": "m/s",
+              "displayName": "Cut-out speed"
+            },
+            {
+              "key": "rotorDiameter",
+              "value": "45",
+              "unit": "m",
+              "displayName": "Rotor diameter"
+            },
+            {
+              "key": "minHubHeight",
+              "value": "90",
+              "unit": "m",
+              "displayName": "Min hub height"
+            },
+            {
+              "key": "maxHubHeight",
+              "value": "127",
+              "unit": "m",
+              "displayName": "max hub height"
+            }
+          ]
+        }
+
+      ]
+  }
+
+]

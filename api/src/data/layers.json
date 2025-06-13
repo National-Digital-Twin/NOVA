@@ -1,0 +1,106 @@
+{
+  "categories": [
+    {
+      "name": "Environmental Protected Sites",
+      "items": [
+        {
+          "id": "areasOfOutstandingNaturalBeauty",
+          "name": "Areas of outstanding natural beauty",
+          "attributes": [
+            {
+              "id": "minDistance",
+              "description": "Minimum Distance in km",
+              "defaultValue": 10,
+              "valueType": "number"
+            }
+          ]
+        },
+        {
+          "id": "siteOfSpecialScientificInterest",
+          "name": "Sites of Special Scientific Interest",
+          "attributes": [
+            {
+              "id": "minDistance",
+              "description": "Minimum Distance in km",
+              "defaultValue": 20,
+              "valueType": "number"
+            }
+          ]
+        },
+        {
+          "id": "specialAreasOfConservation",
+          "name": "Special Areas of Conservation",
+          "attributes": [
+            {
+              "id": "minDistance",
+              "description": "Minimum Distance in km",
+              "defaultValue": 20,
+              "valueType": "number"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Residential Areas",
+      "items": [
+        {
+          "id": "buildUpAreas",
+          "name": "Built up areas",
+          "attributes": [
+            {
+              "id": "minDistance",
+              "description": "Minimum Distance in km",
+              "defaultValue": 10,
+              "valueType": "number"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Grid Service points",
+      "items": [
+        {
+          "id": "substationLocations",
+          "name": "Substation locations",
+          "attributes": [
+            {
+              "id": "minDistance",
+              "description": "Minimum Distance in km",
+              "defaultValue": 3,
+              "valueType": "number"
+            },
+            {
+              "id": "connectionType",
+              "description": "Connection Type ",
+              "options": [
+                "overhead",
+                "underground"
+              ],
+              "defaultValue": "underground",
+              "valueType": "string"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "topology",
+      "name": "Topology",
+      "items": [
+        {
+          "name": "Elevation",
+          "attributes": [
+            {
+              "id": "minHight",
+              "description": "Minimum Hight in Meters",
+              "defaultValue": 200,
+              "valueType": "number"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
