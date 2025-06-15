@@ -15,9 +15,9 @@ describe('ViewToggleButton', () => {
         },
     } as unknown as React.RefObject<MapRef>;
 
-    it('renders with 3D text initially', () => {
+    it('renders with 2D text initially', () => {
         render(<ViewToggleButton mapRef={mockMapRef} />);
-        expect(screen.getByText('3D')).toBeInTheDocument();
+        expect(screen.getByText('2D')).toBeInTheDocument();
     });
 
     it('renders with correct aria label initially', () => {
@@ -29,13 +29,13 @@ describe('ViewToggleButton', () => {
         render(<ViewToggleButton mapRef={mockMapRef} />);
         const button = screen.getByRole('button');
 
-        expect(screen.getByText('3D')).toBeInTheDocument();
-
-        fireEvent.click(button);
         expect(screen.getByText('2D')).toBeInTheDocument();
 
         fireEvent.click(button);
         expect(screen.getByText('3D')).toBeInTheDocument();
+
+        fireEvent.click(button);
+        expect(screen.getByText('2D')).toBeInTheDocument();
     });
 
     it('calls easeTo with correct parameters when toggling to 2D', () => {

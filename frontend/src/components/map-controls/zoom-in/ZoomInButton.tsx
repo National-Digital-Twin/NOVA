@@ -1,5 +1,5 @@
 import type { MapRef } from 'react-map-gl/maplibre';
-import ControlButton from '../ControlButton';
+import ControlButton from '../../../shared/control-button/ControlButton';
 
 interface ZoomInButtonProps {
     mapRef: React.RefObject<MapRef>;
