@@ -1,27 +1,21 @@
 import { Request, Response } from "express";
 import { PositionDTO } from "../models/position.model";
 import { LayersDTO } from "../models/layers.model";
-import { Asset, AssetsDTO } from "../models/asset.model";
-import { GeoJSON, isValidGeoJSON } from "../models/geojson.model";
-import * as fs from "fs";
-import * as path from "path";
+import { AssetDTO, AssetsDTO } from "../models/asset.model";
+import { GeoJSONDTO, isValidGeoJSON } from "../models/geojson.model";
+import { dataProviderUtils } from "../utils/data-provider.utils";
+import { AnalysisRequestDTO } from "../models/analysis-request.model";
+import { SuitabilityResponseDTO } from "../models/suitability-response.model";
+import { LocationDTO, LocationsDTO } from "../models/location.model";
 
 /**
  * Controller for UI-related endpoints
  */
 export class UIController {
-  private readonly layersDataFilePath: string;
-  private readonly assetsDataFilePath: string;
-  private readonly sampleGeoJsonFilePath: string;
-
   /**
    * Constructor for UIController
    */
-  constructor() {
-    this.layersDataFilePath = path.join(__dirname, "../data/layers.json");
-    this.assetsDataFilePath = path.join(__dirname, "../data/assets.json");
-    this.sampleGeoJsonFilePath = path.join(__dirname, "../data/sampleGeoJson.json");
-  }
+  constructor() {}
 
   /**
    * @swagger
@@ -102,7 +96,7 @@ export class UIController {
 
     try {
       // Read the layers data from the JSON file
-      const layersData = this.readLayersData();
+      const layersData = dataProviderUtils.readLayersData();
 
       // In a real application, we might filter the data based on assetType
       // For now, we'll just return all the data regardless of assetType
@@ -114,14 +108,6 @@ export class UIController {
     }
   }
 
-  /**
-   * Read layers data from the JSON file
-   * @returns LayersDTO object containing the layers data
-   */
-  private readLayersData(): LayersDTO {
-    const fileContent = fs.readFileSync(this.layersDataFilePath, 'utf8');
-    return JSON.parse(fileContent) as LayersDTO;
-  }
 
   /**
    * @swagger
@@ -182,7 +168,7 @@ export class UIController {
 
     try {
       // Read the assets data from the JSON file
-      const assetsData = this.readAssetsData();
+      const assetsData = dataProviderUtils.readAssetsData();
 
       res.status(200).json(assetsData);
     } catch (error) {
@@ -191,14 +177,6 @@ export class UIController {
     }
   }
 
-  /**
-   * Read assets data from the JSON file
-   * @returns Array of Asset objects containing the assets data
-   */
-  private readAssetsData(): AssetsDTO {
-    const fileContent = fs.readFileSync(this.assetsDataFilePath, 'utf8');
-    return JSON.parse(fileContent) as AssetsDTO;
-  }
 
   /**
    * @swagger
@@ -220,14 +198,14 @@ export class UIController {
    *       content:
    *         application/json:
    *           schema:
-   *             $ref: '#/components/schemas/GeoJSON'
+   *             $ref: '#/components/schemas/GeoJSONDTO'
    *     responses:
    *       200:
    *         description: GeoJSON processed successfully.
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: '#/components/schemas/GeoJSON'
+   *               $ref: '#/components/schemas/GeoJSONDTO'
    *       400:
    *         description: Bad request - invalid GeoJSON data.
    *       500:
@@ -240,7 +218,7 @@ export class UIController {
 
     try {
       // Read the sample GeoJSON data from the JSON file
-      const geoJsonData = this.readSampleGeoJsonData();
+      const geoJsonData = dataProviderUtils.readSampleGeoJsonData();
 
       // Validate that the data is a valid GeoJSON object
       if (!isValidGeoJSON(req.body)) {
@@ -256,13 +234,164 @@ export class UIController {
   }
 
   /**
-   * Read sample GeoJSON data from the JSON file
-   * @returns GeoJSON object containing the sample GeoJSON data
+   * @swagger
+   * /api/ui/location/analyse/{assetType}:
+   *   post:
+   *     summary: Analyse location data for a specific asset type
+   *     description: Accepts GeoJSON of the selected area, layers configuration, and asset to analyze, returns an array of GeoJSON objects.
+   *     tags:
+   *       - UI
+   *     parameters:
+   *       - in: path
+   *         name: assetType
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: Type of asset to analyse
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/AnalysisRequestDTO'
+   *     responses:
+   *       200:
+   *         description: Location analysis completed successfully.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/GeoJSONDTO'
+   *       400:
+   *         description: Bad request - invalid request data.
+   *       500:
+   *         description: Internal server error.
    */
-  private readSampleGeoJsonData(): GeoJSON {
-    const fileContent = fs.readFileSync(this.sampleGeoJsonFilePath, 'utf8');
-    return JSON.parse(fileContent) as GeoJSON;
+  public analyseLocation(req: Request, res: Response): void {
+    const assetType = req.params.assetType;
+
+    console.debug(`Analysing location for asset type: ${assetType}`);
+
+    try {
+      const analysisRequest = req.body as AnalysisRequestDTO;
+
+      // Validate that the geoJson is a valid GeoJSON object
+      if (!isValidGeoJSON(analysisRequest.location)) {
+        res.status(400).json({ error: "Invalid GeoJSON data" });
+        return;
+      }
+
+      // In a real application, we would perform analysis based on the GeoJSON and layers
+      // For now, we'll just return a sample GeoJSON as an array
+      const geoJsonData = dataProviderUtils.readSampleGeoJsonData();
+
+      // Return an array with the sample GeoJSON
+      res.status(200).json([geoJsonData]);
+    } catch (error) {
+      console.error(`Error analysing location data: ${error}`);
+      res.status(500).json({ error: "Failed to analyse location data" });
+    }
   }
+
+  /**
+   * @swagger
+   * /api/ui/asset/analyse:
+   *   post:
+   *     summary: Analyse asset suitability for a location
+   *     description: Accepts GeoJSON of the selected area, layers configuration, and asset to analyze, returns suitability analysis.
+   *     tags:
+   *       - UI
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/AnalysisRequestDTO'
+   *     responses:
+   *       200:
+   *         description: Asset suitability analysis completed successfully.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/SuitabilityResponseDTO'
+   *       400:
+   *         description: Bad request - invalid request data.
+   *       500:
+   *         description: Internal server error.
+   */
+  public analyseAsset(req: Request, res: Response): void {
+    console.debug("Analysing asset suitability for location");
+
+    try {
+      const analysisRequest = req.body as AnalysisRequestDTO;
+
+      // Validate that the geoJson is a valid GeoJSON object
+      if (!isValidGeoJSON(analysisRequest.location)) {
+        res.status(400).json({ error: "Invalid GeoJSON data" });
+        return;
+      }
+
+      // In a real application, we would perform suitability analysis based on the GeoJSON and layers
+      // For now, we'll just return a sample suitability response
+      const suitabilityResponse: SuitabilityResponseDTO = {
+        suitabilityPercentage: 85.5,
+        suitabilityDescription: "This location is highly suitable for the asset based on the provided layers configuration."
+      };
+
+      res.status(200).json(suitabilityResponse);
+    } catch (error) {
+      console.error(`Error analysing asset suitability: ${error}`);
+      res.status(500).json({ error: "Failed to analyse asset suitability" });
+    }
+  }
+
+  /**
+   * @swagger
+   * /api/ui/substations:
+   *   post:
+   *     summary: Get substations near a location
+   *     description: Returns the 5 closest substations to the provided geolocation point.
+   *     tags:
+   *       - UI
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/GeoJSONDTO'
+   *     responses:
+   *       200:
+   *         description: Substations retrieved successfully.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/LocationsDTO'
+   *       400:
+   *         description: Bad request - invalid GeoJSON data.
+   *       500:
+   *         description: Internal server error.
+   */
+  public getSubstations(req: Request, res: Response): void {
+    console.debug("Getting substations near location");
+
+    try {
+      // Validate that the request body is a valid GeoJSON object
+      if (!isValidGeoJSON(req.body)) {
+        res.status(400).json({ error: "Invalid GeoJSON data" });
+        return;
+      }
+
+      // Read substations data from the JSON file
+      const substations = dataProviderUtils.readSubstationsData();
+
+      res.status(200).json(substations);
+    } catch (error) {
+      console.error(`Error retrieving substations: ${error}`);
+      res.status(500).json({ error: "Failed to retrieve substations" });
+    }
+  }
+
 }
 
 export const uiController = new UIController();

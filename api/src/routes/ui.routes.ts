@@ -24,6 +24,9 @@ export class UIRoutes {
    this.router.get("/ui/layers/:assetType", (req: Request, res: Response) => uiController.getLayers(req, res));
    this.router.get("/ui/assets", (req: Request, res: Response) => uiController.getAssets(req, res));
    this.router.post("/ui/layer/:layerId", (req: Request, res: Response) => uiController.processLayerGeoJSON(req, res));
+   this.router.post("/ui/location/analyse/:assetType", (req: Request, res: Response) => uiController.analyseLocation(req, res));
+   this.router.post("/ui/asset/analyse", (req: Request, res: Response) => uiController.analyseAsset(req, res));
+   this.router.post("/ui/substations", (req: Request, res: Response) => uiController.getSubstations(req, res));
   }
 }
 

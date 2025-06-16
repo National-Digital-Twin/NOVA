@@ -38,7 +38,7 @@ export class SwaggerConfig {
               },
               required: ["latitude", "longitude"]
             },
-            Attribute: {
+            AttributeDTO: {
               type: "object",
               properties: {
                 id: {
@@ -70,7 +70,7 @@ export class SwaggerConfig {
               },
               required: ["id", "description", "defaultValue", "valueType"]
             },
-            Item: {
+            ItemDTO: {
               type: "object",
               properties: {
                 id: {
@@ -84,14 +84,19 @@ export class SwaggerConfig {
                 attributes: {
                   type: "array",
                   items: {
-                    $ref: "#/components/schemas/Attribute"
+                    $ref: "#/components/schemas/AttributeDTO"
                   },
                   description: "List of configurable attributes for this item"
+                },
+                active: {
+                  type: "boolean",
+                  description: "Indicates whether the item is active",
+                  default: false
                 }
               },
               required: ["name", "attributes"]
             },
-            Category: {
+            CategoryDTO: {
               type: "object",
               properties: {
                 name: {
@@ -101,7 +106,7 @@ export class SwaggerConfig {
                 items: {
                   type: "array",
                   items: {
-                    $ref: "#/components/schemas/Item"
+                    $ref: "#/components/schemas/ItemDTO"
                   },
                   description: "List of items in this category"
                 }
@@ -114,14 +119,14 @@ export class SwaggerConfig {
                 categories: {
                   type: "array",
                   items: {
-                    $ref: "#/components/schemas/Category"
+                    $ref: "#/components/schemas/CategoryDTO"
                   },
                   description: "List of categories containing layer items"
                 }
               },
               required: ["categories"]
             },
-            GeoJSON: {
+            GeoJSONDTO: {
               type: "object",
               properties: {
                 type: {
@@ -149,7 +154,7 @@ export class SwaggerConfig {
                 features: {
                   type: "array",
                   items: {
-                    $ref: "#/components/schemas/GeoJSON"
+                    $ref: "#/components/schemas/GeoJSONDTO"
                   },
                   description: "Features of the GeoJSON object (for FeatureCollection)"
                 },
@@ -162,6 +167,24 @@ export class SwaggerConfig {
                 }
               },
               required: ["type"]
+            },
+            AnalysisRequestDTO: {
+              type: "object",
+              properties: {
+                location: {
+                  $ref: "#/components/schemas/GeoJSONDTO",
+                  description: "GeoJSON of the selected area"
+                },
+                layers: {
+                  $ref: "#/components/schemas/LayersDTO",
+                  description: "Layers configuration for the analysis"
+                },
+                asset: {
+                  $ref: "#/components/schemas/AssetDTO",
+                  description: "Asset to be analyzed"
+                }
+              },
+              required: ["location", "layers", "asset"]
             }
           }
         },
