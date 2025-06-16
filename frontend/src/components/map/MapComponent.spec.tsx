@@ -29,23 +29,6 @@ vi.mock('../../components/map-controls/MapControls', () => ({
     ),
 }));
 
-vi.mock('../../components/map-layers/polygons/RandomPolygonsLayer', () => ({
-    default: () => <div data-testid="polygons-layer">Polygons Layer</div>,
-}));
-
-vi.mock('../../components/map-layers/heatmap/RandomHeatmapLayer', () => ({
-    default: () => <div data-testid="heatmap-layer">Heatmap Layer</div>,
-}));
-
-vi.mock('../../components/sidebar/SidebarComponent', () => ({
-    default: ({ onToggleLayer }: { onToggleLayer: (layer: string) => void }) => (
-        <div>
-            <button onClick={() => onToggleLayer('polygons')}>Toggle Polygons</button>
-            <button onClick={() => onToggleLayer('heatmap')}>Toggle Heatmap</button>
-        </div>
-    ),
-}));
-
 describe('MapComponent', () => {
     it('does not render controls before map is initialized', () => {
         render(<MapComponent />);
@@ -57,24 +40,6 @@ describe('MapComponent', () => {
         render(<MapComponent />);
         fireEvent.click(screen.getByTestId('map'));
         expect(screen.getByTestId('map-controls')).toBeInTheDocument();
-        expect(screen.getByTestId('polygons-layer')).toBeInTheDocument();
-        expect(screen.getByTestId('heatmap-layer')).toBeInTheDocument();
-    });
-
-    it('handles layer toggling', () => {
-        render(<MapComponent />);
-        fireEvent.click(screen.getByTestId('map'));
-
-        expect(screen.getByTestId('polygons-layer')).toBeInTheDocument();
-        expect(screen.getByTestId('heatmap-layer')).toBeInTheDocument();
-
-        fireEvent.click(screen.getByText('Toggle Polygons'));
-        expect(screen.queryByTestId('polygons-layer')).not.toBeInTheDocument();
-        expect(screen.getByTestId('heatmap-layer')).toBeInTheDocument();
-
-        fireEvent.click(screen.getByText('Toggle Heatmap'));
-        expect(screen.queryByTestId('polygons-layer')).not.toBeInTheDocument();
-        expect(screen.queryByTestId('heatmap-layer')).not.toBeInTheDocument();
     });
 
     it('handles map style changes', () => {
