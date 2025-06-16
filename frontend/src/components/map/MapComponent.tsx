@@ -6,6 +6,7 @@ import { MAP_STYLES, type MapStyle } from '../../types/map';
 import MapControls from '../map-controls/MapControls';
 import RandomHeatmapLayer from '../map-layers/heatmap/RandomHeatmapLayer';
 import RandomPolygonsLayer from '../map-layers/polygons/RandomPolygonsLayer';
+import SearchPanel from '../search/SearchPanel';
 import SidebarComponent from '../sidebar/SidebarComponent';
 
 const MapComponent = () => {
@@ -13,11 +14,16 @@ const MapComponent = () => {
     const [viewState, setViewState] = useState({ longitude: -1.33, latitude: 50.65, zoom: 10, pitch: 60, bearing: 0 });
     const [layerVisibility, setLayerVisibility] = useState({ heatmap: true, polygons: true });
     const [mapStyle, setMapStyle] = useState<MapStyle>('hybrid');
+    const [isMapInitialized, setIsMapInitialized] = useState(false);
 
     const toggleLayer = (layer: 'heatmap' | 'polygons') => setLayerVisibility(prev => ({ ...prev, [layer]: !prev[layer] }));
 
     const handleStyleChange = (newStyle: MapStyle) => {
         setMapStyle(newStyle);
+    };
+
+    const handleMapLoad = () => {
+        setIsMapInitialized(true);
     };
 
     return (
@@ -27,12 +33,18 @@ const MapComponent = () => {
                 ref={mapRef}
                 {...viewState}
                 onMove={evt => setViewState(evt.viewState)}
+                onLoad={handleMapLoad}
                 mapStyle={MAP_STYLES[mapStyle]}
                 style={{ width: '100%', height: '100%' }}
             >
-                <MapControls mapRef={mapRef} onStyleChange={handleStyleChange} currentStyle={mapStyle} />
-                {layerVisibility.polygons && <RandomPolygonsLayer />}
-                {layerVisibility.heatmap && <RandomHeatmapLayer />}
+                {isMapInitialized && (
+                    <>
+                        <SearchPanel mapRef={mapRef} />
+                        <MapControls mapRef={mapRef} onStyleChange={handleStyleChange} currentStyle={mapStyle} />
+                        {layerVisibility.polygons && <RandomPolygonsLayer />}
+                        {layerVisibility.heatmap && <RandomHeatmapLayer />}
+                    </>
+                )}
             </Map>
         </div>
     );

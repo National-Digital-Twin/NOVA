@@ -36,8 +36,8 @@ describe('MapLegendPanel', () => {
 
         const colorLines = screen.getAllByTestId('color-line');
         expect(colorLines).toHaveLength(3);
-        expect(colorLines[0]).toHaveStyle({ backgroundColor: '#4CAF50' }); // Most Suitable
-        expect(colorLines[1]).toHaveStyle({ backgroundColor: '#FF9800' }); // Moderate
-        expect(colorLines[2]).toHaveStyle({ backgroundColor: '#F44336' }); // Least Suitable
+        expect(colorLines[0]).toHaveStyle({ backgroundColor: '#4CAF50' });
+        expect(colorLines[1]).toHaveStyle({ backgroundColor: '#FF9800' });
+        expect(colorLines[2]).toHaveStyle({ backgroundColor: '#F44336' });
     });
 });

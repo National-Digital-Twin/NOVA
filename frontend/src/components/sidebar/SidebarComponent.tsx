@@ -12,7 +12,7 @@ interface DrawerComponentProps {
 
 const FloatingButton = styled(IconButton)(({ theme }) => ({
     position: 'absolute',
-    top: theme.spacing(2),
+    top: theme.spacing(12),
     left: theme.spacing(2),
     zIndex: 1000,
     backgroundColor: theme.palette.background.paper,
