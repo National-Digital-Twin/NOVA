@@ -1,12 +1,9 @@
 import { Request, Response } from "express";
 import { PositionDTO } from "../models/position.model";
-import { LayersDTO } from "../models/layers.model";
-import { AssetDTO, AssetsDTO } from "../models/asset.model";
-import { GeoJSONDTO, isValidGeoJSON } from "../models/geojson.model";
+import { isValidGeoJSON } from "../models/geojson.model";
 import { dataProviderUtils } from "../utils/data-provider.utils";
 import { AnalysisRequestDTO } from "../models/analysis-request.model";
 import { SuitabilityResponseDTO } from "../models/suitability-response.model";
-import { LocationDTO, LocationsDTO } from "../models/location.model";
 
 /**
  * Controller for UI-related endpoints

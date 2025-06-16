@@ -3,10 +3,8 @@ import { Request, Response } from 'express';
 import { dataProviderUtils } from '../src/utils/data-provider.utils';
 import { AnalysisRequestDTO } from '../src/models/analysis-request.model';
 import { GeoJSONDTO } from '../src/models/geojson.model';
-import { SuitabilityResponseDTO } from '../src/models/suitability-response.model';
 import { LocationDTO, LocationsDTO } from '../src/models/location.model';
 import { AssetDTO } from '../src/models/asset.model';
-import { PositionDTO } from '../src/models/position.model';
 
 // Mock dataProviderUtils
 jest.mock('../src/utils/data-provider.utils');
