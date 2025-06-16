@@ -1,9 +1,8 @@
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
-import type { Feature, FeatureCollection, GeoJsonProperties, Geometry, Polygon } from 'geojson';
+import type { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
 import { useCallback, useState } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
 import ControlButton from '../../../shared/control-button/ControlButton';
-import type { GeoJSONSource } from 'maplibre-gl';
 
 interface DrawPolygonButtonProps {
     onPolygonDrawn: (geojson: FeatureCollection<Geometry>) => void;
@@ -33,49 +32,6 @@ const DrawPolygonButton = ({ onPolygonDrawn, mapRef, drawRef, isVisible }: DrawP
                     draw.changeMode('simple_select', { featureIds: [] });
                     map.off('draw.modechange', handleModeChange);
                     onPolygonDrawn(drawing);
-
-                    const maskPolygon: Feature<Polygon> = {
-                        type: 'Feature',
-                        geometry: {
-                            type: 'Polygon',
-                            coordinates: [
-                                [
-                                    [-180, -85],
-                                    [180, -85],
-                                    [180, 85],
-                                    [-180, 85],
-                                    [-180, -85]
-                                ],
-                                drawing.features[0].geometry.coordinates[0]
-                            ]
-                        },
-                        properties: {}
-                    };
-
-                    const sourceId = 'mask';
-                    const layerId = 'mask-layer';
-
-                    if (!map.getSource(sourceId)) {
-                        map.getMap().addSource(sourceId, {
-                            type: 'geojson',
-                            data: maskPolygon
-                        });
-                    } else {
-                        const source = map.getSource(sourceId) as GeoJSONSource;
-                        source.setData(maskPolygon);
-                    }
-
-                    if (!map.getLayer(layerId)) {
-                        map.getMap().addLayer({
-                            id: layerId,
-                            type: 'fill',
-                            source: sourceId,
-                            paint: {
-                                'fill-color': '#000000',
-                                'fill-opacity': 0.5
-                            }
-                        });
-                    }
                 }
             };
 

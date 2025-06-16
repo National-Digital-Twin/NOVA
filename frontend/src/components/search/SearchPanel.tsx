@@ -1,6 +1,6 @@
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { Box, Divider, styled } from '@mui/material';
-import type { FeatureCollection, Geometry } from 'geojson';
+import type { FeatureCollection, Geometry, Polygon } from 'geojson';
 import { useCallback, useState } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
 import useMapboxDraw from '../../hooks/useMapboxDraw';
@@ -8,6 +8,7 @@ import DeletePolygonButton from './delete-polygon/DeletePolygonButton';
 import DrawPolygonButton from './draw-polygon/DrawPolygonButton';
 import PolygonLayer from './polygon-layer/PolygonLayer';
 import SearchInput from './search-input/SearchInput';
+import { MapMask } from '../../utils/MapMask';
 
 const SearchContainer = styled(Box)({
     position: 'absolute',
@@ -63,6 +64,17 @@ const SearchPanel = ({ mapRef }: SearchPanelProps) => {
 
     const handlePolygonDrawn = useCallback(async (drawnGeojson: FeatureCollection<Geometry>) => {
         setPolygonDrawn(true);
+
+        // Find first feature and apply mask assuming it's a Polygon
+        const firstFeature = drawnGeojson.features[0];
+        if (firstFeature?.geometry.type === 'Polygon') {
+            const polygon = firstFeature.geometry as Polygon;
+            MapMask.apply(mapRef.current.getMap(), polygon);
+        } else {
+            console.warn('Expected a Polygon geometry but got:', firstFeature?.geometry.type);
+            return;
+        }
+
         // drawRef.current.changeMode('static');
         // try {
         //     const response = await fetch('/data/sample-polygons.json', {
@@ -83,10 +95,7 @@ const SearchPanel = ({ mapRef }: SearchPanelProps) => {
     const handlePolygonDeleted = useCallback(async () => {
         setPolygonDrawn(false);
         setLayerData(null);
-        const map = mapRef.current.getMap();
-        if (map.getLayer('mask-layer')) {
-            map.removeLayer('mask-layer');
-        }
+        MapMask.remove(mapRef.current.getMap());
     }, []);
 
     return (
