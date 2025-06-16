@@ -1,0 +1,120 @@
+# NOVA API
+
+NOVA API is a RESTful service that provides geospatial data processing and visualization capabilities. It handles user authentication, geographic data processing, and layer management for mapping applications.
+
+## Features
+
+- Geographic data processing with GeoJSON
+- Layer management for different asset types
+- Location search functionality
+- Health check endpoint for monitoring
+- Swagger API documentation
+
+## Prerequisites
+
+- Node.js (v16 or higher)
+- npm (v7 or higher)
+- Docker (optional, for containerized deployment)
+
+## Build Instructions
+
+### Local Development Build
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Build the TypeScript code:
+   ```bash
+   npm run build
+   ```
+
+### Docker Build
+
+To build the application as a Docker container:
+
+```bash
+cd docker
+./build.sh
+```
+
+This will create a Docker image named `api`.
+
+## Run Instructions
+
+### Local Development
+
+1. Start the development server with hot-reloading:
+   ```bash
+   npm run dev
+   ```
+
+2. Or run the built application:
+   ```bash
+   npm start
+   ```
+
+By default, the server runs on port 3000. You can change this by setting the `PORT` environment variable:
+
+```bash
+PORT=8080 npm start
+```
+
+### Docker Run
+
+To run the application in a Docker container:
+
+```bash
+docker run -p 3000:3000 api
+```
+
+To specify a different port:
+
+```bash
+docker run -p 8080:3000 -e PORT=3000 api
+```
+
+## API Documentation
+
+Once the application is running, you can access the Swagger API documentation at:
+
+```
+http://localhost:3000/api/docs
+```
+
+## Available Endpoints
+
+- `GET /api/health` - Health check endpoint
+- `GET /api/ui/search` - Search for locations
+- `GET /api/ui/layers/:assetType` - Get layers by asset type
+- `GET /api/ui/assets` - Get available assets
+- `POST /api/ui/layer/:layerId` - Process GeoJSON data for a specific layer
+
+## Testing
+
+Run the test suite:
+
+```bash
+npm test
+```
+
+Run tests with coverage report:
+
+```bash
+npm run test:coverage
+```
+
+## Linting
+
+Check code style:
+
+```bash
+npm run lint
+```
+
+Fix code style issues:
+
+```bash
+npm run lint:fix
+```
