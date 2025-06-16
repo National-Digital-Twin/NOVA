@@ -39,6 +39,7 @@ interface SearchPanelProps {
 const SearchPanel = ({ mapRef }: SearchPanelProps) => {
     const drawRef = useMapboxDraw(mapRef) as React.RefObject<MapboxDraw>;
     const [layerData, setLayerData] = useState<FeatureCollection<Geometry> | null>(null);
+    const [polygonDrawn, setPolygonDrawn] = useState(false);
 
     const handleSearch = useCallback(
         async (query: string) => {
@@ -61,19 +62,30 @@ const SearchPanel = ({ mapRef }: SearchPanelProps) => {
     );
 
     const handlePolygonDrawn = useCallback(async (drawnGeojson: FeatureCollection<Geometry>) => {
-        try {
-            const response = await fetch('/data/sample-polygons.json', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(drawnGeojson),
-            });
+        setPolygonDrawn(true);
+        // drawRef.current.changeMode('static');
+        // try {
+        //     const response = await fetch('/data/sample-polygons.json', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //         },
+        //         body: JSON.stringify(drawnGeojson),
+        //     });
 
-            const data = await response.json();
-            setLayerData(data);
-        } catch (error) {
-            console.error('Error processing polygon data:', error);
+        //     const data = await response.json();
+        //     setLayerData(data);
+        // } catch (error) {
+        //     console.error('Error processing polygon data:', error);
+        // }
+    }, []);
+
+    const handlePolygonDeleted = useCallback(async () => {
+        setPolygonDrawn(false);
+        setLayerData(null);
+        const map = mapRef.current.getMap();
+        if (map.getLayer('mask-layer')) {
+            map.removeLayer('mask-layer');
         }
     }, []);
 
@@ -84,9 +96,9 @@ const SearchPanel = ({ mapRef }: SearchPanelProps) => {
             </SearchGroup>
 
             <SearchGroup role="group" aria-label="Drawing controls">
-                <DrawPolygonButton mapRef={mapRef} drawRef={drawRef} onPolygonDrawn={handlePolygonDrawn} />
+                <DrawPolygonButton mapRef={mapRef} drawRef={drawRef} isVisible={!polygonDrawn} onPolygonDrawn={handlePolygonDrawn} />
                 <StyledDivider orientation="vertical" flexItem />
-                <DeletePolygonButton drawRef={drawRef} />
+                <DeletePolygonButton drawRef={drawRef} isVisible={polygonDrawn} onPolygonDeleted={handlePolygonDeleted}/>
             </SearchGroup>
 
             {layerData && <PolygonLayer data={layerData} />}
