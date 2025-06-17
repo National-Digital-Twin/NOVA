@@ -1,5 +1,6 @@
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import ControlButton from '../../../shared/control-button/ControlButton';
+import { useLayerPanel } from '../../layer-selection/LayerPanelContext';
 
 interface DeletePolygonButtonProps {
     onPolygonDeleted: () => void;
@@ -9,10 +10,13 @@ interface DeletePolygonButtonProps {
 
 const DeletePolygonButton = ({ drawRef, isVisible, onPolygonDeleted }: DeletePolygonButtonProps) => {
 
+    const { hideLayerControl: hideLayerControl } = useLayerPanel();
+
     const handleClick = () => {
         if (!drawRef.current) return;
         drawRef.current.deleteAll();
         onPolygonDeleted();
+        hideLayerControl();
     };
 
     if (!isVisible) return null;

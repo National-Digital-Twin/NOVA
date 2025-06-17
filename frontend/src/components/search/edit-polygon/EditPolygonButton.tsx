@@ -1,28 +1,35 @@
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import ControlButton from '../../../shared/control-button/ControlButton';
-import type { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
+import type { FeatureCollection, Geometry, Polygon } from 'geojson';
 import { MapMask } from '../../../utils/MapMask';
 import type { MapRef } from 'react-map-gl/maplibre';
+import maplibregl from 'maplibre-gl';
+import ConfirmPolygonButton from '../../map-controls/confirm-polygon/ConfirmPolygonButton';
+import { createRoot } from 'react-dom/client';
+import { getPolygonConfirmationPopupPositionFromPolygon } from '../../../utils/ConfirmPolygonPositionHelper';
 
 interface EditPolygonButtonProps {
     onPolygonEdited: (geojson: FeatureCollection<Geometry>) => void;
     mapRef: React.RefObject<MapRef>;
     drawRef: React.RefObject<MapboxDraw | null>;
+    setPopUpRef: React.RefObject<maplibregl.Popup | null>;
     isVisible: boolean;
 }
 
-const EditPolygonButton = ({ onPolygonEdited, mapRef, drawRef, isVisible }: EditPolygonButtonProps) => {
-
+const EditPolygonButton = ({ onPolygonEdited, mapRef, drawRef, setPopUpRef, isVisible }: EditPolygonButtonProps) => {
     const handleClick = () => {
         if (!mapRef.current || !drawRef.current) return;
 
         const draw = drawRef.current;
         const map = mapRef.current.getMap();
 
-        // Remove the mask so user can edit
         MapMask.remove(map);
 
-        // Get the drawn features
+        if (setPopUpRef.current) {
+            setPopUpRef.current.remove();
+            setPopUpRef.current = null;
+        }
+
         const featureCollection = draw.getAll() as unknown as FeatureCollection<Geometry>;
         const features = featureCollection.features;
 
@@ -34,17 +41,54 @@ const EditPolygonButton = ({ onPolygonEdited, mapRef, drawRef, isVisible }: Edit
         const polygon = features[0];
         draw.changeMode('direct_select', { featureId: polygon.id });
 
-        const handleModeChange = () => {
-            if (!mapRef.current || !drawRef.current) return;
-            const drawing = drawRef.current.getAll() as unknown as FeatureCollection<Geometry, GeoJsonProperties>;
-            if (drawing.features.length > 0 && drawing.features[0].geometry.type === 'Polygon') {
-                draw.changeMode('simple_select', { featureIds: [] });
-                map.off('draw.modechange', handleModeChange);
-                onPolygonEdited(drawing);
-            }
+        const handleUserFinishDragging = () => {
+            const drawing = draw.getAll() as unknown as FeatureCollection<Geometry>;
+            if (drawing.features.length === 0) return;
+
+            const polygon = drawing.features[0].geometry as Polygon;
+            const popupNode = document.createElement('div');
+
+            const popup = new maplibregl.Popup({
+                closeButton: false,
+                closeOnClick: false,
+                offset: [0, 10],
+                className: 'no-arrow-popup',
+            })
+                .setLngLat(getPolygonConfirmationPopupPositionFromPolygon(polygon))
+                .setDOMContent(popupNode)
+                .addTo(map);
+
+            setPopUpRef.current = popup;
+
+            const root = createRoot(popupNode);
+
+            root.render(
+                <ConfirmPolygonButton
+                    onConfirm={() => {
+                        draw.changeMode('simple_select', { featureIds: [] });
+                        popup.remove();
+                        setPopUpRef.current = null;
+                        onPolygonEdited(draw.getAll() as unknown as FeatureCollection<Geometry>);
+                    }}
+                />
+            );
+
+            const updatePopupPosition = () => {
+                const updated = draw.getAll() as unknown as FeatureCollection<Geometry>;
+                popup.setLngLat(getPolygonConfirmationPopupPositionFromPolygon(updated.features[0].geometry as Polygon));
+            };
+
+            updatePopupPosition();
+
+            map.on('draw.update', updatePopupPosition);
+            map.on('draw.selectionchange', updatePopupPosition);
+
+            map.off('mouseup', handleUserFinishDragging);
+            map.off('touchend', handleUserFinishDragging);
         };
 
-        map.on('draw.modechange', handleModeChange);
+        map.once('mouseup', handleUserFinishDragging);
+        map.once('touchend', handleUserFinishDragging);
     };
 
     if (!isVisible) return null;

@@ -5,6 +5,7 @@ import { Map } from 'react-map-gl/maplibre';
 import { MAP_STYLES, type MapStyle } from '../../types/map';
 import MapControls from '../map-controls/MapControls';
 import SearchPanel from '../search/SearchPanel';
+import LayerControlPanel from '../layer-selection/LayerControlPanel';
 
 const MapComponent = () => {
     const mapRef = useRef<MapRef>(null!);
@@ -34,6 +35,7 @@ const MapComponent = () => {
                     <>
                         <SearchPanel mapRef={mapRef} />
                         <MapControls mapRef={mapRef} onStyleChange={handleStyleChange} currentStyle={mapStyle} />
+                        <LayerControlPanel />
                     </>
                 )}
             </Map>

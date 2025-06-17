@@ -1,10 +1,9 @@
-// src/utils/MapMask.ts
 import type { Map } from 'maplibre-gl';
 import type { Feature, Polygon } from 'geojson';
 import type { GeoJSONSource } from 'maplibre-gl';
 
 /**
- * Utility class for applying and removing a dark overlay mask on the map,
+ * Utility class for applying and removing a dark overlay mask on a map,
  * leaving a transparent visual "hole" where the user-defined polygon is drawn.
  */
 export class MapMask {

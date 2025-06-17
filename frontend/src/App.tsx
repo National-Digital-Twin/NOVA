@@ -4,13 +4,16 @@ import './App.scss';
 import Header from './components/header/Header';
 import MapComponent from './components/map/MapComponent';
 import theme from './theme';
+import { LayerPanelProvider } from './components/layer-selection/LayerPanelContext';
 
 const App: React.FC = () => {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
             <Header />
-            <MapComponent />
+            <LayerPanelProvider>
+                <MapComponent />
+            </LayerPanelProvider>
         </ThemeProvider>
     );
 };

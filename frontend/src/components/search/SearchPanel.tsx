@@ -1,7 +1,7 @@
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { Box, Divider, styled } from '@mui/material';
 import type { FeatureCollection, Geometry, Polygon } from 'geojson';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
 import useMapboxDraw from '../../hooks/useMapboxDraw';
 import DeletePolygonButton from './delete-polygon/DeletePolygonButton';
@@ -10,6 +10,10 @@ import PolygonLayer from './polygon-layer/PolygonLayer';
 import SearchInput from './search-input/SearchInput';
 import { MapMask } from '../../utils/MapMask';
 import EditPolygonButton from './edit-polygon/EditPolygonButton';
+import maplibregl from 'maplibre-gl';
+import { createRoot } from 'react-dom/client';
+import ConfirmPolygonButton from '../map-controls/confirm-polygon/ConfirmPolygonButton';
+import { getPolygonConfirmationPopupPositionFromPolygon } from '../../utils/ConfirmPolygonPositionHelper';
 
 const SearchContainer = styled(Box)({
     position: 'absolute',
@@ -40,8 +44,10 @@ interface SearchPanelProps {
 
 const SearchPanel = ({ mapRef }: SearchPanelProps) => {
     const drawRef = useMapboxDraw(mapRef) as React.RefObject<MapboxDraw>;
+    const setPopUpRef = useRef<maplibregl.Popup | null>(null);
     const [layerData, setLayerData] = useState<FeatureCollection<Geometry> | null>(null);
     const [polygonDrawn, setPolygonDrawn] = useState(false);
+    const [polygonConfirmed, setPolygonConfirmed] = useState(false);
 
     const handleSearch = useCallback(
         async (query: string) => {
@@ -65,10 +71,33 @@ const SearchPanel = ({ mapRef }: SearchPanelProps) => {
 
     const handlePolygonDrawn = useCallback(async (drawnGeojson: FeatureCollection<Geometry>) => {
         setPolygonDrawn(true);
+        setPolygonConfirmed(false);
 
         // Find first feature and mask (assuming it's always a Polygon)
-        const firstFeature = drawnGeojson.features[0];
-        MapMask.apply(mapRef.current.getMap(), firstFeature.geometry as Polygon);
+        const polygon = drawnGeojson.features[0].geometry as Polygon;
+        const popupNode = document.createElement('div');
+        const root = createRoot(popupNode);
+
+        const popup = new maplibregl.Popup({
+            closeButton: false,
+            closeOnClick: false,
+            offset: [100, 0],
+        })
+            .setLngLat(getPolygonConfirmationPopupPositionFromPolygon(polygon))
+            .setDOMContent(popupNode)
+            .addTo(mapRef.current.getMap()!);
+
+        setPopUpRef.current = popup;
+
+        root.render(
+            <ConfirmPolygonButton
+                onConfirm={() => {
+                    popup.remove();
+                    setPopUpRef.current = null;
+                    handlePolygonConfirmed(drawnGeojson);
+                }}
+            />
+        );
 
         // drawRef.current.changeMode('static');
         // try {
@@ -87,18 +116,30 @@ const SearchPanel = ({ mapRef }: SearchPanelProps) => {
         // }
     }, []);
 
-    const handlePolygonDeleted = useCallback(async () => {
-        setPolygonDrawn(false);
-        setLayerData(null);
-        MapMask.remove(mapRef.current.getMap());
-    }, []);
-
     const handlePolygonEdited = useCallback(async (drawnGeojson: FeatureCollection<Geometry>) => {
         setPolygonDrawn(true);
+
+        // Find first feature and mask (assuming it's always a Polygon)
+        const firstFeatureAsPolygon = drawnGeojson.features[0].geometry as Polygon;
+        MapMask.apply(mapRef.current.getMap(), firstFeatureAsPolygon);
+    }, []);
+
+    const handlePolygonConfirmed = useCallback(async (drawnGeojson: FeatureCollection<Geometry>) => {
+        setPolygonConfirmed(true);
+        const firstFeatureAsPolygon = drawnGeojson.features[0].geometry as Polygon;
+        MapMask.apply(mapRef.current.getMap(), firstFeatureAsPolygon);
+    }, []);
+
+    const handlePolygonDeleted = useCallback(async () => {
+        setPolygonDrawn(false);
+        setPolygonConfirmed(false);
         setLayerData(null);
-        const firstFeature = drawnGeojson.features[0];
         MapMask.remove(mapRef.current.getMap());
-        MapMask.apply(mapRef.current.getMap(), firstFeature.geometry as Polygon);
+
+        if (setPopUpRef.current) {
+            setPopUpRef.current.remove();
+            setPopUpRef.current = null;
+        }
     }, []);
 
     return (
@@ -108,10 +149,10 @@ const SearchPanel = ({ mapRef }: SearchPanelProps) => {
             </SearchGroup>
 
             <SearchGroup role="group" aria-label="Drawing controls">
-                <DeletePolygonButton drawRef={drawRef} isVisible={polygonDrawn} onPolygonDeleted={handlePolygonDeleted}/>
+                <DeletePolygonButton drawRef={drawRef} isVisible={polygonDrawn && polygonConfirmed} onPolygonDeleted={handlePolygonDeleted} />
                 <StyledDivider orientation="vertical" flexItem />
-                <EditPolygonButton mapRef={mapRef} drawRef={drawRef} isVisible={polygonDrawn} onPolygonEdited={handlePolygonEdited}/>
-                <DrawPolygonButton mapRef={mapRef} drawRef={drawRef} isVisible={!polygonDrawn} onPolygonDrawn={handlePolygonDrawn} />
+                <EditPolygonButton mapRef={mapRef} drawRef={drawRef} setPopUpRef={setPopUpRef} isVisible={polygonDrawn && polygonConfirmed} onPolygonEdited={handlePolygonEdited} />
+                <DrawPolygonButton mapRef={mapRef} drawRef={drawRef} isVisible={!polygonConfirmed} onPolygonDrawn={handlePolygonDrawn} polygonDrawn={polygonDrawn} />
             </SearchGroup>
 
             {layerData && <PolygonLayer data={layerData} />}
