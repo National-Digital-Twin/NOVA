@@ -14,3 +14,4 @@
 .vscode/
 node_modules
 dist/
+/api/coverage/

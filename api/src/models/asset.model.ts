@@ -6,7 +6,7 @@
  * @swagger
  * components:
  *   schemas:
- *     Specification:
+ *     SpecificationDTO:
  *       type: object
  *       description: Represents a specific attribute or characteristic of an asset variation
  *       properties:
@@ -29,9 +29,9 @@
  *         - displayName
  */
 /**
- * Specification interface representing a specific attribute of an asset variation
+ * SpecificationDTO interface representing a specific attribute of an asset variation
  */
-export interface Specification {
+export interface SpecificationDTO {
   /**
    * Key identifier for the specification
    */
@@ -57,7 +57,7 @@ export interface Specification {
  * @swagger
  * components:
  *   schemas:
- *     Variation:
+ *     VariationDTO:
  *       type: object
  *       description: Represents a specific type or model of an asset
  *       properties:
@@ -68,15 +68,15 @@ export interface Specification {
  *           type: array
  *           description: List of specifications for this variation
  *           items:
- *             $ref: '#/components/schemas/Specification'
+ *             $ref: '#/components/schemas/SpecificationDTO'
  *       required:
  *         - name
  *         - specification
  */
 /**
- * Variation interface representing a specific type of asset
+ * VariationDTO interface representing a specific type of asset
  */
-export interface Variation {
+export interface VariationDTO {
   /**
    * Name of the variation
    */
@@ -85,14 +85,14 @@ export interface Variation {
   /**
    * List of specifications for this variation
    */
-  specification: Specification[];
+  specification: SpecificationDTO[];
 }
 
 /**
  * @swagger
  * components:
  *   schemas:
- *     Asset:
+ *     AssetDTO:
  *       type: object
  *       description: Represents a specific asset type with its variations
  *       properties:
@@ -106,16 +106,16 @@ export interface Variation {
  *           type: array
  *           description: List of variations for this asset
  *           items:
- *             $ref: '#/components/schemas/Variation'
+ *             $ref: '#/components/schemas/VariationDTO'
  *       required:
  *         - id
  *         - name
  *         - variations
  */
 /**
- * Asset interface representing a specific asset type
+ * AssetDTO interface representing a specific asset type
  */
-export interface Asset {
+export interface AssetDTO {
   /**
    * Unique identifier for the asset
    */
@@ -129,7 +129,7 @@ export interface Asset {
   /**
    * List of variations for this asset
    */
-  variations: Variation[];
+  variations: VariationDTO[];
 }
 
 /**
@@ -138,12 +138,12 @@ export interface Asset {
  *   schemas:
  *     AssetsDTO:
  *       type: array
- *       description: Array of Asset objects representing all available assets
+ *       description: Array of AssetDTO objects representing all available assets
  *       items:
- *         $ref: '#/components/schemas/Asset'
+ *         $ref: '#/components/schemas/AssetDTO'
  */
 /**
  * AssetsDTO interface representing the complete assets data structure
- * This is an array of Asset objects
+ * This is an array of AssetDTO objects
  */
-export type AssetsDTO = Asset[];
+export type AssetsDTO = AssetDTO[];

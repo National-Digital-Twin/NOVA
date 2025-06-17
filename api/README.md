@@ -99,11 +99,38 @@ Run the test suite:
 npm test
 ```
 
-Run tests with coverage report:
+### Test Coverage
+
+To run tests with coverage report:
 
 ```bash
 npm run test:coverage
 ```
+
+This will generate coverage reports in the `coverage` directory. To view the detailed HTML coverage report:
+
+1. Open the file `coverage/lcov-report/index.html` in your web browser:
+   ```bash
+   # On Linux
+   xdg-open coverage/lcov-report/index.html
+
+   # On macOS
+   open coverage/lcov-report/index.html
+
+   # On Windows
+   start coverage/lcov-report/index.html
+   ```
+
+2. The report shows:
+   - **Statement Coverage**: Percentage of code statements executed
+   - **Branch Coverage**: Percentage of code branches (if/else, switch cases) executed
+   - **Function Coverage**: Percentage of functions called
+   - **Line Coverage**: Percentage of executable lines executed
+
+3. You can click on individual files to see detailed line-by-line coverage information, with:
+   - Green: Covered lines
+   - Red: Uncovered lines
+   - Gray: Non-executable lines (comments, empty lines)
 
 ## Linting
 
