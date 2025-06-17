@@ -12,6 +12,7 @@ const MapComponent = () => {
     const [viewState, setViewState] = useState({ longitude: -1.33, latitude: 50.65, zoom: 10, pitch: 60, bearing: 0 });
     const [mapStyle, setMapStyle] = useState<MapStyle>('hybrid');
     const [isMapInitialized, setIsMapInitialized] = useState(false);
+    const [showLayerControl, setShowLayerControl] = useState(false);
 
     const handleStyleChange = (newStyle: MapStyle) => {
         setMapStyle(newStyle);
@@ -33,9 +34,9 @@ const MapComponent = () => {
             >
                 {isMapInitialized && (
                     <>
-                        <SearchPanel mapRef={mapRef} />
+                        <SearchPanel mapRef={mapRef} hideLayerControl={() => setShowLayerControl(false)} showLayerControl={() => setShowLayerControl(true)} />
                         <MapControls mapRef={mapRef} onStyleChange={handleStyleChange} currentStyle={mapStyle} />
-                        <LayerControlPanel />
+                        {showLayerControl && <LayerControlPanel />}
                     </>
                 )}
             </Map>

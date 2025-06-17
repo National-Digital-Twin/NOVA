@@ -40,9 +40,11 @@ const StyledDivider = styled(Divider)(({ theme }) => ({
 
 interface SearchPanelProps {
     mapRef: React.RefObject<MapRef>;
+    showLayerControl: () => void;
+    hideLayerControl: () => void;
 }
 
-const SearchPanel = ({ mapRef }: SearchPanelProps) => {
+const SearchPanel = ({ mapRef, showLayerControl, hideLayerControl }: SearchPanelProps) => {
     const drawRef = useMapboxDraw(mapRef) as React.RefObject<MapboxDraw>;
     const setPopUpRef = useRef<maplibregl.Popup | null>(null);
     const [layerData, setLayerData] = useState<FeatureCollection<Geometry> | null>(null);
@@ -95,6 +97,7 @@ const SearchPanel = ({ mapRef }: SearchPanelProps) => {
                     popup.remove();
                     setPopUpRef.current = null;
                     handlePolygonConfirmed(drawnGeojson);
+                    showLayerControl();
                 }}
             />
         );
@@ -122,6 +125,7 @@ const SearchPanel = ({ mapRef }: SearchPanelProps) => {
         // Find first feature and mask (assuming it's always a Polygon)
         const firstFeatureAsPolygon = drawnGeojson.features[0].geometry as Polygon;
         MapMask.apply(mapRef.current.getMap(), firstFeatureAsPolygon);
+        showLayerControl();
     }, []);
 
     const handlePolygonConfirmed = useCallback(async (drawnGeojson: FeatureCollection<Geometry>) => {
@@ -135,6 +139,8 @@ const SearchPanel = ({ mapRef }: SearchPanelProps) => {
         setPolygonConfirmed(false);
         setLayerData(null);
         MapMask.remove(mapRef.current.getMap());
+
+        hideLayerControl();
 
         if (setPopUpRef.current) {
             setPopUpRef.current.remove();

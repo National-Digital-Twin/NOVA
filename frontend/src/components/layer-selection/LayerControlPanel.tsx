@@ -18,7 +18,6 @@ import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
-import { useLayerPanel } from "./LayerPanelContext";
 
 type LayerItem = {
     name: string;
@@ -48,10 +47,6 @@ const layers: LayerGroup = {
 };
 
 const LayerControlPanel: React.FC = () => {
-    const { isVisible } = useLayerPanel();
-
-    if (!isVisible) return null;
-
     const [searchTerm, setSearchTerm] = useState("");
     const [open, setOpen] = useState(true);
 
