@@ -6,11 +6,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import SearchPanel from './SearchPanel';
 
 vi.mock('./search-input/SearchInput', () => ({
-    default: ({ onSearch }: { onSearch: (query: string) => void }) => (
+    default: ({ onSearchResultClick }: { onSearchResultClick: (lat: number, lon: number, zoom: number) => void }) => (
         <input
             type="text"
             data-testid="search-input"
-            onKeyDown={e => e.key === 'Enter' && onSearch(e.currentTarget.value)}
+            onKeyDown={e => {
+                if (e.key === 'Enter') {
+                    onSearchResultClick(57.1497, -2.0943, 10);
+                }
+            }}
             aria-label="Search by region or country"
         />
     ),
@@ -69,10 +73,12 @@ describe('SearchPanel', () => {
         off: vi.fn(),
     }));
 
+    const mockFlyTo = vi.fn();
+
     const mockMapRef = {
         current: {
             getMap: vi.fn().mockReturnValue({
-                flyTo: vi.fn(),
+                flyTo: mockFlyTo,
                 addControl: mockAddControl,
                 removeControl: vi.fn(),
                 on: vi.fn(),
@@ -101,60 +107,20 @@ describe('SearchPanel', () => {
         expect(screen.getByTestId('delete-polygon-button')).toBeInTheDocument();
     });
 
-    it('handles search and flies to location', async () => {
+    it('flies to selected location when triggered', async () => {
         const user = userEvent.setup({ delay: null });
         render(<SearchPanel mapRef={mockMapRef} />);
-        const input = screen.getByTestId('search-input') as HTMLInputElement;
+        const input = screen.getByTestId('search-input');
 
-        await user.type(input, 'Aberdeen{enter}');
+        await user.type(input, '{enter}');
 
-        await waitFor(
-            () => {
-                expect(window.fetch).toHaveBeenCalledWith('/data/mock-search-response.json');
-                expect(mockMapRef.current?.getMap().flyTo).toHaveBeenCalledWith({
-                    center: [-2.0943, 57.1497],
-                    zoom: 12,
-                    duration: 2000,
-                });
-            },
-            { timeout: 2000 }
-        );
-    });
-
-    it('handles search error gracefully', async () => {
-        const user = userEvent.setup({ delay: null });
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-        window.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
-
-        render(<SearchPanel mapRef={mockMapRef} />);
-        const input = screen.getByTestId('search-input') as HTMLInputElement;
-
-        await user.type(input, 'Aberdeen{enter}');
-
-        await waitFor(
-            () => {
-                expect(consoleSpy).toHaveBeenCalledWith('Error searching location:', expect.any(Error));
-            },
-            { timeout: 2000 }
-        );
-
-        consoleSpy.mockRestore();
-    });
-
-    it('does not search with empty input', async () => {
-        const user = userEvent.setup({ delay: null });
-        render(<SearchPanel mapRef={mockMapRef} />);
-        const input = screen.getByTestId('search-input') as HTMLInputElement;
-
-        await user.type(input, '   {enter}');
-
-        await waitFor(
-            () => {
-                expect(window.fetch).not.toHaveBeenCalled();
-                expect(mockMapRef.current?.getMap().flyTo).not.toHaveBeenCalled();
-            },
-            { timeout: 2000 }
-        );
+        await waitFor(() => {
+            expect(mockFlyTo).toHaveBeenCalledWith({
+                center: [-2.0943, 57.1497],
+                zoom: 10,
+                duration: 2000,
+            });
+        });
     });
 
     it('loads and displays polygon data after drawing', async () => {
