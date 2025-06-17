@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
 import { PositionDTO } from "../models/position.model";
-import { isValidGeoJSON } from "../models/geojson.model";
+import { isValidGeoJSON } from "../utils/geojson.utils";
 import { dataProviderUtils } from "../utils/data-provider.utils";
 import { AnalysisRequestDTO } from "../models/analysis-request.model";
 import { SuitabilityResponseDTO } from "../models/suitability-response.model";
+import { substationService } from "../services/substation.service";
+import { GeoJSON } from "geojson";
 
 /**
  * Controller for UI-related endpoints
@@ -348,7 +350,7 @@ export class UIController {
    * /api/ui/substations:
    *   post:
    *     summary: Get substations near a location
-   *     description: Returns the 5 closest substations to the provided geolocation point.
+   *     description: Returns the 3 closest substations to the provided geolocation point.
    *     tags:
    *       - UI
    *     requestBody:
@@ -379,8 +381,13 @@ export class UIController {
         return;
       }
 
-      // Read substations data from the JSON file
-      const substations = dataProviderUtils.readSubstationsData();
+      // Get the nearest substations using the substation service
+      const substations = substationService.getNearestSubstations(req.body);
+
+      if (!substations) {
+        res.status(400).json({ error: "Request body must contain a Point geometry" });
+        return;
+      }
 
       res.status(200).json(substations);
     } catch (error) {

@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { LayersDTO } from "../models/layers.model";
 import { AssetsDTO } from "../models/asset.model";
-import { GeoJSONDTO } from "../models/geojson.model";
+import {FeatureCollection, GeoJSON} from "geojson";
 import { LocationsDTO } from "../models/location.model";
 
 /**
@@ -13,6 +13,7 @@ export class DataProviderUtils {
   private readonly assetsDataFilePath: string;
   private readonly sampleGeoJsonFilePath: string;
   private readonly substationsDataFilePath: string;
+  private readonly gspDataFilePath: string;
 
   /**
    * Constructor for DataProviderUtils
@@ -22,6 +23,7 @@ export class DataProviderUtils {
     this.assetsDataFilePath = path.join(__dirname, "../data/assets.json");
     this.sampleGeoJsonFilePath = path.join(__dirname, "../data/sampleGeoJson.json");
     this.substationsDataFilePath = path.join(__dirname, "../data/substations.json");
+    this.gspDataFilePath = path.join(__dirname, "../data/GSP.geojson");
   }
 
   /**
@@ -55,11 +57,11 @@ export class DataProviderUtils {
 
   /**
    * Read sample GeoJSON data from the JSON file
-   * @returns GeoJSONDTO object containing the sample GeoJSON data
+   * @returns GeoJSON object containing the sample GeoJSON data
    */
-  public readSampleGeoJsonData(): GeoJSONDTO {
+  public readSampleGeoJsonData(): GeoJSON {
     const fileContent = fs.readFileSync(this.sampleGeoJsonFilePath, 'utf8');
-    return JSON.parse(fileContent) as GeoJSONDTO;
+    return JSON.parse(fileContent) as GeoJSON;
   }
 
   /**
@@ -69,6 +71,15 @@ export class DataProviderUtils {
   public readSubstationsData(): LocationsDTO {
     const fileContent = fs.readFileSync(this.substationsDataFilePath, 'utf8');
     return JSON.parse(fileContent) as LocationsDTO;
+  }
+
+  /**
+   * Read GSP data from the GeoJSON file
+   * @returns GeoJSON object containing the GSP data
+   */
+  public readGSPData(): FeatureCollection {
+    const fileContent = fs.readFileSync(this.gspDataFilePath, 'utf8');
+    return JSON.parse(fileContent) as FeatureCollection;
   }
 }
 

@@ -5,9 +5,26 @@ import { AnalysisRequestDTO } from '../src/models/analysis-request.model';
 import { GeoJSONDTO } from '../src/models/geojson.model';
 import { LocationDTO, LocationsDTO } from '../src/models/location.model';
 import { AssetDTO } from '../src/models/asset.model';
+import { substationService } from '../src/services/substation.service';
 
 // Mock dataProviderUtils
 jest.mock('../src/utils/data-provider.utils');
+
+// Mock substationService
+jest.mock('../src/services/substation.service');
+
+// Mock @turf/turf
+jest.mock('@turf/turf', () => ({
+  point: (coords: number[]) => ({ type: 'Point', coordinates: coords }),
+  distance: (from: any, to: any) => {
+    // Simple mock implementation of distance calculation
+    const fromCoords = from.coordinates;
+    const toCoords = to.coordinates;
+    const dx = fromCoords[0] - toCoords[0];
+    const dy = fromCoords[1] - toCoords[1];
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+}));
 
 describe('UIController', () => {
   let controller: any;
@@ -136,6 +153,151 @@ describe('UIController', () => {
       }
     ];
     (dataProviderUtils.readSubstationsData as jest.Mock).mockReturnValue(mockSubstationsData);
+
+    // Mock the readGSPData method
+    const mockGSPData: GeoJSONDTO = {
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          properties: {
+            "Owner Type": "SSEN",
+            "Owner Name": "DOAN",
+            "Type": "Primary",
+            "Class": "Distribution",
+            "Number": "BEAP"
+          },
+          geometry: {
+            type: "Point",
+            coordinates: [0.01, 0.01]
+          }
+        },
+        {
+          type: "Feature",
+          properties: {
+            "Owner Type": "SSEN",
+            "Owner Name": "DOAN",
+            "Type": "Secondary",
+            "Class": "Transmission",
+            "Number": "79181002"
+          },
+          geometry: {
+            type: "Point",
+            coordinates: [-0.01, 0.02]
+          }
+        },
+        {
+          type: "Feature",
+          properties: {
+            "Owner Type": "SSEN",
+            "Owner Name": "DOAN",
+            "Type": "Primary",
+            "Class": "Distribution",
+            "Number": "ROMI"
+          },
+          geometry: {
+            type: "Point",
+            coordinates: [0.02, -0.01]
+          }
+        },
+        {
+          type: "Feature",
+          properties: {
+            "Owner Type": "SSEN",
+            "Owner Name": "DOAN",
+            "Type": "Primary",
+            "Class": "Distribution",
+            "Number": "DADO"
+          },
+          geometry: {
+            type: "Point",
+            coordinates: [0.03, 0.03]
+          }
+        },
+        {
+          type: "Feature",
+          properties: {
+            "Owner Type": "SSEN",
+            "Owner Name": "DOAN",
+            "Type": "Primary",
+            "Class": "Distribution",
+            "Number": "THAM"
+          },
+          geometry: {
+            type: "Point",
+            coordinates: [-0.03, -0.03]
+          }
+        }
+      ]
+    };
+    (dataProviderUtils.readGSPData as jest.Mock).mockReturnValue(mockGSPData);
+
+    // Mock the substationService.getNearestSubstations method
+    const mockNearestSubstations: LocationsDTO = [
+      {
+        location: {
+          type: 'Feature',
+          properties: {
+            "Owner Type": "SSEN",
+            "Owner Name": "DOAN",
+            "Type": "Primary",
+            "Class": "Distribution",
+            "Number": "BEAP"
+          },
+          geometry: {
+            type: "Point",
+            coordinates: [0.01, 0.01]
+          }
+        },
+        name: "BEAP",
+        distance: 0.014142135623730951
+      },
+      {
+        location: {
+          type: 'Feature',
+          properties: {
+            "Owner Type": "SSEN",
+            "Owner Name": "DOAN",
+            "Type": "Secondary",
+            "Class": "Transmission",
+            "Number": "79181002"
+          },
+          geometry: {
+            type: "Point",
+            coordinates: [-0.01, 0.02]
+          }
+        },
+        name: "79181002",
+        distance: 0.022360679774997898
+      },
+      {
+        location: {
+          type: 'Feature',
+          properties: {
+            "Owner Type": "SSEN",
+            "Owner Name": "DOAN",
+            "Type": "Primary",
+            "Class": "Distribution",
+            "Number": "ROMI"
+          },
+          geometry: {
+            type: "Point",
+            coordinates: [0.02, -0.01]
+          }
+        },
+        name: "ROMI",
+        distance: 0.022360679774997898
+      }
+    ];
+
+    (substationService.getNearestSubstations as jest.Mock).mockImplementation((geoJson: GeoJSONDTO) => {
+      // Return null if the GeoJSON is invalid or doesn't contain a Point geometry
+      if (!geoJson.type || 
+          (geoJson.type === 'Feature' && (!geoJson.geometry || geoJson.geometry.type !== 'Point'))) {
+        return null;
+      }
+      return mockNearestSubstations;
+    });
   });
 
   describe('constructor', () => {
@@ -845,7 +1007,7 @@ describe('UIController', () => {
   });
 
   describe('getSubstations', () => {
-    it('should return an array of LocationDTO objects when given a valid GeoJSON point', () => {
+    it('should return the 3 nearest substations when given a valid GeoJSON point', () => {
       // Setup request with a valid GeoJSON point
       const mockGeoJsonPoint: GeoJSONDTO = {
         type: "Feature",
@@ -869,7 +1031,7 @@ describe('UIController', () => {
 
       // Verify that the response is an array of LocationDTO objects
       expect(Array.isArray(responseData)).toBe(true);
-      expect(responseData.length).toBe(3); // We expect 3 substations from substations.json
+      expect(responseData.length).toBe(3); // We expect 3 nearest substations
 
       // Verify the structure of each LocationDTO
       responseData.forEach((location: LocationDTO) => {
@@ -879,6 +1041,7 @@ describe('UIController', () => {
         expect(typeof location.name).toBe('string');
         expect(typeof location.distance).toBe('number');
         expect(location.location).toHaveProperty('type');
+        expect(location.location).toHaveProperty('properties');
         expect(location.location).toHaveProperty('geometry');
         expect(location.location.geometry).toHaveProperty('type');
         expect(location.location.geometry).toHaveProperty('coordinates');
@@ -886,6 +1049,29 @@ describe('UIController', () => {
         expect(Array.isArray(location.location.geometry?.coordinates)).toBe(true);
         expect(location.location.geometry?.coordinates?.length).toBe(2);
       });
+
+      // Verify that the substations are sorted by distance
+      expect(responseData[0].distance).toBeLessThanOrEqual(responseData[1].distance);
+      expect(responseData[1].distance).toBeLessThanOrEqual(responseData[2].distance);
+
+      // Verify that we got the 3 nearest substations from our mock data
+      // The nearest points to [0, 0] in our mock data are:
+      // 1. [0.01, 0.01] - distance ~0.014
+      // 2. [-0.01, 0.02] - distance ~0.022
+      // 3. [0.02, -0.01] - distance ~0.022
+      expect(responseData[0].location.geometry?.coordinates).toEqual([0.01, 0.01]);
+      expect(responseData[0].name).toBe("BEAP");
+
+      // The next two points have the same distance, so the order might vary
+      const secondCoords = responseData[1].location.geometry?.coordinates;
+      const thirdCoords = responseData[2].location.geometry?.coordinates;
+
+      expect(
+        (JSON.stringify(secondCoords) === JSON.stringify([-0.01, 0.02]) && 
+         JSON.stringify(thirdCoords) === JSON.stringify([0.02, -0.01])) ||
+        (JSON.stringify(secondCoords) === JSON.stringify([0.02, -0.01]) && 
+         JSON.stringify(thirdCoords) === JSON.stringify([-0.01, 0.02]))
+      ).toBeTruthy();
     });
 
     it('should return 400 when given an invalid GeoJSON', () => {
@@ -908,6 +1094,26 @@ describe('UIController', () => {
       expect(res.json).toHaveBeenCalledWith({ error: "Invalid GeoJSON data" });
     });
 
+    it('should return 400 when the request body does not contain a Point geometry', () => {
+      // Setup request with a valid GeoJSON but not a Point geometry
+      const mockGeoJsonPolygon: GeoJSONDTO = {
+        type: "Feature",
+        geometry: {
+          type: "Polygon",
+          coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]]
+        }
+      };
+
+      req.body = mockGeoJsonPolygon;
+
+      // Call the method
+      controller.getSubstations(req as Request, res as Response);
+
+      // Verify the response
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ error: "Request body must contain a Point geometry" });
+    });
+
     it('should handle errors when retrieving substations', () => {
       // Setup request with a valid GeoJSON point
       const mockGeoJsonPoint: GeoJSONDTO = {
@@ -923,8 +1129,8 @@ describe('UIController', () => {
       // Mock console.error
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
-      // Mock dataProviderUtils.readSubstationsData to throw an error
-      (dataProviderUtils.readSubstationsData as jest.Mock).mockImplementation(() => {
+      // Mock substationService.getNearestSubstations to throw an error
+      (substationService.getNearestSubstations as jest.Mock).mockImplementation(() => {
         throw new Error('Test error');
       });
 

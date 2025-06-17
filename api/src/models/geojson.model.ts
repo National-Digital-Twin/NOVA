@@ -3,6 +3,77 @@
  */
 
 /**
+ * Type definitions for GeoJSON coordinates
+ */
+export type Position = number[]; // [longitude, latitude] or [longitude, latitude, elevation]
+export type PointCoordinates = Position;
+export type LineStringCoordinates = Position[];
+export type PolygonCoordinates = Position[][];
+export type MultiPointCoordinates = Position[];
+export type MultiLineStringCoordinates = Position[][];
+export type MultiPolygonCoordinates = Position[][][];
+
+/**
+ * Type definitions for GeoJSON geometry objects
+ */
+export interface GeoJsonPointGeometry {
+  type: "Point";
+  coordinates: PointCoordinates;
+}
+
+export interface GeoJsonLineStringGeometry {
+  type: "LineString";
+  coordinates: LineStringCoordinates;
+}
+
+export interface GeoJsonPolygonGeometry {
+  type: "Polygon";
+  coordinates: PolygonCoordinates;
+}
+
+export interface GeoJsonMultiPointGeometry {
+  type: "MultiPoint";
+  coordinates: MultiPointCoordinates;
+}
+
+export interface GeoJsonMultiLineStringGeometry {
+  type: "MultiLineString";
+  coordinates: MultiLineStringCoordinates;
+}
+
+export interface GeoJsonMultiPolygonGeometry {
+  type: "MultiPolygon";
+  coordinates: MultiPolygonCoordinates;
+}
+
+export type GeoJsonGeometry = 
+  | GeoJsonPointGeometry
+  | GeoJsonLineStringGeometry
+  | GeoJsonPolygonGeometry
+  | GeoJsonMultiPointGeometry
+  | GeoJsonMultiLineStringGeometry
+  | GeoJsonMultiPolygonGeometry;
+
+/**
+ * Type definition for GeoJSON Feature
+ */
+export interface GeoJsonFeature {
+  type: "Feature";
+  properties: Record<string, any>;
+  geometry: GeoJsonGeometry;
+}
+
+/**
+ * Type definition for GeoJSON FeatureCollection
+ * Represents a collection of GeoJSON Feature objects
+ */
+export interface GeoJsonFeatureCollectionDTO {
+  type: "FeatureCollection";
+  features: GeoJsonFeature[];
+  bbox?: number[]; // [west, south, east, north] or [west, south, min_elevation, east, north, max_elevation]
+}
+
+/**
  * @swagger
  * components:
  *   schemas:
@@ -68,8 +139,16 @@ export interface GeoJSONDTO {
 
     /**
      * Coordinates of the geometry
+     * The type depends on the geometry type:
+     * - Point: [number, number] (longitude, latitude)
+     * - LineString: Array of positions
+     * - Polygon: Array of arrays of positions
+     * - MultiPoint: Array of positions
+     * - MultiLineString: Array of arrays of positions
+     * - MultiPolygon: Array of arrays of arrays of positions
      */
-    coordinates: any;
+    coordinates: PointCoordinates | LineStringCoordinates | PolygonCoordinates | 
+                MultiPointCoordinates | MultiLineStringCoordinates | MultiPolygonCoordinates;
   };
 
   /**
@@ -83,6 +162,13 @@ export interface GeoJSONDTO {
    * For 3D coordinates: [west, south, min_elevation, east, north, max_elevation]
    */
   bbox?: number[];
+
+  /**
+   * Coordinates of the geometry (for direct geometry objects)
+   * Only present if the type is a geometry type (Point, LineString, etc.)
+   */
+  coordinates?: PointCoordinates | LineStringCoordinates | PolygonCoordinates | 
+               MultiPointCoordinates | MultiLineStringCoordinates | MultiPolygonCoordinates;
 }
 
 /**
