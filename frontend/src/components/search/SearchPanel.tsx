@@ -9,6 +9,7 @@ import DrawPolygonButton from './draw-polygon/DrawPolygonButton';
 import PolygonLayer from './polygon-layer/PolygonLayer';
 import SearchInput from './search-input/SearchInput';
 import { MapMask } from '../../utils/MapMask';
+import EditPolygonButton from './edit-polygon/EditPolygonButton';
 
 const SearchContainer = styled(Box)({
     position: 'absolute',
@@ -65,15 +66,9 @@ const SearchPanel = ({ mapRef }: SearchPanelProps) => {
     const handlePolygonDrawn = useCallback(async (drawnGeojson: FeatureCollection<Geometry>) => {
         setPolygonDrawn(true);
 
-        // Find first feature and apply mask assuming it's a Polygon
+        // Find first feature and mask (assuming it's always a Polygon)
         const firstFeature = drawnGeojson.features[0];
-        if (firstFeature?.geometry.type === 'Polygon') {
-            const polygon = firstFeature.geometry as Polygon;
-            MapMask.apply(mapRef.current.getMap(), polygon);
-        } else {
-            console.warn('Expected a Polygon geometry but got:', firstFeature?.geometry.type);
-            return;
-        }
+        MapMask.apply(mapRef.current.getMap(), firstFeature.geometry as Polygon);
 
         // drawRef.current.changeMode('static');
         // try {
@@ -98,6 +93,14 @@ const SearchPanel = ({ mapRef }: SearchPanelProps) => {
         MapMask.remove(mapRef.current.getMap());
     }, []);
 
+    const handlePolygonEdited = useCallback(async (drawnGeojson: FeatureCollection<Geometry>) => {
+        setPolygonDrawn(true);
+        setLayerData(null);
+        const firstFeature = drawnGeojson.features[0];
+        MapMask.remove(mapRef.current.getMap());
+        MapMask.apply(mapRef.current.getMap(), firstFeature.geometry as Polygon);
+    }, []);
+
     return (
         <SearchContainer>
             <SearchGroup role="group" aria-label="Search controls" sx={{ minWidth: 400 }}>
@@ -105,9 +108,10 @@ const SearchPanel = ({ mapRef }: SearchPanelProps) => {
             </SearchGroup>
 
             <SearchGroup role="group" aria-label="Drawing controls">
-                <DrawPolygonButton mapRef={mapRef} drawRef={drawRef} isVisible={!polygonDrawn} onPolygonDrawn={handlePolygonDrawn} />
-                <StyledDivider orientation="vertical" flexItem />
                 <DeletePolygonButton drawRef={drawRef} isVisible={polygonDrawn} onPolygonDeleted={handlePolygonDeleted}/>
+                <StyledDivider orientation="vertical" flexItem />
+                <EditPolygonButton mapRef={mapRef} drawRef={drawRef} isVisible={polygonDrawn} onPolygonEdited={handlePolygonEdited}/>
+                <DrawPolygonButton mapRef={mapRef} drawRef={drawRef} isVisible={!polygonDrawn} onPolygonDrawn={handlePolygonDrawn} />
             </SearchGroup>
 
             {layerData && <PolygonLayer data={layerData} />}

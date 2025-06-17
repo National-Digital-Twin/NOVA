@@ -1,3 +1,4 @@
+import type { MapMouseEvent, Map } from 'maplibre-gl';
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import type { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
 import { useCallback, useState } from 'react';
@@ -36,27 +37,28 @@ const DrawPolygonButton = ({ onPolygonDrawn, mapRef, drawRef, isVisible }: DrawP
             };
 
             map.on('draw.modechange', handleModeChange);
+        } else {
+            // If already active and clicked again, cancel drawing
+            setIsActive(false);
+            draw.changeMode('simple_select', { featureIds: [] });
         }
     }, [mapRef, drawRef, isActive, onPolygonDrawn]);
 
     // Prevent edit when user clicks on the drawn polygon
     // This is to avoid the default behavior of Mapbox Draw which allows editing the polygon.
-    if (mapRef.current) {
-        mapRef.current.on('click', (e) => {
-            const map = mapRef.current;
-            const draw = drawRef.current;
-            if (!map || !draw) return;
-
-            const features = map.queryRenderedFeatures(e.point, {
-                layers: ['gl-draw-polygon-fill.cold']
-            });
-
-            if (features.length > 0) {
-                draw.changeMode('simple_select', { featureIds: [] });
-                e.preventDefault();
-            }
+    const handlePreventEdit = (e: maplibregl.MapMouseEvent & { target: maplibregl.Map }) => {
+        const features = mapRef.current.queryRenderedFeatures([e.point.x, e.point.y], {
+            layers: ['gl-draw-polygon-fill.cold'],
         });
-    }
+    
+        if (features.length > 0) {
+            drawRef.current.changeMode('simple_select', { featureIds: [] });
+            e.preventDefault();
+        }
+    };
+
+    mapRef.current.on('click', handlePreventEdit);
+    mapRef.current.on('contextmenu', handlePreventEdit); // right click support    
 
     if (!isVisible) return null;
 
