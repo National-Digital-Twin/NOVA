@@ -31,6 +31,9 @@ const DrawPolygonButton = ({ onPolygonDrawn, mapRef, drawRef, isVisible, polygon
     const handleClick = useCallback(() => {
         if (!mapRef.current || !drawRef.current) return;
 
+        // Prevent drawing again if polygon already exists
+        if (polygonDrawn) return;
+
         const map = mapRef.current;
         const draw = drawRef.current;
 
@@ -48,12 +51,8 @@ const DrawPolygonButton = ({ onPolygonDrawn, mapRef, drawRef, isVisible, polygon
             };
 
             map.on('draw.modechange', handleModeChange);
-        } else {
-            // If already active and clicked again, cancel drawing
-            setIsActive(false);
-            draw.changeMode('simple_select', { featureIds: [] });
         }
-    }, [mapRef, drawRef, isActive, onPolygonDrawn]);
+    }, [mapRef, drawRef, isActive, onPolygonDrawn, polygonDrawn]);
 
     // Prevent edit when user clicks on the drawn polygon
     // This is to avoid the default behavior of Mapbox Draw which allows editing the polygon.
