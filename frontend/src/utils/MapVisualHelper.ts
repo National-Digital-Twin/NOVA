@@ -115,8 +115,13 @@ export class MapVisualHelper {
      */
     static getConfirmationPopupCoordinates(polygon: Polygon): [number, number] {
         const coords = polygon.coordinates[0];
+    
         const topLat = Math.max(...coords.map(([, lat]) => lat));
         const avgLng = coords.reduce((sum, [lng]) => sum + lng, 0) / coords.length;
-        return [avgLng, topLat];
+    
+        // Offset the popup upward slightly above the top point to make sure the polygon point is always visible for editing.
+        const offsetLat = topLat + 0.0050;
+    
+        return [avgLng, offsetLat];
     }
 }
