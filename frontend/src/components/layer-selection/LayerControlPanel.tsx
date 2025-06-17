@@ -7,10 +7,9 @@
  * - Expand/collapse grouped layer categories
  * - Toggle checkboxes to include/exclude layers
  * - Request a heatmap be calculated based on selected layers
- *
  */
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useId } from "react";
 import {
     Paper,
     Accordion,
@@ -45,14 +44,20 @@ const layers: LayerGroup = {
         { name: "Sites of special scientific interest" },
         { name: "Special areas of conservation" },
     ],
-    Weather: [{ name: "Wind speed" }],
-    Residential: [{ name: "Built up areas" }],
+    "Weather": [{ name: "Wind speed" }],
+    "Residential": [{ name: "Built up areas" }],
     "Network infrastructure": [],
-    Consumption: [],
+    "Consumption": [],
 };
 
 // Main layer panel component
 const LayerControlPanel = () => {
+    // Determine first non-empty category for initial expansion
+    const defaultExpandedCategory =
+        Object.entries(layers).find(([, items]) => items.length > 0)?.[0] || "";
+
+    const idPrefix = useId(); // Unique prefix for form controls
+
     // State for search text input
     const [searchTerm, setSearchTerm] = useState("");
 
@@ -71,9 +76,11 @@ const LayerControlPanel = () => {
     });
 
     // Which accordion panels are expanded
-    const [expandedPanels, setExpandedPanels] = useState<string[]>(["Environmental protected sites"]);
+    const [expandedPanels, setExpandedPanels] = useState<string[]>(
+        defaultExpandedCategory ? [defaultExpandedCategory] : []
+    );
 
-    // Toggles a checkbox state
+    // Checkbox toggle handler
     const handleCheckboxChange = (layerName: string) => {
         setCheckedLayers(prev => ({
             ...prev,
@@ -81,7 +88,7 @@ const LayerControlPanel = () => {
         }));
     };
 
-    // Toggles an accordion open/closed
+    // Accordion toggle handler
     const handleAccordionToggle = (category: string) => {
         setExpandedPanels(prev =>
             prev.includes(category)
@@ -90,7 +97,7 @@ const LayerControlPanel = () => {
         );
     };
 
-    // Updates search term and auto-expands matching groups
+    // Search change handler
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setSearchTerm(value);
@@ -99,19 +106,19 @@ const LayerControlPanel = () => {
 
         const lower = value.toLowerCase();
         const matching = Object.entries(layers)
-            .filter(([_, items]) => items.some(item => item.name.toLowerCase().includes(lower)))
+            .filter(([, items]) => items.some(item => item.name.toLowerCase().includes(lower)))
             .map(([category]) => category);
 
         setExpandedPanels(matching);
     };
 
-    // Clears search and resets expanded state
+    // Clear search and reset expanded panel
     const clearSearch = () => {
         setSearchTerm("");
-        setExpandedPanels(["Environmental protected sites"]);
+        setExpandedPanels(defaultExpandedCategory ? [defaultExpandedCategory] : []);
     };
 
-    // Finalises the selection (currently just logs to console)
+    // Handle Apply button
     const handleApply = () => {
         const selected = Object.entries(checkedLayers)
             .filter(([_, isChecked]) => isChecked)
@@ -119,9 +126,55 @@ const LayerControlPanel = () => {
         console.log("Selected layers:", selected);
     };
 
+    // Memoised list of filtered layer entries
+    const filteredLayerEntries = useMemo(() => {
+        return Object.entries(layers).map(([category, items]) => {
+            const filteredItems = items.filter(item =>
+                item.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            if (filteredItems.length === 0) return null;
+
+            return (
+                <Accordion
+                    key={category}
+                    expanded={expandedPanels.includes(category)}
+                    onChange={() => handleAccordionToggle(category)}
+                    className="layer-accordion"
+                    disableGutters
+                >
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        className="layer-accordion-summary"
+                    >
+                        <Typography>{category}</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails sx={{ pt: 0.5, pb: 0 }}>
+                        {filteredItems.map(item => {
+                            const checkboxId = `${idPrefix}-${item.name.replace(/\s+/g, '-')}`;
+                            return (
+                                <Box key={item.name} className="layer-item">
+                                    <label htmlFor={checkboxId}>
+                                        <Typography variant="body2">{item.name}</Typography>
+                                        <Checkbox
+                                            id={checkboxId}
+                                            checked={checkedLayers[item.name] || false}
+                                            onChange={() => handleCheckboxChange(item.name)}
+                                        />
+                                    </label>
+                                </Box>
+                            );
+                        })}
+                    </AccordionDetails>
+                </Accordion>
+            );
+        });
+    }, [searchTerm, expandedPanels, checkedLayers, idPrefix]);
+
+    const hasSearchResults = filteredLayerEntries.some(Boolean);
+
     return (
         <>
-            {/* Side toggle button */}
+            {/* Toggle button */}
             <Box
                 className="layer-panel-toggle"
                 sx={{ left: open ? "430px" : "1rem" }}
@@ -134,16 +187,14 @@ const LayerControlPanel = () => {
                 </IconButton>
             </Box>
 
-            {/* Main panel content */}
+            {/* Panel content */}
             {open && (
                 <Paper className="layer-panel" elevation={4}>
-                    {/* Panel header */}
                     <Box className="layer-panel-header">
                         <LayersOutlinedIcon color="primary" sx={{ mr: 1 }} />
                         <Typography variant="subtitle1">Layers</Typography>
                     </Box>
 
-                    {/* Search input */}
                     <Box className="layer-panel-search">
                         <TextField
                             fullWidth
@@ -166,73 +217,24 @@ const LayerControlPanel = () => {
                                             </IconButton>
                                         </InputAdornment>
                                     ),
-                                    sx: { borderRadius: 2, mb: 1 },
+                                    sx: { borderRadius: 2 },
                                 }
                             }}
                         />
                     </Box>
 
-                    {/* List of layer groups */}
                     <Box className="layer-panel-selectable-layers">
-                        {(() => {
-                            // Render accordion per group
-                            const entries = Object.entries(layers).map(([category, items]) => {
-                                const filteredItems = items.filter((item) =>
-                                    item.name.toLowerCase().includes(searchTerm.toLowerCase())
-                                );
-                                if (filteredItems.length === 0) return null;
-
-                                return (
-                                    <Accordion
-                                        key={category}
-                                        expanded={expandedPanels.includes(category)}
-                                        onChange={() => handleAccordionToggle(category)}
-                                        className="layer-accordion"
-                                        disableGutters
-                                    >
-                                        <AccordionSummary
-                                            expandIcon={<ExpandMoreIcon />}
-                                            className="layer-accordion-summary"
-                                        >
-                                            <Typography>{category}</Typography>
-                                        </AccordionSummary>
-                                        <AccordionDetails sx={{ pt: 0.5, pb: 0 }}>
-                                            {filteredItems.map((item) => {
-                                                const checkboxId = `checkbox-${item.name.replace(/\s+/g, '-')}`;
-                                                return (
-                                                    <Box key={item.name} className="layer-item">
-                                                        <label htmlFor={checkboxId}>
-                                                            <Typography variant="body2">{item.name}</Typography>
-                                                            <Checkbox
-                                                                id={checkboxId}
-                                                                checked={checkedLayers[item.name] || false}
-                                                                onChange={() => handleCheckboxChange(item.name)}
-                                                            />
-                                                        </label>
-                                                    </Box>
-                                                );
-                                            })}
-                                        </AccordionDetails>
-                                    </Accordion>
-                                );
-                            });
-
-                            // If nothing matches search, show fallback message
-                            const hasResults = entries.some(Boolean);
-
-                            return hasResults ? entries : (
-                                <Box sx={{ px: 2, pt: 2 }}>
-                                    <Typography variant="body2" color="text.secondary">
-                                        No results
-                                    </Typography>
-                                </Box>
-                            );
-                        })()}
+                        {hasSearchResults ? filteredLayerEntries : (
+                            <Box sx={{ px: 2, pt: 2 }}>
+                                <Typography variant="body2" color="text.secondary">
+                                    No results
+                                </Typography>
+                            </Box>
+                        )}
                     </Box>
 
                     <Divider sx={{ my: 2, opacity: 0.3 }} />
 
-                    {/* Apply button */}
                     <Box className="layer-panel-footer">
                         <Button variant="contained" onClick={handleApply} sx={{ px: 4 }}>
                             APPLY
