@@ -40,21 +40,18 @@ const SearchPanel = ({ mapRef }: SearchPanelProps) => {
     const drawRef = useMapboxDraw(mapRef) as React.RefObject<MapboxDraw>;
     const [layerData, setLayerData] = useState<FeatureCollection<Geometry> | null>(null);
 
-    const handleSearch = useCallback(
-        async (query: string) => {
-            if (!query.trim() || !mapRef.current) return;
+    const handleLocationSelect = useCallback(
+        async (lat: number, long: number, zoom: number) => {
+            if (!mapRef.current) return;
 
             try {
-                const response = await fetch('/data/mock-search-response.json');
-                const data = await response.json();
-
                 mapRef.current.getMap().flyTo({
-                    center: data.coordinates as [number, number],
-                    zoom: data.zoom,
+                    center: [long, lat],
+                    zoom,
                     duration: 2000,
                 });
             } catch (error) {
-                console.error('Error searching location:', error);
+                console.error('Error navigating to location:', error);
             }
         },
         [mapRef]
@@ -80,7 +77,7 @@ const SearchPanel = ({ mapRef }: SearchPanelProps) => {
     return (
         <SearchContainer>
             <SearchGroup role="group" aria-label="Search controls" sx={{ minWidth: 400 }}>
-                <SearchInput onSearch={handleSearch} />
+                <SearchInput onSearchResultClick={handleLocationSelect} />
             </SearchGroup>
 
             <SearchGroup role="group" aria-label="Drawing controls">

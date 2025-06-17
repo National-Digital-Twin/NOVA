@@ -15,6 +15,7 @@ describe('DataProviderUtils', () => {
   const mockAssetsPath = path.join(__dirname, '../src/data/assets.json');
   const mockGeoJsonPath = path.join(__dirname, '../src/data/sampleGeoJson.json');
   const mockSubstationsPath = path.join(__dirname, '../src/data/substations.json');
+  const mockRegionsPath = path.join(__dirname, '../src/data/regions.json');
 
   // Sample data for mocking file reads
   const mockLayersData: LayersDTO = {

@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { PositionDTO } from "../models/position.model";
 import { isValidGeoJSON } from "../models/geojson.model";
 import { dataProviderUtils } from "../utils/data-provider.utils";
 import { AnalysisRequestDTO } from "../models/analysis-request.model";
@@ -12,7 +11,7 @@ export class UIController {
   /**
    * Constructor for UIController
    */
-  constructor() {}
+  constructor() {  }
 
   /**
    * @swagger
@@ -40,23 +39,18 @@ export class UIController {
    *         description: Bad request - location parameter is missing.
    */
   public searchLocation(req: Request, res: Response): void {
-    const location = req.query.location as string;
+    const query = req.query.location as string;
 
-    if (!location) {
-      res.status(400).json({error: "Location parameter is required"});
+    if (!query) {
+      res.status(400).json({ error: 'Location parameter is required' });
       return;
     }
 
-    console.debug(`Location search requested for: ${location}`);
+    console.debug(`Location search requested for: ${query}`);
 
-    // In a real application, this would call a geocoding service
-    // For now, we'll return mock coordinates based on the location name
-    const position: PositionDTO = {
-      latitude: 57.3912591,
-      longitude: -2.5751915
-    };
+    const matches = dataProviderUtils.getSearchOptions(query);
 
-    res.status(200).json(position);
+    res.status(200).json(matches);
   }
 
   /**
