@@ -6,7 +6,7 @@ const StyledIconButton = styled(IconButton, { shouldForwardProp: prop => prop !=
 
     return {
         width: '3rem',
-        height: '3rem',
+        height: '3.5rem',
         padding: 0,
         backgroundColor: isActive ? theme.palette.secondary.main : theme.palette.background.paper,
         color: isActive ? theme.palette.primary.contrastText : theme.palette.text.primary,
