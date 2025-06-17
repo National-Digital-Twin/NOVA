@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import { PositionDTO } from "../models/position.model";
+import Fuse from 'fuse.js';
+import { SearchOptionDTO } from "../models/search.model";
 import { isValidGeoJSON } from "../models/geojson.model";
 import { dataProviderUtils } from "../utils/data-provider.utils";
 import { AnalysisRequestDTO } from "../models/analysis-request.model";
@@ -9,10 +10,6 @@ import { SuitabilityResponseDTO } from "../models/suitability-response.model";
  * Controller for UI-related endpoints
  */
 export class UIController {
-  private readonly layersDataFilePath: string;
-  private readonly assetsDataFilePath: string;
-  private readonly sampleGeoJsonFilePath: string;
-
   private regions: SearchOptionDTO[];
   private fuse: Fuse<SearchOptionDTO>;
 
@@ -29,10 +26,6 @@ export class UIController {
       threshold: 0.3,
       distance: 100,
     });
-
-    this.layersDataFilePath = path.join(__dirname, "../data/layers.json");
-    this.assetsDataFilePath = path.join(__dirname, "../data/assets.json");
-    this.sampleGeoJsonFilePath = path.join(__dirname, "../data/sampleGeoJson.json");
   }
 
   /**
