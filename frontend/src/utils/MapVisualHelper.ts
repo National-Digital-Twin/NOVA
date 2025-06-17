@@ -12,13 +12,13 @@ export class MapVisualHelper {
 
 
     /**
-     * Applies a dimmed mask over the entire map except inside the given polygon.
+     * Applies a dimmed mask over the entire map except inside the given polygon and centers the map on that polygon.
      * If the mask source or layer already exists, it will update them.
      *
      * @param map - The MapLibre map instance
      * @param polygon - A GeoJSON Polygon to act as the visible cutout
      */
-    static applyDimmedMask(map: Map, polygon: Polygon) {
+    static applyDimmedMaskAndPanToPolygon(map: Map, polygon: Polygon) {
         const maskFeature: Feature<Polygon> = {
             type: 'Feature',
             geometry: {
@@ -60,6 +60,31 @@ export class MapVisualHelper {
                 }
             });
         }
+
+        // Centre the map on the polygon
+        const coords = polygon.coordinates[0];
+        let minLng = coords[0][0];
+        let minLat = coords[0][1];
+        let maxLng = coords[0][0];
+        let maxLat = coords[0][1];
+
+        coords.forEach(([lng, lat]) => {
+            if (lng < minLng) minLng = lng;
+            if (lat < minLat) minLat = lat;
+            if (lng > maxLng) maxLng = lng;
+            if (lat > maxLat) maxLat = lat;
+        });
+
+        map.fitBounds(
+            [
+                [minLng, minLat],
+                [maxLng, maxLat]
+            ],
+            {
+                padding: 50,
+                duration: 2000 // Slow pan for smaller polygons at lower zoom levels
+            }
+        );
     }
 
     /**

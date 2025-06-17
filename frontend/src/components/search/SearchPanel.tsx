@@ -105,14 +105,14 @@ const SearchPanel = ({ mapRef, showLayerControl, hideLayerControl }: SearchPanel
     const handlePolygonEdited = useCallback(async (drawnGeojson: FeatureCollection<Geometry>) => {
         setPolygonDrawn(true);
         const firstFeatureAsPolygon = drawnGeojson.features[0].geometry as Polygon;
-        MapVisualHelper.applyDimmedMask(mapRef.current.getMap(), firstFeatureAsPolygon);
+        MapVisualHelper.applyDimmedMaskAndPanToPolygon(mapRef.current.getMap(), firstFeatureAsPolygon);
         showLayerControl();
     }, []);
 
     const handlePolygonConfirmed = useCallback(async (drawnGeojson: FeatureCollection<Geometry>) => {
         setPolygonConfirmed(true);
         const firstFeatureAsPolygon = drawnGeojson.features[0].geometry as Polygon;
-        MapVisualHelper.applyDimmedMask(mapRef.current.getMap(), firstFeatureAsPolygon);
+        MapVisualHelper.applyDimmedMaskAndPanToPolygon(mapRef.current.getMap(), firstFeatureAsPolygon);
     }, []);
 
     const handlePolygonDeleted = useCallback(async () => {
