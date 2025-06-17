@@ -4,6 +4,7 @@ import { LayersDTO } from "../models/layers.model";
 import { AssetsDTO } from "../models/asset.model";
 import { GeoJSONDTO } from "../models/geojson.model";
 import { LocationsDTO } from "../models/location.model";
+import { SearchOptionDTO } from "../models/search.model";
 
 /**
  * Utility class for data providers
@@ -13,11 +14,13 @@ export class DataProviderUtils {
   private readonly assetsDataFilePath: string;
   private readonly sampleGeoJsonFilePath: string;
   private readonly substationsDataFilePath: string;
+  private readonly regionsDataFilePath: string;
 
   /**
    * Constructor for DataProviderUtils
    */
   constructor() {
+    this.regionsDataFilePath = path.join(__dirname, '../data/regions.json');
     this.layersDataFilePath = path.join(__dirname, "../data/layers.json");
     this.assetsDataFilePath = path.join(__dirname, "../data/assets.json");
     this.sampleGeoJsonFilePath = path.join(__dirname, "../data/sampleGeoJson.json");
@@ -70,6 +73,15 @@ export class DataProviderUtils {
     const fileContent = fs.readFileSync(this.substationsDataFilePath, 'utf8');
     return JSON.parse(fileContent) as LocationsDTO;
   }
+
+    /**
+   * Read regions data from the JSON file
+   * @returns SearchOptionDTO Array containing the regions data
+   */
+    public readRegionsData(): SearchOptionDTO[] {
+      const fileContent = fs.readFileSync(this.regionsDataFilePath, 'utf8');
+      return JSON.parse(fileContent) as SearchOptionDTO[];
+    }
 }
 
 export const dataProviderUtils = new DataProviderUtils();

@@ -145,46 +145,38 @@ describe('UIController', () => {
   });
 
   describe('searchLocation', () => {
-    it('should return position data for a valid location query', () => {
-      // Setup request with query parameter
+    it('should return an array of matched locations for a valid query', () => {
       req.query = { location: 'Test Location' };
-
-      // Mock console.debug
+  
+      // Mock the fuse property on the controller
+      controller.fuse = {
+        search: jest.fn().mockReturnValue([
+          { item: { name: 'Test County', type: 'County', latitude: 51.5, longitude: -0.1 } },
+          { item: { name: 'Test Region', type: 'Region', latitude: 52.0, longitude: -1.2 } }
+        ])
+      };
+  
       const consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation();
-
-      // Call the method
+  
       controller.searchLocation(req as Request, res as Response);
-
-      // Verify console.debug was called
+  
       expect(consoleDebugSpy).toHaveBeenCalledWith('Location search requested for: Test Location');
-
-      // Restore console.debug
-      consoleDebugSpy.mockRestore();
-
-      // Verify the response
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalled();
-
-      // Get the data passed to res.json
-      const responseData = (res.json as jest.Mock).mock.calls[0][0];
-
-      // Verify that the response is a PositionDTO
-      expect(responseData).toHaveProperty('latitude');
-      expect(responseData).toHaveProperty('longitude');
-      expect(typeof responseData.latitude).toBe('number');
-      expect(typeof responseData.longitude).toBe('number');
+      expect(res.json).toHaveBeenCalledWith([
+        { name: 'Test County', type: 'County', latitude: 51.5, longitude: -0.1 },
+        { name: 'Test Region', type: 'Region', latitude: 52.0, longitude: -1.2 }
+      ]);
+  
+      consoleDebugSpy.mockRestore();
     });
-
+  
     it('should return 400 when location parameter is missing', () => {
-      // Setup request without location parameter
       req.query = {};
-
-      // Call the method
+  
       controller.searchLocation(req as Request, res as Response);
-
-      // Verify the response
+  
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: "Location parameter is required" });
+      expect(res.json).toHaveBeenCalledWith({ error: 'Location parameter is required' });
     });
   });
 

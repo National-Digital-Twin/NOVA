@@ -17,9 +17,7 @@ export class UIController {
    * Constructor for UIController
    */
   constructor() {
-    const filePath = path.join(__dirname, '../data/regions.json');
-    const rawJson = fs.readFileSync(filePath, 'utf-8');
-    this.regions = JSON.parse(rawJson);
+    this.regions = dataProviderUtils.readRegionsData();
 
     this.fuse = new Fuse(this.regions, {
       keys: ['name'],
