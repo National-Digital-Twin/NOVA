@@ -1,0 +1,62 @@
+/**
+ * Data models for location information
+ */
+import { GeoJSONDTO } from "./geojson.model";
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     LocationDTO:
+ *       type: object
+ *       description: Represents a location with its geolocation and distance information
+ *       properties:
+ *         location:
+ *           $ref: '#/components/schemas/GeoJSONDTO'
+ *           description: GeoJSON representation of the location
+ *         name:
+ *           type: string
+ *           description: Name of the location
+ *         distance:
+ *           type: number
+ *           description: Distance from the provided point in kilometers
+ *       required:
+ *         - location
+ *         - name
+ *         - distance
+ */
+/**
+ * LocationDTO interface representing a location with its geolocation and distance information
+ */
+export interface LocationDTO {
+  /**
+   * GeoJSON representation of the location
+   */
+  location: GeoJSONDTO;
+
+  /**
+   * Name of the location
+   */
+  name: string;
+
+  /**
+   * Distance from the provided point in kilometers
+   */
+  distance: number;
+}
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     LocationsDTO:
+ *       type: array
+ *       description: Array of LocationDTO objects representing locations
+ *       items:
+ *         $ref: '#/components/schemas/LocationDTO'
+ */
+/**
+ * LocationsDTO interface representing the complete locations data structure
+ * This is an array of LocationDTO objects
+ */
+export type LocationsDTO = LocationDTO[];
