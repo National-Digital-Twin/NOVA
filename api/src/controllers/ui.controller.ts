@@ -358,7 +358,9 @@ export class UIController {
    *       content:
    *         application/json:
    *           schema:
-   *             $ref: '#/components/schemas/GeoJSONDTO'
+   *             oneOf:
+   *               - $ref: '#/components/schemas/GeoJSONDTO'
+   *               - $ref: '#/components/schemas/PositionDTO'
    *     responses:
    *       200:
    *         description: Substations retrieved successfully.
@@ -367,7 +369,7 @@ export class UIController {
    *             schema:
    *               $ref: '#/components/schemas/LocationsDTO'
    *       400:
-   *         description: Bad request - invalid GeoJSON data.
+   *         description: Bad request - invalid data.
    *       500:
    *         description: Internal server error.
    */
@@ -375,17 +377,29 @@ export class UIController {
     console.debug("Getting substations near location");
 
     try {
-      // Validate that the request body is a valid GeoJSON object
-      if (!isValidGeoJSON(req.body)) {
-        res.status(400).json({ error: "Invalid GeoJSON data" });
-        return;
+      let geoJson: GeoJSON;
+
+      // Check if the request body is a PositionDTO (has latitude and longitude properties)
+      if (req.body.latitude !== undefined && req.body.longitude !== undefined) {
+        // Convert PositionDTO to GeoJSON Point
+        geoJson = {
+          type: "Point",
+          coordinates: [req.body.longitude, req.body.latitude]
+        };
+      } else {
+        // Validate that the request body is a valid GeoJSON object
+        if (!isValidGeoJSON(req.body)) {
+          res.status(400).json({ error: "Invalid data. Must be a valid GeoJSON object or a position with latitude and longitude." });
+          return;
+        }
+        geoJson = req.body;
       }
 
       // Get the nearest substations using the substation service
-      const substations = substationService.getNearestSubstations(req.body);
+      const substations = substationService.getNearestSubstations(geoJson,5);
 
-      if (!substations) {
-        res.status(400).json({ error: "Request body must contain a Point geometry" });
+      if (!substations || substations.length === 0) {
+        res.status(400).json({ error: "Request must contain a valid point geometry" });
         return;
       }
 

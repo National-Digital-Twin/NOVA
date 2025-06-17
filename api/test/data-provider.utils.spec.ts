@@ -3,7 +3,7 @@ import * as path from 'path';
 import { dataProviderUtils } from '../src/utils/data-provider.utils';
 import { LayersDTO } from '../src/models/layers.model';
 import { AssetsDTO } from '../src/models/asset.model';
-import { GeoJSONDTO } from '../src/models/geojson.model';
+import { GeoJSONDTO } from '../src/utils/geojson.utils';
 import { LocationsDTO } from '../src/models/location.model';
 
 // Mock fs module
