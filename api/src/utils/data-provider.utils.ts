@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import Fuse from 'fuse.js';
 import { LayersDTO } from "../models/layers.model";
 import { AssetsDTO } from "../models/asset.model";
 import { GeoJSONDTO } from "../models/geojson.model";
@@ -15,6 +16,8 @@ export class DataProviderUtils {
   private readonly sampleGeoJsonFilePath: string;
   private readonly substationsDataFilePath: string;
   private readonly regionsDataFilePath: string;
+
+  private fuse!: Fuse<SearchOptionDTO>;
 
   /**
    * Constructor for DataProviderUtils
@@ -74,14 +77,30 @@ export class DataProviderUtils {
     return JSON.parse(fileContent) as LocationsDTO;
   }
 
-    /**
-   * Read regions data from the JSON file
-   * @returns SearchOptionDTO Array containing the regions data
+  /**
+   * Read regions data from the JSON file and stores into local fuse instance
    */
-    public readRegionsData(): SearchOptionDTO[] {
-      const fileContent = fs.readFileSync(this.regionsDataFilePath, 'utf8');
-      return JSON.parse(fileContent) as SearchOptionDTO[];
+  private readRegionsData() {
+    const fileContent = fs.readFileSync(this.regionsDataFilePath, 'utf8');
+    const regions = JSON.parse(fileContent) as SearchOptionDTO[];
+
+    this.fuse = new Fuse(regions, {
+      keys: ['name'],
+      threshold: 0.3,
+      distance: 100,
+    });
+  }
+
+  /**
+   * @returns SearchOptionDTO array containing the matches relevant to the input string
+   */
+  public getSearchOptions(query: string): SearchOptionDTO[] {
+    if(!this.fuse) {
+        this.readRegionsData();
     }
+
+    return this.fuse.search(query).slice(0, 10).map(r => r.item);
+  }
 }
 
 export const dataProviderUtils = new DataProviderUtils();

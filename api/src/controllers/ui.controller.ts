@@ -1,6 +1,4 @@
 import { Request, Response } from "express";
-import Fuse from 'fuse.js';
-import { SearchOptionDTO } from "../models/search.model";
 import { isValidGeoJSON } from "../models/geojson.model";
 import { dataProviderUtils } from "../utils/data-provider.utils";
 import { AnalysisRequestDTO } from "../models/analysis-request.model";
@@ -10,21 +8,10 @@ import { SuitabilityResponseDTO } from "../models/suitability-response.model";
  * Controller for UI-related endpoints
  */
 export class UIController {
-  private regions: SearchOptionDTO[];
-  private fuse: Fuse<SearchOptionDTO>;
-
   /**
    * Constructor for UIController
    */
-  constructor() {
-    this.regions = dataProviderUtils.readRegionsData();
-
-    this.fuse = new Fuse(this.regions, {
-      keys: ['name'],
-      threshold: 0.3,
-      distance: 100,
-    });
-  }
+  constructor() {  }
 
   /**
    * @swagger
@@ -61,7 +48,7 @@ export class UIController {
 
     console.debug(`Location search requested for: ${query}`);
 
-    const matches = this.fuse.search(query).slice(0, 10).map(r => r.item);
+    const matches = dataProviderUtils.getSearchOptions(query);
 
     res.status(200).json(matches);
   }

@@ -148,24 +148,21 @@ describe('UIController', () => {
     it('should return an array of matched locations for a valid query', () => {
       req.query = { location: 'Test Location' };
   
-      // Mock the fuse property on the controller
-      controller.fuse = {
-        search: jest.fn().mockReturnValue([
-          { item: { name: 'Test County', type: 'County', latitude: 51.5, longitude: -0.1 } },
-          { item: { name: 'Test Region', type: 'Region', latitude: 52.0, longitude: -1.2 } }
-        ])
-      };
+      const mockMatches = [
+        { name: 'Test County', type: 'County', latitude: 51.5, longitude: -0.1 },
+        { name: 'Test Region', type: 'Region', latitude: 52.0, longitude: -1.2 }
+      ];
+  
+      (dataProviderUtils.getSearchOptions as jest.Mock).mockReturnValue(mockMatches);
   
       const consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation();
   
       controller.searchLocation(req as Request, res as Response);
   
       expect(consoleDebugSpy).toHaveBeenCalledWith('Location search requested for: Test Location');
+      expect(dataProviderUtils.getSearchOptions).toHaveBeenCalledWith('Test Location');
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith([
-        { name: 'Test County', type: 'County', latitude: 51.5, longitude: -0.1 },
-        { name: 'Test Region', type: 'Region', latitude: 52.0, longitude: -1.2 }
-      ]);
+      expect(res.json).toHaveBeenCalledWith(mockMatches);
   
       consoleDebugSpy.mockRestore();
     });
