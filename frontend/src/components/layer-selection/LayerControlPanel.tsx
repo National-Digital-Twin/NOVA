@@ -1,3 +1,15 @@
+/**
+ * LayerControlPanel
+ *
+ * A React component that provides an interactive panel for selecting map layers to be used in Heatmap calculations.
+ * Users can:
+ * - Search for layers
+ * - Expand/collapse grouped layer categories
+ * - Toggle checkboxes to include/exclude layers
+ * - Request a heatmap be calculated based on selected layers
+ *
+ */
+
 import React, { useState } from "react";
 import {
     Paper,
@@ -19,9 +31,13 @@ import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 
+import "../../App.scss";
+
+// Types used internally by the component
 type LayerItem = { name: string };
 type LayerGroup = { [group: string]: LayerItem[] };
 
+// Static layer data grouped by category
 const layers: LayerGroup = {
     "Environmental protected sites": [
         { name: "Areas of outstanding natural beauty" },
@@ -35,21 +51,29 @@ const layers: LayerGroup = {
     Consumption: [],
 };
 
+// Main layer panel component
 const LayerControlPanel = () => {
+    // State for search text input
     const [searchTerm, setSearchTerm] = useState("");
+
+    // Whether the panel is expanded or collapsed
     const [open, setOpen] = useState(true);
+
+    // Tracks which layers are checked
     const [checkedLayers, setCheckedLayers] = useState<Record<string, boolean>>(() => {
         const initial: Record<string, boolean> = {};
         Object.values(layers).forEach(group => {
             group.forEach(item => {
-                initial[item.name] = true;
+                initial[item.name] = true; // all checked by default
             });
         });
         return initial;
     });
 
+    // Which accordion panels are expanded
     const [expandedPanels, setExpandedPanels] = useState<string[]>(["Environmental protected sites"]);
 
+    // Toggles a checkbox state
     const handleCheckboxChange = (layerName: string) => {
         setCheckedLayers(prev => ({
             ...prev,
@@ -57,6 +81,7 @@ const LayerControlPanel = () => {
         }));
     };
 
+    // Toggles an accordion open/closed
     const handleAccordionToggle = (category: string) => {
         setExpandedPanels(prev =>
             prev.includes(category)
@@ -65,6 +90,7 @@ const LayerControlPanel = () => {
         );
     };
 
+    // Updates search term and auto-expands matching groups
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setSearchTerm(value);
@@ -79,11 +105,13 @@ const LayerControlPanel = () => {
         setExpandedPanels(matching);
     };
 
+    // Clears search and resets expanded state
     const clearSearch = () => {
         setSearchTerm("");
         setExpandedPanels(["Environmental protected sites"]);
     };
 
+    // Finalises the selection (currently just logs to console)
     const handleApply = () => {
         const selected = Object.entries(checkedLayers)
             .filter(([_, isChecked]) => isChecked)
@@ -93,27 +121,12 @@ const LayerControlPanel = () => {
 
     return (
         <>
-            {/* Toggle Button */}
+            {/* Side toggle button */}
             <Box
-                sx={{
-                    position: "absolute",
-                    top: 80,
-                    left: open ? "430px" : "1rem",
-                    zIndex: 1100,
-                }}
+                className="layer-panel-toggle"
+                sx={{ left: open ? "430px" : "1rem" }}
             >
-                <IconButton
-                    onClick={() => setOpen(!open)}
-                    sx={{
-                        backgroundColor: "white",
-                        '&:hover': { backgroundColor: '#d5d5d5' },
-                        borderRadius: 1,
-                        boxShadow: 2,
-                        width: 50,
-                        height: 50,
-                        border: "1px solid #ccc",
-                    }}
-                >
+                <IconButton onClick={() => setOpen(!open)}>
                     <ArrowBackIosNewIcon
                         fontSize="small"
                         sx={{ transform: !open ? "rotate(180deg)" : "none" }}
@@ -121,37 +134,17 @@ const LayerControlPanel = () => {
                 </IconButton>
             </Box>
 
+            {/* Main panel content */}
             {open && (
-                <Paper
-                    elevation={4}
-                    sx={{
-                        width: 400,
-                        height: "calc(100vh - 25vh)",
-                        overflow: "hidden",
-                        position: "absolute",
-                        top: 80,
-                        left: "1rem",
-                        display: "flex",
-                        flexDirection: "column",
-                    }}
-                >
-                    {/* Header */}
-                    <Box
-                        sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            px: 2,
-                            py: 1,
-                            borderBottom: "1px solid #ddd",
-                            bgcolor: "#e8e8e8",
-                        }}
-                    >
+                <Paper className="layer-panel" elevation={4}>
+                    {/* Panel header */}
+                    <Box className="layer-panel-header">
                         <LayersOutlinedIcon color="primary" sx={{ mr: 1 }} />
                         <Typography variant="subtitle1">Layers</Typography>
                     </Box>
 
-                    {/* Search bar */}
-                    <Box sx={{ px: 2, pt: 2 }}>
+                    {/* Search input */}
+                    <Box className="layer-panel-search">
                         <TextField
                             fullWidth
                             variant="outlined"
@@ -179,98 +172,69 @@ const LayerControlPanel = () => {
                         />
                     </Box>
 
-                    {/* Scrollable list */}
-                    <Box
-                        sx={{
-                            px: 1,
-                            flexGrow: 1,
-                            overflowY: "auto",
-                            minHeight: 0,
-                        }}
-                    >
-                        {Object.entries(layers).map(([category, items]) => {
-                            const filteredItems = items.filter((item) =>
-                                item.name.toLowerCase().includes(searchTerm.toLowerCase())
-                            );
-                            if (filteredItems.length === 0) return null;
+                    {/* List of layer groups */}
+                    <Box className="layer-panel-selectable-layers">
+                        {(() => {
+                            // Render accordion per group
+                            const entries = Object.entries(layers).map(([category, items]) => {
+                                const filteredItems = items.filter((item) =>
+                                    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+                                );
+                                if (filteredItems.length === 0) return null;
 
-                            return (
-                                <Accordion
-                                    key={category}
-                                    expanded={expandedPanels.includes(category)}
-                                    onChange={() => handleAccordionToggle(category)}
-                                    disableGutters
-                                    sx={{
-                                        boxShadow: "none",
-                                        "&:before": { display: "none" },
-                                        bgcolor: "transparent",
-                                        mb: 0.5,
-                                    }}
-                                >
-                                    <AccordionSummary
-                                        expandIcon={<ExpandMoreIcon />}
-                                        sx={{
-                                            minHeight: 40,
-                                            "& .MuiAccordionSummary-content": { margin: 0 },
-                                        }}
+                                return (
+                                    <Accordion
+                                        key={category}
+                                        expanded={expandedPanels.includes(category)}
+                                        onChange={() => handleAccordionToggle(category)}
+                                        className="layer-accordion"
+                                        disableGutters
                                     >
-                                        <Typography>{category}</Typography>
-                                    </AccordionSummary>
-                                    <AccordionDetails sx={{ pt: 0.5, pb: 0 }}>
-                                        {filteredItems.map((item) => {
-                                            const checkboxId = `checkbox-${item.name.replace(/\s+/g, '-')}`;
+                                        <AccordionSummary
+                                            expandIcon={<ExpandMoreIcon />}
+                                            className="layer-accordion-summary"
+                                        >
+                                            <Typography>{category}</Typography>
+                                        </AccordionSummary>
+                                        <AccordionDetails sx={{ pt: 0.5, pb: 0 }}>
+                                            {filteredItems.map((item) => {
+                                                const checkboxId = `checkbox-${item.name.replace(/\s+/g, '-')}`;
+                                                return (
+                                                    <Box key={item.name} className="layer-item">
+                                                        <label htmlFor={checkboxId}>
+                                                            <Typography variant="body2">{item.name}</Typography>
+                                                            <Checkbox
+                                                                id={checkboxId}
+                                                                checked={checkedLayers[item.name] || false}
+                                                                onChange={() => handleCheckboxChange(item.name)}
+                                                            />
+                                                        </label>
+                                                    </Box>
+                                                );
+                                            })}
+                                        </AccordionDetails>
+                                    </Accordion>
+                                );
+                            });
 
-                                            return (
-                                                <Box
-                                                    key={item.name}
-                                                    sx={{
-                                                        display: "flex",
-                                                        alignItems: "center",
-                                                        justifyContent: "space-between",
-                                                        px: 1,
-                                                        py: 0.75,
-                                                        pl: 2,
-                                                        borderLeft: "3px solid #e0e0e0",
-                                                        "&:hover": {
-                                                            backgroundColor: "rgba(0, 0, 0, 0.04)",
-                                                        },
-                                                    }}
-                                                >
-                                                    <label
-                                                        htmlFor={checkboxId}
-                                                        style={{
-                                                            display: "flex",
-                                                            alignItems: "center",
-                                                            justifyContent: "space-between",
-                                                            width: "100%",
-                                                            cursor: "pointer",
-                                                        }}
-                                                    >
-                                                        <Typography variant="body2">{item.name}</Typography>
-                                                        <Checkbox
-                                                            id={checkboxId}
-                                                            checked={checkedLayers[item.name] || false}
-                                                            onChange={() => handleCheckboxChange(item.name)}
-                                                        />
-                                                    </label>
-                                                </Box>
-                                            );
-                                        })}
-                                    </AccordionDetails>
-                                </Accordion>
+                            // If nothing matches search, show fallback message
+                            const hasResults = entries.some(Boolean);
+
+                            return hasResults ? entries : (
+                                <Box sx={{ px: 2, pt: 2 }}>
+                                    <Typography variant="body2" color="text.secondary">
+                                        No results
+                                    </Typography>
+                                </Box>
                             );
-                        })}
+                        })()}
                     </Box>
 
                     <Divider sx={{ my: 2, opacity: 0.3 }} />
 
                     {/* Apply button */}
-                    <Box sx={{ px: 2, pb: 2, display: "flex", justifyContent: "center" }}>
-                        <Button
-                            variant="contained"
-                            onClick={handleApply}
-                            sx={{ px: 4 }}
-                        >
+                    <Box className="layer-panel-footer">
+                        <Button variant="contained" onClick={handleApply} sx={{ px: 4 }}>
                             APPLY
                         </Button>
                     </Box>
