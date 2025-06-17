@@ -85,7 +85,7 @@ export class MapVisualHelper {
                     top: 50,
                     bottom: 50,
                     left: 450,   // 400px layer switcher width + 50px buffer
-                    right: 50
+                    right: 66   // 50px default + 16px (typically 1rem control panel)
                 },
                 duration: 2000
             }
