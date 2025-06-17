@@ -1,16 +1,14 @@
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import ControlButton from '../../../shared/control-button/ControlButton';
-import { useLayerPanel } from '../../layer-selection/LayerPanelContext';
 
 interface DeletePolygonButtonProps {
-    onPolygonDeleted: () => void;
     drawRef: React.RefObject<MapboxDraw | null>;
-    isVisible: boolean; 
+    isVisible: boolean;
+    onPolygonDeleted: () => void;
+    hideLayerControl: () => void;
 }
 
-const DeletePolygonButton = ({ drawRef, isVisible, onPolygonDeleted }: DeletePolygonButtonProps) => {
-
-    const { hideLayerControl: hideLayerControl } = useLayerPanel();
+const DeletePolygonButton = ({ drawRef, isVisible, onPolygonDeleted, hideLayerControl }: DeletePolygonButtonProps) => {
 
     const handleClick = () => {
         if (!drawRef.current) return;
@@ -22,7 +20,7 @@ const DeletePolygonButton = ({ drawRef, isVisible, onPolygonDeleted }: DeletePol
     if (!isVisible) return null;
 
     return (
-        <ControlButton onClick={handleClick} aria-label="Delete polygon">
+        <ControlButton onClick={handleClick} aria-label="Delete polygon" showTooltip={true}>
             <img src="/icons/delete-polygon.svg" alt="Delete polygon" width={24} height={24} />
         </ControlButton>
     );

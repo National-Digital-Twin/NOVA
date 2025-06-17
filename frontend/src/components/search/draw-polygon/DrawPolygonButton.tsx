@@ -74,7 +74,7 @@ const DrawPolygonButton = ({ onPolygonDrawn, mapRef, drawRef, isVisible, polygon
     if (!isVisible) return null;
 
     return (
-        <ControlButton onClick={handleClick} isActive={isActive} aria-label="Draw Polygon" aria-pressed={isActive}>
+        <ControlButton onClick={handleClick} isActive={isActive} aria-label="Draw Polygon" aria-pressed={isActive} showTooltip={true}>
             <img
                 src={isActive ? '/icons/polygon-white.svg' : '/icons/polygon.svg'}
                 alt="Draw polygon"

@@ -30,55 +30,69 @@ interface ControlButtonProps {
     isActive?: boolean;
     disabled?: boolean;
     'aria-pressed'?: boolean;
+    showTooltip?: boolean;
 }
 
 const StyledTooltip = styled((props: TooltipProps) => (
     <Tooltip
-      {...props}
-      placement="bottom"
-      slotProps={{
-        popper: {
-          modifiers: [
-            {
-              name: 'offset',
-              options: {
-                offset: [0, 12], // 12px space below the button
-              },
+        {...props}
+        placement="bottom"
+        slotProps={{
+            popper: {
+                modifiers: [
+                    {
+                        name: 'offset',
+                        options: {
+                            offset: [0, 12], // 12px space below the button
+                        },
+                    },
+                ],
             },
-          ],
-        },
-      }}
-      classes={{ popper: props.className }}
+        }}
+        classes={{ popper: props.className }}
     />
-  ))(({ theme }) => ({
+))(({ theme }) => ({
     [`& .${tooltipClasses.tooltip}`]: {
-      backgroundColor: '#ffffff',
-      color: '#000000',
-      boxShadow: theme.shadows[2],
-      fontSize: 13,
-      padding: '6px 12px',
-      borderRadius: 8,
+        backgroundColor: '#ffffff',
+        color: '#000000',
+        boxShadow: theme.shadows[2],
+        fontSize: 13,
+        padding: '6px 12px',
+        borderRadius: 8,
     },
     [`& .${tooltipClasses.arrow}`]: {
-      display: 'none',
+        display: 'none',
     },
-  }));
+}));
 
-const ControlButton = ({ onClick, children, 'aria-label': ariaLabel, isActive, disabled, 'aria-pressed': ariaPressed }: ControlButtonProps) => {
+const ControlButton = ({ onClick, children, 'aria-label': ariaLabel, isActive, disabled, 'aria-pressed': ariaPressed, showTooltip }: ControlButtonProps) => {
     return (
         <Box>
-            <StyledTooltip title={ariaLabel}>
-                <span>
-                    <StyledIconButton
-                        onClick={onClick}
-                        aria-label={ariaLabel}
-                        isActive={isActive}
-                        disabled={disabled}
-                        aria-pressed={ariaPressed}>
-                        {children}
-                    </StyledIconButton>
-                </span>
-            </StyledTooltip>
+            {showTooltip ? (
+                <StyledTooltip title={ariaLabel}>
+                    <span>
+                        <StyledIconButton
+                            onClick={onClick}
+                            aria-label={ariaLabel}
+                            isActive={isActive}
+                            disabled={disabled}
+                            aria-pressed={ariaPressed}
+                        >
+                            {children}
+                        </StyledIconButton>
+                    </span>
+                </StyledTooltip>
+            ) : (
+                <StyledIconButton
+                    onClick={onClick}
+                    aria-label={ariaLabel}
+                    isActive={isActive}
+                    disabled={disabled}
+                    aria-pressed={ariaPressed}
+                >
+                    {children}
+                </StyledIconButton>
+            )}
         </Box>
     );
 };

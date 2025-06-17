@@ -1,29 +1,31 @@
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import ControlButton from '../../../shared/control-button/ControlButton';
 import type { FeatureCollection, Geometry, Polygon } from 'geojson';
-import { MapMask } from '../../../utils/MapMask';
+import { MapVisualHelper } from '../../../utils/MapVisualHelper';
 import type { MapRef } from 'react-map-gl/maplibre';
 import maplibregl from 'maplibre-gl';
 import ConfirmPolygonButton from '../../map-controls/confirm-polygon/ConfirmPolygonButton';
 import { createRoot } from 'react-dom/client';
-import { getPolygonConfirmationPopupPositionFromPolygon } from '../../../utils/ConfirmPolygonPositionHelper';
 
 interface EditPolygonButtonProps {
     onPolygonEdited: (geojson: FeatureCollection<Geometry>) => void;
+    hideLayerControl: () => void;
     mapRef: React.RefObject<MapRef>;
     drawRef: React.RefObject<MapboxDraw | null>;
     setPopUpRef: React.RefObject<maplibregl.Popup | null>;
     isVisible: boolean;
 }
 
-const EditPolygonButton = ({ onPolygonEdited, mapRef, drawRef, setPopUpRef, isVisible }: EditPolygonButtonProps) => {
+const EditPolygonButton = ({ onPolygonEdited, hideLayerControl, mapRef, drawRef, setPopUpRef, isVisible }: EditPolygonButtonProps) => {
     const handleClick = () => {
         if (!mapRef.current || !drawRef.current) return;
+
+        hideLayerControl();
 
         const draw = drawRef.current;
         const map = mapRef.current.getMap();
 
-        MapMask.remove(map);
+        MapVisualHelper.removeDimmedMask(map);
 
         if (setPopUpRef.current) {
             setPopUpRef.current.remove();
@@ -54,7 +56,7 @@ const EditPolygonButton = ({ onPolygonEdited, mapRef, drawRef, setPopUpRef, isVi
                 offset: [0, 10],
                 className: 'no-arrow-popup',
             })
-                .setLngLat(getPolygonConfirmationPopupPositionFromPolygon(polygon))
+                .setLngLat(MapVisualHelper.getConfirmationPopupCoordinates(polygon))
                 .setDOMContent(popupNode)
                 .addTo(map);
 
@@ -75,7 +77,7 @@ const EditPolygonButton = ({ onPolygonEdited, mapRef, drawRef, setPopUpRef, isVi
 
             const updatePopupPosition = () => {
                 const updated = draw.getAll() as unknown as FeatureCollection<Geometry>;
-                popup.setLngLat(getPolygonConfirmationPopupPositionFromPolygon(updated.features[0].geometry as Polygon));
+                popup.setLngLat(MapVisualHelper.getConfirmationPopupCoordinates(updated.features[0].geometry as Polygon));
             };
 
             updatePopupPosition();
@@ -94,7 +96,7 @@ const EditPolygonButton = ({ onPolygonEdited, mapRef, drawRef, setPopUpRef, isVi
     if (!isVisible) return null;
 
     return (
-        <ControlButton onClick={handleClick} aria-label="Edit polygon">
+        <ControlButton onClick={handleClick} aria-label="Edit polygon" showTooltip={true}>
             <img src="/icons/edit-polygon.svg" alt="Edit polygon" width={24} height={24} />
         </ControlButton>
     );
