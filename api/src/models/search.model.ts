@@ -19,10 +19,14 @@
  *         longitude:
  *           type: number
  *           description: Longitude coordinate
+ *         zoom:
+ *            type: number
+ *            description: Zoom level
  *       required:
  *         - name
  *         - latitude
  *         - longitude
+ *         - zoom
  */
 export interface SearchOptionDTO {
   /**
