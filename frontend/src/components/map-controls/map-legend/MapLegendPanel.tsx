@@ -1,6 +1,6 @@
 import { Box, styled, Typography } from '@mui/material';
 import { useState } from 'react';
-import ControlButton from '../ControlButton';
+import ControlButton from '../../../shared/control-button/ControlButton';
 
 const StyledPanel = styled('div')(({ theme }) => ({
     position: 'absolute',

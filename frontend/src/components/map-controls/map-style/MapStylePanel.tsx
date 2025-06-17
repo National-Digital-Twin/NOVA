@@ -1,7 +1,7 @@
 import { FormControl, FormControlLabel, Radio, RadioGroup, styled, Typography } from '@mui/material';
 import { useState } from 'react';
 import type { MapStyle } from '../../../types/map';
-import ControlButton from '../ControlButton';
+import ControlButton from '../../../shared/control-button/ControlButton';
 
 const StyledPanel = styled('div')(({ theme }) => ({
     position: 'absolute',

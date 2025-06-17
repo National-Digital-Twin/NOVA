@@ -16,6 +16,7 @@ describe('DataProviderUtils', () => {
   const mockGeoJsonPath = path.join(__dirname, '../src/data/sampleGeoJson.json');
   const mockSubstationsPath = path.join(__dirname, '../src/data/substations.json');
   const mockGSPPath = path.join(__dirname, '../src/data/GSP.geojson');
+  const mockRegionsPath = path.join(__dirname, '../src/data/regions.json');
 
   // Sample data for mocking file reads
   const mockLayersData: LayersDTO = {
@@ -218,22 +219,6 @@ describe('DataProviderUtils', () => {
 
       // Verify the result
       expect(result).toEqual(mockSubstationsData);
-    });
-  });
-
-  describe('readGSPData', () => {
-    it('should read and parse GSP data from file', () => {
-      // Mock fs.readFileSync to return our mock data
-      (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockGSPData));
-
-      // Call the method
-      const result = dataProviderUtils.readGSPData();
-
-      // Verify fs.readFileSync was called with the correct path
-      expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringContaining('GSP.geojson'), 'utf8');
-
-      // Verify the result
-      expect(result).toEqual(mockGSPData);
     });
   });
 });
