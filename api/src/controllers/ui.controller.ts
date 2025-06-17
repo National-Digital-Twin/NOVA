@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
-import { PositionDTO } from "../models/position.model";
+import { SearchOptionDTO } from "../models/search.model";
 import { LayersDTO } from "../models/layers.model";
-import { Asset, AssetsDTO } from "../models/asset.model";
+import { AssetsDTO } from "../models/asset.model";
 import { GeoJSON, isValidGeoJSON } from "../models/geojson.model";
 import * as fs from "fs";
+import Fuse from 'fuse.js';
 import * as path from "path";
 
 /**
@@ -14,10 +15,23 @@ export class UIController {
   private readonly assetsDataFilePath: string;
   private readonly sampleGeoJsonFilePath: string;
 
+  private regions: SearchOptionDTO[];
+  private fuse: Fuse<SearchOptionDTO>;
+
   /**
    * Constructor for UIController
    */
   constructor() {
+    const filePath = path.join(__dirname, '../data/regions.json');
+    const rawJson = fs.readFileSync(filePath, 'utf-8');
+    this.regions = JSON.parse(rawJson);
+
+    this.fuse = new Fuse(this.regions, {
+      keys: ['name'],
+      threshold: 0.3,
+      distance: 100,
+    });
+
     this.layersDataFilePath = path.join(__dirname, "../data/layers.json");
     this.assetsDataFilePath = path.join(__dirname, "../data/assets.json");
     this.sampleGeoJsonFilePath = path.join(__dirname, "../data/sampleGeoJson.json");
@@ -49,23 +63,18 @@ export class UIController {
    *         description: Bad request - location parameter is missing.
    */
   public searchLocation(req: Request, res: Response): void {
-    const location = req.query.location as string;
+    const query = req.query.location as string;
 
-    if (!location) {
-      res.status(400).json({error: "Location parameter is required"});
+    if (!query) {
+      res.status(400).json({ error: 'Location parameter is required' });
       return;
     }
 
-    console.debug(`Location search requested for: ${location}`);
+    console.debug(`Location search requested for: ${query}`);
 
-    // In a real application, this would call a geocoding service
-    // For now, we'll return mock coordinates based on the location name
-    const position: PositionDTO = {
-      latitude: 57.3912591,
-      longitude: -2.5751915
-    };
+    const matches = this.fuse.search(query).slice(0, 10).map(r => r.item);
 
-    res.status(200).json(position);
+    res.status(200).json(matches);
   }
 
   /**
