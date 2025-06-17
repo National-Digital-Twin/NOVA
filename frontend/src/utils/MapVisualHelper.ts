@@ -81,8 +81,13 @@ export class MapVisualHelper {
                 [maxLng, maxLat]
             ],
             {
-                padding: 50,
-                duration: 2000 // Slow pan for smaller polygons at lower zoom levels
+                padding: {
+                    top: 50,
+                    bottom: 50,
+                    left: 450,   // 400px layer switcher width + 50px buffer
+                    right: 50
+                },
+                duration: 2000
             }
         );
     }
