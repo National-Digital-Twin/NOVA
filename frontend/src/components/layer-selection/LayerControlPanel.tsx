@@ -212,7 +212,7 @@ const LayerControlPanel = () => {
                                     ),
                                     endAdornment: searchTerm && (
                                         <InputAdornment position="end">
-                                            <IconButton size="small" onClick={clearSearch}>
+                                            <IconButton size="small" onClick={clearSearch} aria-label="Clear search">
                                                 <HighlightOffIcon />
                                             </IconButton>
                                         </InputAdornment>

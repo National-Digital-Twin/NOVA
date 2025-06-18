@@ -1,238 +1,243 @@
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import type { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import type { FeatureCollection, Geometry, GeoJsonProperties } from 'geojson';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import DrawPolygonButton from './DrawPolygonButton';
 
-interface ControlButtonProps {
-    children: React.ReactNode;
-    onClick: () => void;
-    isActive: boolean;
-    'aria-label': string;
-    'aria-pressed': boolean;
-}
-
+// Mock ControlButton component to simplify rendering
 vi.mock('../../../shared/control-button/ControlButton', () => ({
-    default: ({ children, onClick, isActive, 'aria-label': ariaLabel, 'aria-pressed': ariaPressed }: ControlButtonProps) => (
-        <button
-            onClick={onClick}
-            className={isActive ? 'Mui-selected' : ''}
-            aria-label={ariaLabel}
-            aria-pressed={ariaPressed}
-            data-testid="control-button"
-            data-active={isActive}
-        >
-            {children}
-        </button>
-    ),
+  default: ({
+    children,
+    onClick,
+    isActive,
+    'aria-label': ariaLabel,
+    'aria-pressed': ariaPressed,
+  }: any) => (
+    <button
+      onClick={onClick}
+      className={isActive ? 'Mui-selected' : ''}
+      aria-label={ariaLabel}
+      aria-pressed={ariaPressed}
+      data-testid="control-button"
+      data-active={isActive}
+    >
+      {children}
+    </button>
+  ),
 }));
 
 describe('DrawPolygonButton', () => {
-    const mockMapRef = {
-        current: {
-            on: vi.fn(),
-            off: vi.fn(),
-            addControl: vi.fn(),
-            removeControl: vi.fn(),
-            getMap: vi.fn().mockReturnValue({
-                on: vi.fn(),
-                off: vi.fn(),
-            }),
+  const mockOnPolygonDrawn = vi.fn();
+  let modeChangeCallback: (() => void) | null = null;
+
+  const mockMapInstance = {
+    on: vi.fn((event: string, cb: any) => {
+      if (event === 'draw.modechange') {
+        modeChangeCallback = cb;
+      }
+    }),
+    off: vi.fn(),
+    queryRenderedFeatures: vi.fn().mockReturnValue([]),
+  };
+
+  const mockMapRef = {
+    current: mockMapInstance,
+  } as unknown as React.RefObject<MapRef>;
+
+  const mockDrawRef = {
+    current: {
+      changeMode: vi.fn(),
+      getAll: vi.fn(), // important: mock with vi.fn()
+    },
+  } as unknown as React.RefObject<MapboxDraw>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    modeChangeCallback = null;
+  });
+
+  it('does not render if isVisible is false', () => {
+    render(
+      <DrawPolygonButton
+        mapRef={mockMapRef}
+        drawRef={mockDrawRef}
+        onPolygonDrawn={mockOnPolygonDrawn}
+        isVisible={false}
+        polygonDrawn={false}
+      />
+    );
+
+    expect(screen.queryByLabelText('Draw Polygon')).not.toBeInTheDocument();
+  });
+
+  it('renders and activates when clicked, triggering draw_polygon mode', async () => {
+    render(
+      <DrawPolygonButton
+        mapRef={mockMapRef}
+        drawRef={mockDrawRef}
+        onPolygonDrawn={mockOnPolygonDrawn}
+        isVisible={true}
+        polygonDrawn={false}
+      />
+    );
+
+    const button = screen.getByLabelText('Draw Polygon');
+
+    await act(() => fireEvent.click(button));
+
+    expect(mockDrawRef.current.changeMode).toHaveBeenCalledWith('draw_polygon');
+    expect(mockMapRef.current.on).toHaveBeenCalledWith('draw.modechange', expect.any(Function));
+  });
+
+  it('does not activate if polygonDrawn is true', async () => {
+    render(
+      <DrawPolygonButton
+        mapRef={mockMapRef}
+        drawRef={mockDrawRef}
+        onPolygonDrawn={mockOnPolygonDrawn}
+        isVisible={true}
+        polygonDrawn={true}
+      />
+    );
+
+    const button = screen.getByLabelText('Draw Polygon');
+
+    await act(() => fireEvent.click(button));
+
+    expect(mockDrawRef.current.changeMode).not.toHaveBeenCalled();
+  });
+
+  it('does not break if drawRef is null', async () => {
+    const nullDrawRef = { current: null } as unknown as React.RefObject<MapboxDraw>;
+
+    render(
+      <DrawPolygonButton
+        mapRef={mockMapRef}
+        drawRef={nullDrawRef}
+        onPolygonDrawn={mockOnPolygonDrawn}
+        isVisible={true}
+        polygonDrawn={false}
+      />
+    );
+
+    const button = screen.getByLabelText('Draw Polygon');
+
+    await act(() => fireEvent.click(button));
+
+    expect(mockOnPolygonDrawn).not.toHaveBeenCalled();
+  });
+
+  it('does not break if mapRef is null', async () => {
+    const nullMapRef = { current: null } as unknown as React.RefObject<MapRef>;
+
+    render(
+      <DrawPolygonButton
+        mapRef={nullMapRef}
+        drawRef={mockDrawRef}
+        onPolygonDrawn={mockOnPolygonDrawn}
+        isVisible={true}
+        polygonDrawn={false}
+      />
+    );
+
+    const button = screen.getByLabelText('Draw Polygon');
+
+    await act(() => fireEvent.click(button));
+
+    expect(mockDrawRef.current.changeMode).not.toHaveBeenCalled();
+  });
+
+  it('triggers onPolygonDrawn after drawing a polygon', async () => {
+    const mockPolygon: FeatureCollection<Geometry, GeoJsonProperties> = {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'Polygon',
+            coordinates: [[[0, 0], [1, 1], [1, 0], [0, 0]]],
+          },
+          properties: {},
         },
-    } as unknown as React.RefObject<MapRef>;
+      ],
+    };
 
-    const mockDrawRef = {
-        current: {
-            on: vi.fn(),
-            off: vi.fn(),
-            getAll: vi.fn().mockReturnValue({
-                type: 'FeatureCollection',
-                features: [],
-            }),
-            changeMode: vi.fn(),
-            deleteAll: vi.fn(),
-            getMode: vi.fn().mockReturnValue('simple_select'),
-        },
-    } as unknown as React.RefObject<MapboxDraw>;
+    const getAllMock = vi.fn();
+    mockDrawRef.current.getAll = getAllMock;
+    getAllMock.mockReturnValue(mockPolygon);
 
-    const mockOnPolygonDrawn = vi.fn();
-    let modeChangeCallback: ((event: { mode: string }) => void) | null = null;
+    render(
+      <DrawPolygonButton
+        mapRef={mockMapRef}
+        drawRef={mockDrawRef}
+        onPolygonDrawn={mockOnPolygonDrawn}
+        isVisible={true}
+        polygonDrawn={false}
+      />
+    );
 
-    beforeEach(() => {
-        vi.clearAllMocks();
-        modeChangeCallback = null;
-        (mockDrawRef.current?.getMode as ReturnType<typeof vi.fn>).mockReturnValue('simple_select');
-        (mockDrawRef.current?.getAll as ReturnType<typeof vi.fn>).mockReturnValue({
-            type: 'FeatureCollection',
-            features: [],
-        });
-        (mockMapRef.current?.getMap().on as ReturnType<typeof vi.fn>).mockImplementation((event, callback) => {
-            if (event === 'draw.modechange') {
-                modeChangeCallback = callback;
-            }
-        });
+    const button = screen.getByLabelText('Draw Polygon');
+
+    await act(() => fireEvent.click(button));
+
+    expect(mockDrawRef.current.changeMode).toHaveBeenCalledWith('draw_polygon');
+
+    await act(() => {
+      if (modeChangeCallback) modeChangeCallback();
     });
 
-    it('renders the button with correct aria label', () => {
-        render(<DrawPolygonButton mapRef={mockMapRef} drawRef={mockDrawRef} onPolygonDrawn={mockOnPolygonDrawn} />);
+    expect(mockDrawRef.current.changeMode).toHaveBeenCalledWith('simple_select', { featureIds: [] });
+    expect(mockOnPolygonDrawn).toHaveBeenCalledWith(mockPolygon);
+  });
 
-        const button = screen.getByRole('button', { name: 'Draw Polygon' });
-        expect(button).toBeInTheDocument();
-        expect(button).toHaveAttribute('aria-pressed', 'false');
-    });
-
-    it('toggles between draw_polygon and simple_select modes', async () => {
-        render(<DrawPolygonButton mapRef={mockMapRef} drawRef={mockDrawRef} onPolygonDrawn={mockOnPolygonDrawn} />);
-
-        const button = screen.getByRole('button', { name: 'Draw Polygon' });
-
-        await act(async () => {
-            fireEvent.click(button);
-        });
-
-        await waitFor(() => {
-            expect(button).toHaveAttribute('aria-pressed', 'true');
-            expect(button).toHaveClass('Mui-selected');
-        });
-
-        expect(mockDrawRef.current?.changeMode).toHaveBeenCalledWith('draw_polygon');
-        expect(mockMapRef.current?.getMap().on).toHaveBeenCalledWith('draw.modechange', expect.any(Function));
-
-        await act(async () => {
-            if (modeChangeCallback) {
-                modeChangeCallback({ mode: 'simple_select' });
-            }
-        });
-
-        await waitFor(() => {
-            expect(button).toHaveAttribute('aria-pressed', 'false');
-            expect(button).not.toHaveClass('Mui-selected');
-        });
-
-        await act(async () => {
-            fireEvent.click(button);
-        });
-
-        await waitFor(() => {
-            expect(button).toHaveAttribute('aria-pressed', 'true');
-            expect(button).toHaveClass('Mui-selected');
-        });
-
-        expect(mockDrawRef.current?.changeMode).toHaveBeenCalledWith('draw_polygon');
-    });
-
-    it('shows active state when in draw_polygon mode', async () => {
-        (mockDrawRef.current?.getMode as ReturnType<typeof vi.fn>).mockReturnValue('draw_polygon');
-
-        await act(async () => {
-            render(<DrawPolygonButton mapRef={mockMapRef} drawRef={mockDrawRef} onPolygonDrawn={mockOnPolygonDrawn} />);
-        });
-
-        const button = screen.getByRole('button', { name: 'Draw Polygon' });
-        await waitFor(() => {
-            expect(button).toHaveAttribute('aria-pressed', 'false');
-            expect(button).not.toHaveClass('Mui-selected');
-        });
-    });
-
-    it('shows inactive state when in simple_select mode', async () => {
-        (mockDrawRef.current?.getMode as ReturnType<typeof vi.fn>).mockReturnValue('simple_select');
-
-        await act(async () => {
-            render(<DrawPolygonButton mapRef={mockMapRef} drawRef={mockDrawRef} onPolygonDrawn={mockOnPolygonDrawn} />);
-        });
-
-        const button = screen.getByRole('button', { name: 'Draw Polygon' });
-        await waitFor(() => {
-            expect(button).toHaveAttribute('aria-pressed', 'false');
-            expect(button).not.toHaveClass('Mui-selected');
-        });
-    });
-
-    it('handles null drawRef.current gracefully', () => {
-        const nullDrawRef = { current: null } as unknown as React.RefObject<MapboxDraw>;
-        render(<DrawPolygonButton mapRef={mockMapRef} drawRef={nullDrawRef} onPolygonDrawn={mockOnPolygonDrawn} />);
-
-        const button = screen.getByRole('button', { name: 'Draw Polygon' });
-        fireEvent.click(button);
-        expect(mockOnPolygonDrawn).not.toHaveBeenCalled();
-    });
-
-    it('does nothing if mapRef.current is null on click', () => {
-        const nullMapRef = { current: null } as unknown as React.RefObject<MapRef>;
-        render(<DrawPolygonButton mapRef={nullMapRef} drawRef={mockDrawRef} onPolygonDrawn={mockOnPolygonDrawn} />);
-
-        const button = screen.getByRole('button', { name: 'Draw Polygon' });
-        fireEvent.click(button);
-        expect(mockDrawRef.current?.changeMode).not.toHaveBeenCalled();
-    });
-
-    it('does nothing if drawRef.current is null on click', () => {
-        const nullDrawRef = { current: null } as unknown as React.RefObject<MapboxDraw>;
-        render(<DrawPolygonButton mapRef={mockMapRef} drawRef={nullDrawRef} onPolygonDrawn={mockOnPolygonDrawn} />);
-
-        const button = screen.getByRole('button', { name: 'Draw Polygon' });
-        fireEvent.click(button);
-        expect(mockDrawRef.current?.changeMode).not.toHaveBeenCalled();
-    });
-
-    it('handleModeChange does nothing if mapRef.current is null', () => {
-        const nullMapRef = { current: null } as unknown as React.RefObject<MapRef>;
-        render(<DrawPolygonButton mapRef={nullMapRef} drawRef={mockDrawRef} onPolygonDrawn={mockOnPolygonDrawn} />);
-
-        const button = screen.getByRole('button', { name: 'Draw Polygon' });
-        fireEvent.click(button);
-        expect(mockDrawRef.current?.changeMode).not.toHaveBeenCalled();
-    });
-
-    it('calls onPolygonDrawn when isActive becomes false and there are features', async () => {
-        const mockFeatures: FeatureCollection<Geometry, GeoJsonProperties> = {
-            type: 'FeatureCollection',
-            features: [
-                {
-                    type: 'Feature',
-                    geometry: {
-                        type: 'Polygon',
-                        coordinates: [
-                            [
-                                [0, 0],
-                                [0, 1],
-                                [1, 1],
-                                [1, 0],
-                                [0, 0],
-                            ],
-                        ],
-                    },
-                    properties: {},
-                },
-            ],
-        };
-        (mockDrawRef.current?.getAll as ReturnType<typeof vi.fn>).mockReturnValue(mockFeatures);
-
-        render(<DrawPolygonButton mapRef={mockMapRef} drawRef={mockDrawRef} onPolygonDrawn={mockOnPolygonDrawn} />);
-
-        const button = screen.getByRole('button', { name: 'Draw Polygon' });
-
-        await act(async () => {
-            fireEvent.click(button);
-        });
-
-        await waitFor(() => {
-            expect(button).toHaveAttribute('aria-pressed', 'true');
-            expect(button).toHaveClass('Mui-selected');
-        });
-
-        await act(async () => {
-            if (modeChangeCallback) {
-                modeChangeCallback({ mode: 'simple_select' });
-            }
-        });
-
-        await waitFor(() => {
-            expect(button).toHaveAttribute('aria-pressed', 'false');
-            expect(button).not.toHaveClass('Mui-selected');
-            expect(mockOnPolygonDrawn).toHaveBeenCalledWith(mockFeatures);
-        });
-    });
+  it('prevents editing existing polygon on map click', () => {
+    const mockChangeMode = vi.fn();
+    const mockQueryRenderedFeatures = vi.fn().mockReturnValue([{}]); // pretend a polygon is clicked
+  
+    const map = {
+      on: vi.fn(),
+      off: vi.fn(),
+      queryRenderedFeatures: mockQueryRenderedFeatures,
+    };
+  
+    const draw = {
+      changeMode: mockChangeMode,
+      getAll: vi.fn(),
+    };
+  
+    const mapRef = { current: map } as unknown as React.RefObject<MapRef>;
+    const drawRef = { current: draw } as unknown as React.RefObject<MapboxDraw>;
+  
+    const { unmount } = render(
+      <DrawPolygonButton
+        mapRef={mapRef}
+        drawRef={drawRef}
+        onPolygonDrawn={mockOnPolygonDrawn}
+        isVisible={true}
+        polygonDrawn={true}
+      />
+    );
+  
+    // simulate the callback added to map.on
+    const clickHandler = map.on.mock.calls.find(call => call[0] === 'click')?.[1];
+    expect(clickHandler).toBeDefined();
+  
+    const fakeEvent = {
+      point: { x: 10, y: 10 },
+      preventDefault: vi.fn(),
+    };
+  
+    // Call the preventEdit logic manually
+    clickHandler(fakeEvent);
+  
+    expect(mockQueryRenderedFeatures).toHaveBeenCalled();
+    expect(mockChangeMode).toHaveBeenCalledWith('simple_select', { featureIds: [] });
+    expect(fakeEvent.preventDefault).toHaveBeenCalled();
+  
+    // cleanup
+    unmount();
+    expect(map.off).toHaveBeenCalledWith('click', expect.any(Function));
+    expect(map.off).toHaveBeenCalledWith('contextmenu', expect.any(Function));
+  });
 });

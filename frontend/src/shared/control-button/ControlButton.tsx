@@ -73,11 +73,10 @@ const ControlButton = ({ onClick, children, 'aria-label': ariaLabel, isActive, d
                     <span>
                         <StyledIconButton
                             onClick={onClick}
-                            aria-label={ariaLabel}
                             isActive={isActive}
                             disabled={disabled}
                             aria-pressed={ariaPressed}
-                        >
+                            aria-label={ariaLabel + " button"}>
                             {children}
                         </StyledIconButton>
                     </span>

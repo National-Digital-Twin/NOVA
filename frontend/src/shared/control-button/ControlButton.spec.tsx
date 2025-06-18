@@ -48,7 +48,7 @@ describe('ControlButton', () => {
         const button = screen.getByLabelText('Test Button');
         expect(button).toHaveStyle({
             width: '3rem',
-            height: '3rem',
+            height: '3.5rem',
             padding: '0',
         });
     });

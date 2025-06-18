@@ -8,14 +8,42 @@ import ConfirmPolygonButton from '../../map-controls/confirm-polygon/ConfirmPoly
 import { createRoot } from 'react-dom/client';
 
 interface EditPolygonButtonProps {
+    /**
+     * Callback triggered after a polygon has been edited and confirmed by the user.
+     */
     onPolygonEdited: (geojson: FeatureCollection<Geometry>) => void;
+
+    /**
+     * Function to hide the map's layer control while editing is active.
+     */
     hideLayerControl: () => void;
+
+    /**
+     * Reference to the MapLibre map instance.
+     */
     mapRef: React.RefObject<MapRef>;
+
+    /**
+     * Reference to the Mapbox Draw instance.
+     */
     drawRef: React.RefObject<MapboxDraw | null>;
+
+    /**
+     * Ref to hold and manage the popup instance for confirmation.
+     */
     polygonConfirmationPopUpRef: React.RefObject<maplibregl.Popup | null>;
+
+    /**
+     * Controls visibility of the edit button.
+     */
     isVisible: boolean;
 }
 
+/**
+ * EditPolygonButton renders a control button for initiating polygon editing
+ * using Mapbox Draw on a MapLibre map. It enables direct selection of the polygon,
+ * displays a confirmation popup after dragging, and updates the polygon's geometry.
+ */
 const EditPolygonButton = ({
     onPolygonEdited,
     hideLayerControl,
@@ -24,6 +52,10 @@ const EditPolygonButton = ({
     polygonConfirmationPopUpRef,
     isVisible,
 }: EditPolygonButtonProps) => {
+    /**
+     * Handles the edit button click. It activates direct_select mode,
+     * sets up a one-time drag completion listener, and displays a confirmation popup.
+     */
     const handleClick = () => {
         const draw = drawRef.current;
         const map = mapRef.current?.getMap();
@@ -35,6 +67,7 @@ const EditPolygonButton = ({
 
         const polygon = MapVisualHelper.getFirstPolygon(draw);
         const polygonFeatureId = MapVisualHelper.getFeatureCollection(draw).features[0]?.id;
+
         if (!polygon || !polygonFeatureId) {
             console.warn('No valid polygon to edit');
             return;
@@ -42,6 +75,10 @@ const EditPolygonButton = ({
 
         draw.changeMode('direct_select', { featureId: polygonFeatureId });
 
+        /**
+         * Called once after user finishes dragging the polygon.
+         * Displays a confirmation popup, updates the geometry, and handles future edits.
+         */
         const handleUserFinishDragging = () => {
             const latestPolygon = MapVisualHelper.getFirstPolygon(draw);
             if (!latestPolygon) return;
@@ -68,6 +105,9 @@ const EditPolygonButton = ({
                 />
             );
 
+            /**
+             * Keeps the confirmation popup anchored to the polygon's new position after edits.
+             */
             const updatePopupPosition = () => {
                 const updatedPolygon = MapVisualHelper.getFirstPolygon(draw);
                 if (updatedPolygon) {
@@ -78,6 +118,7 @@ const EditPolygonButton = ({
             updatePopupPosition();
             map.on('draw.update', updatePopupPosition);
             map.on('draw.selectionchange', updatePopupPosition);
+
             map.off('mouseup', handleUserFinishDragging);
             map.off('touchend', handleUserFinishDragging);
         };
@@ -90,7 +131,7 @@ const EditPolygonButton = ({
 
     return (
         <ControlButton onClick={handleClick} aria-label="Edit polygon" showTooltip={true}>
-            <img src="/icons/edit-polygon.svg" alt="Edit polygon" width={24} height={24} />
+            <img src="/icons/edit-polygon.svg" alt="Edit polygon icon" width={24} height={24} />
         </ControlButton>
     );
 };

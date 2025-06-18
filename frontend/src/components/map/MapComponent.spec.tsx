@@ -3,6 +3,14 @@ import type { ViewState } from 'react-map-gl/maplibre';
 import { describe, expect, it, vi } from 'vitest';
 import MapComponent from '../../components/map/MapComponent';
 
+vi.mock('../../components/search/SearchPanel', () => ({
+    default: ({ showLayerControl }: { showLayerControl: () => void }) => (
+        <div data-testid="search-panel">
+            <button onClick={showLayerControl}>Show Layer Panel</button>
+        </div>
+    ),
+}));
+
 vi.mock('react-map-gl/maplibre', () => ({
     Map: ({ children, onMove, onLoad }: { children: React.ReactNode; onMove?: (evt: { viewState: ViewState }) => void; onLoad?: () => void }) => (
         <div
@@ -53,5 +61,13 @@ describe('MapComponent', () => {
         render(<MapComponent />);
         fireEvent.click(screen.getByTestId('map'));
         expect(screen.getByTestId('map')).toBeInTheDocument();
+    });
+
+    it('shows the layer control panel when triggered from SearchPanel', () => {
+        render(<MapComponent />);
+        fireEvent.click(screen.getByTestId('map')); // Initialise map
+        fireEvent.click(screen.getByText('Show Layer Panel')); // Trigger setShowLayerControl(true)
+
+        expect(screen.getByText('Layers')).toBeInTheDocument(); // From LayerControlPanel
     });
 });

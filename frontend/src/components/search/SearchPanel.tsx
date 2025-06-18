@@ -1,6 +1,5 @@
-import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { Box, Divider, styled } from '@mui/material';
-import type { FeatureCollection, Geometry, Polygon } from 'geojson';
+import type { FeatureCollection, Geometry } from 'geojson';
 import { useCallback, useRef, useState } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
 import useMapboxDraw from '../../hooks/useMapboxDraw';
@@ -10,9 +9,9 @@ import PolygonLayer from './polygon-layer/PolygonLayer';
 import SearchInput from './search-input/SearchInput';
 import { MapVisualHelper } from '../../utils/MapVisualHelper';
 import EditPolygonButton from './edit-polygon/EditPolygonButton';
+import { usePolygonHandlers } from '../../hooks/usePolygonHandlers';
 import maplibregl from 'maplibre-gl';
-import { createRoot } from 'react-dom/client';
-import ConfirmPolygonButton from '../map-controls/confirm-polygon/ConfirmPolygonButton';
+import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 
 const SearchContainer = styled(Box)({
     position: 'absolute',
@@ -45,75 +44,31 @@ interface SearchPanelProps {
 
 const SearchPanel = ({ mapRef, showLayerControl, hideLayerControl }: SearchPanelProps) => {
     const drawRef = useMapboxDraw(mapRef) as React.RefObject<MapboxDraw>;
-    const setPopUpRef = useRef<maplibregl.Popup | null>(null);
+    const popupRef = useRef<maplibregl.Popup | null>(null);
+
     const [layerData, setLayerData] = useState<FeatureCollection<Geometry> | null>(null);
     const [polygonDrawn, setPolygonDrawn] = useState(false);
     const [polygonConfirmed, setPolygonConfirmed] = useState(false);
 
-    const handleLocationSelect = useCallback(
-        async (lat: number, long: number, zoom: number) => {
-            if (!mapRef.current) return;
+    const {
+        handlePolygonDrawn,
+        handlePolygonEdited,
+        handlePolygonDeleted
+    } = usePolygonHandlers({
+        mapRef,
+        popupRef,
+        setPolygonDrawn,
+        setPolygonConfirmed,
+        showLayerControl,
+        clearLayerData: () => setLayerData(null),
+    });
 
-            try {
-                MapVisualHelper.flyToLocation(mapRef, lat, long, zoom);
-            } catch (error) {
-                console.error('Error navigating to location:', error);
-            }
+    const handleLocationSelect = useCallback(
+        (lat: number, long: number, zoom: number) => {
+            MapVisualHelper.flyToLocation(mapRef, lat, long, zoom);
         },
         [mapRef]
     );
-
-    const handlePolygonDrawn = useCallback(async (drawnGeojson: FeatureCollection<Geometry>) => {
-        setPolygonDrawn(true);
-        setPolygonConfirmed(false);
-
-        // Find first feature and mask (assuming it's always a Polygon)
-        const polygon = drawnGeojson.features[0].geometry as Polygon;
-        const popupNode = document.createElement('div');
-        const root = createRoot(popupNode);
-
-        const popup = new maplibregl.Popup({
-            closeButton: false,
-            closeOnClick: false,
-            offset: [100, 0],
-        })
-            .setLngLat(MapVisualHelper.getConfirmationPopupCoordinates(polygon))
-            .setDOMContent(popupNode)
-            .addTo(mapRef.current.getMap()!);
-
-        setPopUpRef.current = popup;
-
-        root.render(
-            <ConfirmPolygonButton
-                onConfirm={() => {
-                    MapVisualHelper.removeExistingPopup(setPopUpRef);
-                    handlePolygonConfirmed(drawnGeojson);
-                    showLayerControl();
-                }}
-            />
-        );
-    }, []);
-
-    const handlePolygonEdited = useCallback(async (drawnGeojson: FeatureCollection<Geometry>) => {
-        setPolygonDrawn(true);
-        const firstFeatureAsPolygon = drawnGeojson.features[0].geometry as Polygon;
-        MapVisualHelper.applyDimmedMaskAndPanToPolygon(mapRef.current.getMap(), firstFeatureAsPolygon);
-        showLayerControl();
-    }, []);
-
-    const handlePolygonConfirmed = useCallback(async (drawnGeojson: FeatureCollection<Geometry>) => {
-        setPolygonConfirmed(true);
-        const firstFeatureAsPolygon = drawnGeojson.features[0].geometry as Polygon;
-        MapVisualHelper.applyDimmedMaskAndPanToPolygon(mapRef.current.getMap(), firstFeatureAsPolygon);
-    }, []);
-
-    const handlePolygonDeleted = useCallback(async () => {
-        setPolygonDrawn(false);
-        setPolygonConfirmed(false);
-        setLayerData(null);
-        MapVisualHelper.removeDimmedMask(mapRef.current.getMap());
-        MapVisualHelper.removeExistingPopup(setPopUpRef);
-    }, []);
 
     return (
         <SearchContainer>
@@ -122,10 +77,28 @@ const SearchPanel = ({ mapRef, showLayerControl, hideLayerControl }: SearchPanel
             </SearchGroup>
 
             <SearchGroup role="group" aria-label="Drawing controls">
-                <DeletePolygonButton drawRef={drawRef} isVisible={polygonDrawn && polygonConfirmed} onPolygonDeleted={handlePolygonDeleted} hideLayerControl={hideLayerControl} />
+                <DeletePolygonButton
+                    drawRef={drawRef}
+                    isVisible={polygonDrawn && polygonConfirmed}
+                    onPolygonDeleted={handlePolygonDeleted}
+                    hideLayerControl={hideLayerControl}
+                />
                 <StyledDivider orientation="vertical" flexItem />
-                <EditPolygonButton mapRef={mapRef} drawRef={drawRef} polygonConfirmationPopUpRef={setPopUpRef} isVisible={polygonDrawn && polygonConfirmed} onPolygonEdited={handlePolygonEdited} hideLayerControl={hideLayerControl} />
-                <DrawPolygonButton mapRef={mapRef} drawRef={drawRef} isVisible={!polygonConfirmed} onPolygonDrawn={handlePolygonDrawn} polygonDrawn={polygonDrawn} />
+                <EditPolygonButton
+                    mapRef={mapRef}
+                    drawRef={drawRef}
+                    polygonConfirmationPopUpRef={popupRef}
+                    isVisible={polygonDrawn && polygonConfirmed}
+                    onPolygonEdited={handlePolygonEdited}
+                    hideLayerControl={hideLayerControl}
+                />
+                <DrawPolygonButton
+                    mapRef={mapRef}
+                    drawRef={drawRef}
+                    isVisible={!polygonConfirmed}
+                    onPolygonDrawn={handlePolygonDrawn}
+                    polygonDrawn={polygonDrawn}
+                />
             </SearchGroup>
 
             {layerData && <PolygonLayer data={layerData} />}

@@ -175,6 +175,18 @@ export class MapVisualHelper {
         return feature.geometry as Polygon;
     }
 
+    /*
+    * Extracts the first polygon from a GeoJSON FeatureCollection.
+    * If no polygon exists, returns null.
+    *
+    * @param geojson - The GeoJSON FeatureCollection to extract from
+    * @returns The first polygon geometry or null if none exists
+    */
+    static extractFirstPolygon(geojson: FeatureCollection<Geometry>): Polygon | null {
+        const geometry = geojson.features[0]?.geometry;
+        return geometry?.type === 'Polygon' ? (geometry as Polygon) : null;
+    }
+
     /**
      * Retrieves the entire feature collection from the Mapbox Draw instance.
      *
