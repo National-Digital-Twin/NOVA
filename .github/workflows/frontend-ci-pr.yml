@@ -90,7 +90,6 @@ jobs:
         run: |
           mkdir -p .coverage
           npm run test:coverage
-        continue-on-error: true
 
   security-scanning:
     name: Security Scanning

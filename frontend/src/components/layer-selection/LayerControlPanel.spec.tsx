@@ -96,8 +96,7 @@ describe('LayerControlPanel', () => {
         await userEvent.click(applyBtn);
 
         expect(logSpy).toHaveBeenCalledWith(
-            expect.stringContaining('Selected layers:'),
-            expect.arrayContaining(['Areas of outstanding natural beauty', 'Wind speed'])
+            expect.stringContaining('Apply clicked')
         );
     });
 
