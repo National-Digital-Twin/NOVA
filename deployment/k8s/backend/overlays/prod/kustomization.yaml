@@ -11,6 +11,10 @@ patches:
   - path: patches/allow-ingress.yaml
     target:
       kind: AuthorizationPolicy
+  - path: patches/set-node-env.yaml
+    target:
+      kind: Deployment
+      name: nova-backend-env
 
 labels:
   - pairs:
