@@ -55,11 +55,7 @@ const SearchPanel = ({ mapRef, showLayerControl, hideLayerControl }: SearchPanel
             if (!mapRef.current) return;
 
             try {
-                mapRef.current.getMap().flyTo({
-                    center: [long, lat],
-                    zoom,
-                    duration: 2000,
-                });
+                MapVisualHelper.flyToLocation(mapRef, lat, long, zoom);
             } catch (error) {
                 console.error('Error navigating to location:', error);
             }
@@ -90,8 +86,7 @@ const SearchPanel = ({ mapRef, showLayerControl, hideLayerControl }: SearchPanel
         root.render(
             <ConfirmPolygonButton
                 onConfirm={() => {
-                    popup.remove();
-                    setPopUpRef.current = null;
+                    MapVisualHelper.removeExistingPopup(setPopUpRef);
                     handlePolygonConfirmed(drawnGeojson);
                     showLayerControl();
                 }}
@@ -117,11 +112,7 @@ const SearchPanel = ({ mapRef, showLayerControl, hideLayerControl }: SearchPanel
         setPolygonConfirmed(false);
         setLayerData(null);
         MapVisualHelper.removeDimmedMask(mapRef.current.getMap());
-
-        if (setPopUpRef.current) {
-            setPopUpRef.current.remove();
-            setPopUpRef.current = null;
-        }
+        MapVisualHelper.removeExistingPopup(setPopUpRef);
     }, []);
 
     return (
@@ -133,7 +124,7 @@ const SearchPanel = ({ mapRef, showLayerControl, hideLayerControl }: SearchPanel
             <SearchGroup role="group" aria-label="Drawing controls">
                 <DeletePolygonButton drawRef={drawRef} isVisible={polygonDrawn && polygonConfirmed} onPolygonDeleted={handlePolygonDeleted} hideLayerControl={hideLayerControl} />
                 <StyledDivider orientation="vertical" flexItem />
-                <EditPolygonButton mapRef={mapRef} drawRef={drawRef} setPopUpRef={setPopUpRef} isVisible={polygonDrawn && polygonConfirmed} onPolygonEdited={handlePolygonEdited} hideLayerControl={hideLayerControl} />
+                <EditPolygonButton mapRef={mapRef} drawRef={drawRef} polygonConfirmationPopUpRef={setPopUpRef} isVisible={polygonDrawn && polygonConfirmed} onPolygonEdited={handlePolygonEdited} hideLayerControl={hideLayerControl} />
                 <DrawPolygonButton mapRef={mapRef} drawRef={drawRef} isVisible={!polygonConfirmed} onPolygonDrawn={handlePolygonDrawn} polygonDrawn={polygonDrawn} />
             </SearchGroup>
 

@@ -1,6 +1,8 @@
 import type { Map } from 'maplibre-gl';
-import type { Feature, Polygon } from 'geojson';
+import type { Feature, FeatureCollection, Geometry, Polygon } from 'geojson';
 import type { GeoJSONSource } from 'maplibre-gl';
+import type { MapRef } from 'react-map-gl/maplibre';
+import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 
 /**
  * Helper class for applying map visualisations when using MapLibre GL.
@@ -115,13 +117,72 @@ export class MapVisualHelper {
      */
     static getConfirmationPopupCoordinates(polygon: Polygon): [number, number] {
         const coords = polygon.coordinates[0];
-    
+
         const topLat = Math.max(...coords.map(([, lat]) => lat));
         const avgLng = coords.reduce((sum, [lng]) => sum + lng, 0) / coords.length;
-    
+
         // Offset the popup upward slightly above the top point to make sure the polygon point is always visible for editing.
         const offsetLat = topLat + 0.0050;
-    
+
         return [avgLng, offsetLat];
     }
+
+    /**
+     * Removes an existing popup from the map, if it exists.
+     *
+     * @param popupRef - A React ref to the popup instance
+     */
+    static removeExistingPopup(popupRef: React.RefObject<maplibregl.Popup | null>) {
+        if (popupRef.current) {
+            popupRef.current.remove();
+            popupRef.current = null;
+        }
+    }
+
+    /**
+     * Flies the map to a specific location with a smooth animation.
+     *
+     * @param mapRef - A React ref to the MapLibre map instance
+     * @param lat - Latitude of the target location
+     * @param lng - Longitude of the target location
+     * @param zoom - Zoom level for the target location
+     * @param duration - Duration of the flyTo animation in milliseconds (default is 2000ms)
+     */
+    static flyToLocation(mapRef: React.RefObject<MapRef>, lat: number, lng: number, zoom: number, duration = 2000) {
+        const map = mapRef.current?.getMap();
+        if (!map) return;
+
+        map.flyTo({
+            center: [lng, lat],
+            zoom,
+            duration,
+        });
+    }
+
+    /**
+     * Retrieves the first polygon from the Mapbox Draw instance.
+     * If no polygon exists, returns null.
+     *
+     * @param draw - The Mapbox Draw polygon instance
+     * @returns The first polygon geometry or null if none exists
+     */
+    static getFirstPolygon(draw: MapboxDraw): Polygon | null {
+        const collection = draw.getAll() as unknown as FeatureCollection<Geometry>;
+        const feature = collection.features[0];
+
+        if (!feature || feature.geometry.type !== 'Polygon') return null;
+
+        return feature.geometry as Polygon;
+    }
+
+    /**
+     * Retrieves the entire feature collection from the Mapbox Draw instance.
+     *
+     * @param draw - The Mapbox Draw polygon instance
+     * @returns The feature collection containing all drawn geometries
+     */
+    static getFeatureCollection(draw: MapboxDraw): FeatureCollection<Geometry> {
+        return draw.getAll() as unknown as FeatureCollection<Geometry>;
+    }
+
 }

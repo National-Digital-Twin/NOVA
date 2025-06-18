@@ -1,9 +1,10 @@
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
-import type { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
+import type { FeatureCollection, Geometry } from 'geojson';
 import { useCallback, useEffect, useState } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
 import ControlButton from '../../../shared/control-button/ControlButton';
 import maplibregl from 'maplibre-gl';
+import { MapVisualHelper } from '../../../utils/MapVisualHelper';
 
 interface DrawPolygonButtonProps {
     onPolygonDrawn: (geojson: FeatureCollection<Geometry>) => void;
@@ -13,67 +14,78 @@ interface DrawPolygonButtonProps {
     polygonDrawn: boolean;
 }
 
-const DrawPolygonButton = ({ onPolygonDrawn, mapRef, drawRef, isVisible, polygonDrawn }: DrawPolygonButtonProps) => {
+const DrawPolygonButton = ({
+    onPolygonDrawn,
+    mapRef,
+    drawRef,
+    isVisible,
+    polygonDrawn
+}: DrawPolygonButtonProps) => {
     const [isActive, setIsActive] = useState(false);
 
+    // Update active state from props
     useEffect(() => {
-        if (!isVisible) {
-            setIsActive(false);
-        }
+        setIsActive(polygonDrawn);
+    }, [polygonDrawn]);
 
-        if (polygonDrawn) {
-            setIsActive(true);
-        } else {
-            setIsActive(false);
-        }
-    }, [isVisible, polygonDrawn]);
+    // Prevent editing existing polygon
+    useEffect(() => {
+        if (!polygonDrawn || !mapRef.current || !drawRef.current) return;
+    
+        const map = mapRef.current;
+        const draw = drawRef.current;
+    
+        const preventEdit = (e: maplibregl.MapMouseEvent & { target: maplibregl.Map }) => {
+            const features = map.queryRenderedFeatures([e.point.x, e.point.y], {
+                layers: ['gl-draw-polygon-fill.cold'],
+            });
+    
+            if (features.length > 0) {
+                draw.changeMode('simple_select', { featureIds: [] });
+                e.preventDefault();
+            }
+        };
+    
+        map.on('click', preventEdit);
+        map.on('contextmenu', preventEdit);
+    
+        return () => {
+            map.off('click', preventEdit);
+            map.off('contextmenu', preventEdit);
+        };
+    }, [polygonDrawn, mapRef, drawRef]);
 
     const handleClick = useCallback(() => {
-        if (!mapRef.current || !drawRef.current) return;
-
-        // Prevent drawing again if polygon already exists
-        if (polygonDrawn) return;
+        if (!mapRef.current || !drawRef.current || polygonDrawn) return;
 
         const map = mapRef.current;
         const draw = drawRef.current;
 
-        if (!isActive) {
-            setIsActive(true);
-            draw.changeMode('draw_polygon');
+        setIsActive(true);
+        draw.changeMode('draw_polygon');
 
-            const handleModeChange = () => {
-                const drawing = drawRef.current.getAll() as unknown as FeatureCollection<Geometry, GeoJsonProperties>;
-                if (drawing.features.length > 0 && drawing.features[0].geometry.type === 'Polygon') {
-                    draw.changeMode('simple_select', { featureIds: [] });
-                    map.off('draw.modechange', handleModeChange);
-                    onPolygonDrawn(drawing);
-                }
-            };
+        const handleModeChange = () => {
+            const polygon = MapVisualHelper.getFirstPolygon(draw);
+            if (polygon) {
+                draw.changeMode('simple_select', { featureIds: [] });
+                map.off('draw.modechange', handleModeChange);
+                onPolygonDrawn(MapVisualHelper.getFeatureCollection(draw));
+            }
+        };
 
-            map.on('draw.modechange', handleModeChange);
-        }
-    }, [mapRef, drawRef, isActive, onPolygonDrawn, polygonDrawn]);
-
-    // Prevent edit when user clicks on the drawn polygon
-    // This is to avoid the default behavior of Mapbox Draw which allows editing the polygon.
-    const handlePreventEdit = (e: maplibregl.MapMouseEvent & { target: maplibregl.Map }) => {
-        const features = mapRef.current.queryRenderedFeatures([e.point.x, e.point.y], {
-            layers: ['gl-draw-polygon-fill.cold'],
-        });
-
-        if (features.length > 0) {
-            drawRef.current.changeMode('simple_select', { featureIds: [] });
-            e.preventDefault();
-        }
-    };
-
-    mapRef.current.on('click', handlePreventEdit);
-    mapRef.current.on('contextmenu', handlePreventEdit); // right click support    
+        map.on('draw.modechange', handleModeChange);
+    }, [mapRef, drawRef, polygonDrawn, onPolygonDrawn]);
 
     if (!isVisible) return null;
 
     return (
-        <ControlButton onClick={handleClick} isActive={isActive} aria-label="Draw Polygon" aria-pressed={isActive} showTooltip={true}>
+        <ControlButton
+            onClick={handleClick}
+            isActive={isActive}
+            aria-label="Draw Polygon"
+            aria-pressed={isActive}
+            showTooltip={true}
+        >
             <img
                 src={isActive ? '/icons/polygon-white.svg' : '/icons/polygon.svg'}
                 alt="Draw polygon"
