@@ -23,11 +23,17 @@ export class DataProviderUtils {
    * Constructor for DataProviderUtils
    */
   constructor() {
-    this.regionsDataFilePath = path.resolve("src/data/regions.json");
-    this.layersDataFilePath = path.resolve("src/data/layers.json");
-    this.assetsDataFilePath = path.resolve("src/data/assets.json");
-    this.sampleGeoJsonFilePath = path.resolve("src/data/sampleGeoJson.json");
-    this.substationsDataFilePath = path.resolve("src/data/substations.json");
+    this.regionsDataFilePath = path.resolve(__dirname, "../data/regions.json");
+    this.layersDataFilePath = path.resolve(__dirname, "../data/layers.json");
+    this.assetsDataFilePath = path.resolve(__dirname, "../data/assets.json");
+    this.sampleGeoJsonFilePath = path.resolve(
+      __dirname,
+      "../data/sampleGeoJson.json"
+    );
+    this.substationsDataFilePath = path.resolve(
+      __dirname,
+      "../data/substations.json"
+    );
   }
 
   /**
