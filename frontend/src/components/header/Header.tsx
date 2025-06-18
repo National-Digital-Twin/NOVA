@@ -1,11 +1,14 @@
 import { AppBar, Box, styled } from '@mui/material';
 import React from 'react';
 import novaLogo from '../../assets/nova-logo.svg';
+import UserMenu from './UserMenu';
 
 const Toolbar = styled(AppBar)(({ theme }) => ({
     height: 'var(--header-height)',
-    alignItems: 'start',
-    justifyContent: 'center',
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingLeft: theme.spacing(2),
     paddingRight: theme.spacing(2),
 }));
@@ -13,7 +16,8 @@ const Toolbar = styled(AppBar)(({ theme }) => ({
 const Header: React.FC = () => {
     return (
         <Toolbar position="relative">
-            <Box component="img" src={novaLogo} alt="NOVA Logo" sx={{ height: '2rem' }} />
+            <Box component="img" src={novaLogo} alt="NOVA Logo" sx={{ height: '1rem' }} />
+            <UserMenu />
         </Toolbar>
     );
 };

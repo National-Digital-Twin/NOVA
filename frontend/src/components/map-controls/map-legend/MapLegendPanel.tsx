@@ -30,7 +30,7 @@ const LegendItem = styled(Box)(({ theme }) => ({
 }));
 
 const ColorLine = styled(Box, {
-    shouldForwardProp: prop => prop !== 'color',
+    shouldForwardProp: (prop) => prop !== 'color',
 })<{ color: string }>(({ color, theme }) => ({
     width: '2rem',
     height: '4px',

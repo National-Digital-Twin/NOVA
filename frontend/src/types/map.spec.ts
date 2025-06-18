@@ -10,7 +10,7 @@ describe('map types', () => {
     it('provides valid MapTiler style URLs', () => {
         Object.entries(MAP_STYLES).forEach(([style, url]) => {
             expect(url).toMatch(/^https:\/\/api\.maptiler\.com\/maps\/[a-z-]+(?:-v\d+)?\/style\.json\?key=.+$/);
-            
+
             switch (style) {
                 case 'basic':
                     expect(url).toContain('/basic-v2/');

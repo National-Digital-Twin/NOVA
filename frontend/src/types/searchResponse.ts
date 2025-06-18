@@ -1,6 +1,6 @@
-export interface SearchResponse {
-    name : string,
-    latitude : number,
-    longitude : number,
-    zoom: number
-}
+export type SearchResponse = {
+    name: string;
+    latitude: number;
+    longitude: number;
+    zoom: number;
+};

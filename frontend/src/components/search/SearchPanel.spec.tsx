@@ -10,7 +10,7 @@ vi.mock('./search-input/SearchInput', () => ({
         <input
             type="text"
             data-testid="search-input"
-            onKeyDown={e => {
+            onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                     onSearchResultClick(57.1497, -2.0943, 10);
                 }

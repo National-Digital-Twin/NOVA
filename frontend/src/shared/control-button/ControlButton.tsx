@@ -1,7 +1,7 @@
 import { Box, IconButton } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
-const StyledIconButton = styled(IconButton, { shouldForwardProp: prop => prop !== 'isActive' })<{ isActive?: boolean }>(({ theme, isActive }) => ({
+const StyledIconButton = styled(IconButton, { shouldForwardProp: (prop) => prop !== 'isActive' })<{ isActive?: boolean }>(({ theme, isActive }) => ({
     width: '3rem',
     height: '3rem',
     padding: 0,
