@@ -1,91 +1,91 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { dataProviderUtils } from '../src/utils/data-provider.utils';
-import { LayersDTO } from '../src/models/layers.model';
-import { AssetsDTO } from '../src/models/asset.model';
-import { GeoJSONDTO } from '../src/models/geojson.model';
-import { LocationsDTO } from '../src/models/location.model';
+import * as fs from "fs";
+import * as path from "path";
+import { dataProviderUtils } from "../src/utils/data-provider.utils";
+import { LayersDTO } from "../src/models/layers.model";
+import { AssetsDTO } from "../src/models/asset.model";
+import { GeoJSONDTO } from "../src/models/geojson.model";
+import { LocationsDTO } from "../src/models/location.model";
 
 // Mock fs module
-jest.mock('fs');
+jest.mock("fs");
 
-describe('DataProviderUtils', () => {
+describe("DataProviderUtils", () => {
   // Mock file paths
-  const mockLayersPath = path.join(__dirname, '../src/data/layers.json');
-  const mockAssetsPath = path.join(__dirname, '../src/data/assets.json');
-  const mockGeoJsonPath = path.join(__dirname, '../src/data/sampleGeoJson.json');
-  const mockSubstationsPath = path.join(__dirname, '../src/data/substations.json');
-  const mockRegionsPath = path.join(__dirname, '../src/data/regions.json');
+  const mockLayersPath = path.resolve("../src/data/layers.json");
+  const mockAssetsPath = path.resolve("../src/data/assets.json");
+  const mockGeoJsonPath = path.resolve("../src/data/sampleGeoJson.json");
+  const mockSubstationsPath = path.resolve("../src/data/substations.json");
+  const mockRegionsPath = path.resolve("../src/data/regions.json");
 
   // Sample data for mocking file reads
   const mockLayersData: LayersDTO = {
     categories: [
       {
-        name: 'Test Category',
+        name: "Test Category",
         items: [
           {
-            id: 'testItem',
-            name: 'Test Item',
+            id: "testItem",
+            name: "Test Item",
             attributes: [],
-            active: true
+            active: true,
           },
           {
-            id: 'testItem2',
-            name: 'Test Item 2',
-            attributes: []
+            id: "testItem2",
+            name: "Test Item 2",
+            attributes: [],
             // active property intentionally omitted to test default value assignment
-          }
-        ]
-      }
-    ]
+          },
+        ],
+      },
+    ],
   };
 
   const mockAssetsData: AssetsDTO = [
     {
-      id: 'testAsset',
-      name: 'Test Asset',
+      id: "testAsset",
+      name: "Test Asset",
       variations: [
         {
-          name: 'Test Variation',
+          name: "Test Variation",
           specification: [
             {
-              key: 'testSpec',
-              value: 'testValue',
-              unit: 'testUnit',
-              displayName: 'Test Specification'
-            }
-          ]
-        }
-      ]
-    }
+              key: "testSpec",
+              value: "testValue",
+              unit: "testUnit",
+              displayName: "Test Specification",
+            },
+          ],
+        },
+      ],
+    },
   ];
 
   const mockGeoJsonData: GeoJSONDTO = {
-    type: 'FeatureCollection',
+    type: "FeatureCollection",
     features: [
       {
-        type: 'Feature',
+        type: "Feature",
         properties: {},
         geometry: {
-          type: 'Point',
-          coordinates: [0, 0]
-        }
-      }
-    ]
+          type: "Point",
+          coordinates: [0, 0],
+        },
+      },
+    ],
   };
 
   const mockSubstationsData: LocationsDTO = [
     {
-      name: 'Test Substation',
+      name: "Test Substation",
       location: {
-        type: 'Point',
+        type: "Point",
         geometry: {
-          type: 'Point',
-          coordinates: [0, 0]
-        }
+          type: "Point",
+          coordinates: [0, 0],
+        },
       },
-      distance: 1.5
-    }
+      distance: 1.5,
+    },
   ];
 
   beforeEach(() => {
@@ -93,8 +93,8 @@ describe('DataProviderUtils', () => {
     jest.resetAllMocks();
   });
 
-  describe('readLayersData', () => {
-    it('should read and parse layers data from file', () => {
+  describe("readLayersData", () => {
+    it("should read and parse layers data from file", () => {
       // Create a deep copy of the mock data to avoid modifications affecting the original
       const mockData = JSON.parse(JSON.stringify(mockLayersData));
 
@@ -105,7 +105,10 @@ describe('DataProviderUtils', () => {
       const result = dataProviderUtils.readLayersData();
 
       // Verify fs.readFileSync was called with the correct path
-      expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringContaining('layers.json'), 'utf8');
+      expect(fs.readFileSync).toHaveBeenCalledWith(
+        expect.stringContaining("layers.json"),
+        "utf8"
+      );
 
       // Since the method adds the active property, we need to add it to our expected result
       mockData.categories.forEach((category: any) => {
@@ -120,17 +123,19 @@ describe('DataProviderUtils', () => {
       expect(result).toEqual(mockData);
     });
 
-    it('should set active property to false if it is undefined', () => {
+    it("should set active property to false if it is undefined", () => {
       // Mock fs.readFileSync to return our mock data
-      (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockLayersData));
+      (fs.readFileSync as jest.Mock).mockReturnValue(
+        JSON.stringify(mockLayersData)
+      );
 
       // Call the method
       const result = dataProviderUtils.readLayersData();
 
       // Verify that all items have the active property
-      result.categories.forEach(category => {
-        category.items.forEach(item => {
-          expect(item).toHaveProperty('active');
+      result.categories.forEach((category) => {
+        category.items.forEach((item) => {
+          expect(item).toHaveProperty("active");
         });
       });
 
@@ -139,48 +144,63 @@ describe('DataProviderUtils', () => {
     });
   });
 
-  describe('readAssetsData', () => {
-    it('should read and parse assets data from file', () => {
+  describe("readAssetsData", () => {
+    it("should read and parse assets data from file", () => {
       // Mock fs.readFileSync to return our mock data
-      (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockAssetsData));
+      (fs.readFileSync as jest.Mock).mockReturnValue(
+        JSON.stringify(mockAssetsData)
+      );
 
       // Call the method
       const result = dataProviderUtils.readAssetsData();
 
       // Verify fs.readFileSync was called with the correct path
-      expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringContaining('assets.json'), 'utf8');
+      expect(fs.readFileSync).toHaveBeenCalledWith(
+        expect.stringContaining("assets.json"),
+        "utf8"
+      );
 
       // Verify the result
       expect(result).toEqual(mockAssetsData);
     });
   });
 
-  describe('readSampleGeoJsonData', () => {
-    it('should read and parse sample GeoJSON data from file', () => {
+  describe("readSampleGeoJsonData", () => {
+    it("should read and parse sample GeoJSON data from file", () => {
       // Mock fs.readFileSync to return our mock data
-      (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockGeoJsonData));
+      (fs.readFileSync as jest.Mock).mockReturnValue(
+        JSON.stringify(mockGeoJsonData)
+      );
 
       // Call the method
       const result = dataProviderUtils.readSampleGeoJsonData();
 
       // Verify fs.readFileSync was called with the correct path
-      expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringContaining('sampleGeoJson.json'), 'utf8');
+      expect(fs.readFileSync).toHaveBeenCalledWith(
+        expect.stringContaining("sampleGeoJson.json"),
+        "utf8"
+      );
 
       // Verify the result
       expect(result).toEqual(mockGeoJsonData);
     });
   });
 
-  describe('readSubstationsData', () => {
-    it('should read and parse substations data from file', () => {
+  describe("readSubstationsData", () => {
+    it("should read and parse substations data from file", () => {
       // Mock fs.readFileSync to return our mock data
-      (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockSubstationsData));
+      (fs.readFileSync as jest.Mock).mockReturnValue(
+        JSON.stringify(mockSubstationsData)
+      );
 
       // Call the method
       const result = dataProviderUtils.readSubstationsData();
 
       // Verify fs.readFileSync was called with the correct path
-      expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringContaining('substations.json'), 'utf8');
+      expect(fs.readFileSync).toHaveBeenCalledWith(
+        expect.stringContaining("substations.json"),
+        "utf8"
+      );
 
       // Verify the result
       expect(result).toEqual(mockSubstationsData);
