@@ -39,30 +39,30 @@
  * AttributeDTO interface representing configurable properties of an item
  */
 export interface AttributeDTO {
-  /**
-   * Unique identifier for the attribute
-   */
-  id: string;
+    /**
+     * Unique identifier for the attribute
+     */
+    id: string;
 
-  /**
-   * Human-readable description of the attribute
-   */
-  description: string;
+    /**
+     * Human-readable description of the attribute
+     */
+    description: string;
 
-  /**
-   * Default value for the attribute
-   */
-  defaultValue: number | string;
+    /**
+     * Default value for the attribute
+     */
+    defaultValue: number | string;
 
-  /**
-   * Data type of the attribute value
-   */
-  valueType: string;
+    /**
+     * Data type of the attribute value
+     */
+    valueType: string;
 
-  /**
-   * Optional list of available options for string attributes
-   */
-  options?: string[];
+    /**
+     * Optional list of available options for string attributes
+     */
+    options?: string[];
 }
 
 /**
@@ -97,27 +97,26 @@ export interface AttributeDTO {
  * ItemDTO interface representing a specific layer item
  */
 export interface ItemDTO {
+    /**
+     * Unique identifier for the item
+     */
+    id: string;
 
-  /**
-   * Unique identifier for the item
-   */
-  id: string;
+    /**
+     * Name of the item
+     */
+    name: string;
 
-  /**
-   * Name of the item
-   */
-  name: string;
+    /**
+     * List of configurable attributes for this item
+     */
+    attributes: AttributeDTO[];
 
-  /**
-   * List of configurable attributes for this item
-   */
-  attributes: AttributeDTO[];
-
-  /**
-   * Indicates whether the item is active
-   * @default false
-   */
-  active?: boolean;
+    /**
+     * Indicates whether the item is active
+     * @default false
+     */
+    active?: boolean;
 }
 
 /**
@@ -144,15 +143,15 @@ export interface ItemDTO {
  * CategoryDTO interface representing a group of related items
  */
 export interface CategoryDTO {
-  /**
-   * Name of the category
-   */
-  name: string;
+    /**
+     * Name of the category
+     */
+    name: string;
 
-  /**
-   * List of items in this category
-   */
-  items: ItemDTO[];
+    /**
+     * List of items in this category
+     */
+    items: ItemDTO[];
 }
 
 /**
@@ -175,8 +174,8 @@ export interface CategoryDTO {
  * LayersDTO interface representing the complete layers data structure
  */
 export interface LayersDTO {
-  /**
-   * List of categories containing layer items
-   */
-  categories: CategoryDTO[];
+    /**
+     * List of categories containing layer items
+     */
+    categories: CategoryDTO[];
 }

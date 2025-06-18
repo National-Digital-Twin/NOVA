@@ -1,7 +1,7 @@
 /**
  * Data models for location information
  */
-import { Feature } from "geojson";
+import { Feature } from 'geojson';
 
 /**
  * @swagger
@@ -29,20 +29,20 @@ import { Feature } from "geojson";
  * LocationDTO interface representing a location with its geolocation and distance information
  */
 export interface LocationDTO {
-  /**
-   * GeoJSON representation of the location
-   */
-  location: Feature;
+    /**
+     * GeoJSON representation of the location
+     */
+    location: Feature;
 
-  /**
-   * Name of the location
-   */
-  name: string;
+    /**
+     * Name of the location
+     */
+    name: string;
 
-  /**
-   * Distance from the provided point in kilometers
-   */
-  distance: number;
+    /**
+     * Distance from the provided point in kilometers
+     */
+    distance: number;
 }
 
 /**

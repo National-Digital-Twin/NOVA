@@ -1,6 +1,5 @@
 import SearchIcon from '@mui/icons-material/Search';
 import { Autocomplete, CircularProgress, InputAdornment, styled, TextField } from '@mui/material';
-import Popper from '@mui/material/Popper';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { SearchResponse } from '../../../types/searchResponse';
 

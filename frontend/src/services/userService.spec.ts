@@ -5,7 +5,7 @@ import { userService } from './userService';
 const mockUserData = {
     username: 'testuser',
     email: 'test@example.com',
-    role: 'user',
+    displayName: 'Test User',
 };
 
 describe('userService', () => {
@@ -95,7 +95,8 @@ describe('userService', () => {
         });
 
         afterEach(() => {
-            window.location = originalLocation;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (window.location as any) = originalLocation;
             Object.assign(import.meta.env, originalEnv);
             consoleErrorSpy.mockRestore();
         });

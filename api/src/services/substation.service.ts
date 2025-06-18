@@ -1,6 +1,6 @@
 import * as turf from '@turf/turf';
 import {Feature, FeatureCollection, GeoJSON, Point, Position} from 'geojson';
-import { LocationDTO, LocationsDTO } from '../models/location.model';
+import { LocationsDTO } from '../models/location.model';
 import { dataProviderUtils } from '../utils/data-provider.utils';
 import { isValidGeoJSON } from '../utils/geojson.utils';
 
@@ -38,7 +38,7 @@ export class SubstationService {
         type: 'Feature',
         geometry: {
           type: 'Point',
-          coordinates: (geoJson as any).coordinates as Position
+          coordinates: (geoJson as Point).coordinates as Position
         },
         properties: {}
       };
@@ -88,7 +88,11 @@ export class SubstationService {
         properties: item.feature.properties || {},
         geometry: item.feature.geometry
       },
-      name: `${item.feature.properties?.Locality}-${item.feature.properties?.['Operating Area']}-${item.feature.properties?.['Owner Name']}`.trim() || 'Unknown',
+      name: [
+        item.feature.properties?.Locality,
+        item.feature.properties?.['Operating Area'],
+        item.feature.properties?.['Owner Name']
+      ].filter(part => part !== undefined && part !== '').join('-') || 'Unknown',
       distance:  Number(item.distance.toFixed(2))
     }));
   }

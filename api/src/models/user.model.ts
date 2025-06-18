@@ -25,18 +25,18 @@
  *         - displayName
  */
 export interface UserDTO {
-  /**
-   * Unique username
-   */
-  username: string;
+    /**
+     * Unique username
+     */
+    username: string;
 
-  /**
-   * User email address
-   */
-  email: string;
+    /**
+     * User email address
+     */
+    email: string;
 
-  /**
-   * User's display name
-   */
-  displayName: string;
-} 
+    /**
+     * User's display name
+     */
+    displayName: string;
+}

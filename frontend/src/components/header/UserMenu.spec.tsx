@@ -14,7 +14,7 @@ vi.mock('../../services/userService', () => ({
 const mockUserData = {
     username: 'testuser',
     email: 'test@example.com',
-    role: 'user',
+    displayName: 'Test User',
 };
 
 describe('UserMenu', () => {
@@ -55,7 +55,7 @@ describe('UserMenu', () => {
         });
 
         await waitFor(() => {
-            expect(screen.getByText('test@example.com')).toBeInTheDocument();
+            expect(screen.getByText('Test User')).toBeInTheDocument();
         });
     });
 
@@ -78,7 +78,7 @@ describe('UserMenu', () => {
         });
 
         await waitFor(() => {
-            expect(screen.getByText('test@example.com')).toBeInTheDocument();
+            expect(screen.getByText('Test User')).toBeInTheDocument();
         });
 
         await act(async () => {
@@ -97,7 +97,7 @@ describe('UserMenu', () => {
         });
 
         await waitFor(() => {
-            expect(screen.getByText('test@example.com')).toBeInTheDocument();
+            expect(screen.getByText('Test User')).toBeInTheDocument();
         });
 
         await act(async () => {
