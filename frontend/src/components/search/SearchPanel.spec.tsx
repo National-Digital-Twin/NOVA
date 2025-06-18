@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import type { FeatureCollection, Geometry } from 'geojson';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import SearchPanel from './SearchPanel';
@@ -75,8 +75,6 @@ vi.mock('./polygon-layer/PolygonLayer', () => ({
 }));
 
 describe('SearchPanel', () => {
-
-  const mockFlyTo = vi.fn();
 
   const mockMapRef = createMockMapRef();
 

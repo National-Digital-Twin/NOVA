@@ -120,10 +120,7 @@ const LayerControlPanel = () => {
 
     // Handle Apply button
     const handleApply = () => {
-        const selected = Object.entries(checkedLayers)
-            .filter(([_, isChecked]) => isChecked)
-            .map(([name]) => name);
-        console.log("Selected layers:", selected);
+        console.log("Apply clicked");
     };
 
     // Memoised list of filtered layer entries

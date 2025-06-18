@@ -47,10 +47,10 @@ describe('EditPolygonButton', () => {
     drawMock = {
       current: {
           changeMode: vi.fn(),
-          onAdd: function (map: maplibregl.Map): HTMLElement {
+          onAdd: function (): HTMLElement {
               throw new Error('Function not implemented.');
           },
-          onRemove: function (map: maplibregl.Map): void {
+          onRemove: function (): void {
               throw new Error('Function not implemented.');
           },
           getMode: function (): string {
@@ -59,7 +59,7 @@ describe('EditPolygonButton', () => {
           getAll: function (): Record<string, unknown>[] {
               throw new Error('Function not implemented.');
           },
-          delete: function (id: string): void {
+          delete: function (): void {
               throw new Error('Function not implemented.');
           },
           deleteAll: function (): void {
