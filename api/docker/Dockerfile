@@ -1,29 +1,12 @@
-# Stage 1: Build
-FROM node:23-alpine AS builder
-
-# Set the working directory
-WORKDIR /app
-
-# Copy package files and install dependencies
-COPY package*.json ./
-RUN npm install
-
-# Copy the rest of the source code and build the app
-COPY . .
-RUN npm run build
-
-# Stage 2: Production Image
 FROM node:23-alpine
+RUN mkdir -p /home/node/dist
 
-# Set the working directory
-WORKDIR /app
+WORKDIR /home/node
+COPY --chown=root:root --chmod=755 ./api/dist ./dist
 
-# Copy package files and node_modules from the builder stage
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
+USER node
 
-# Copy the built application code
-COPY --from=builder /app/dist/src ./dist/src
+EXPOSE 3000
+ENV HOST=0.0.0.0
 
-# Start the application
-CMD ["npm", "start"]
+CMD [ "node", "--enable-source-maps", "dist/server.mjs" ]

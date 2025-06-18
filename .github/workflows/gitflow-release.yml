@@ -53,10 +53,22 @@ jobs:
         run: |
           echo "Generated Version: ${{ steps.extract_version.outputs.version }}"
 
+  backend-ci:
+    needs: [versioning]
+    uses: ./.github/workflows/backend-ci-pr.yml
+
   frontend-ci:
     needs: [versioning]
     uses: ./.github/workflows/frontend-ci-pr.yml
 
+  backend-push-to-ECR:
+    needs: [backend-ci, versioning]
+    uses: ./.github/workflows/backend-cd-push-to-ECR.yml
+    with:
+      aws_account_number: "${{ vars.STAGING_AWS_ACCOUNT_ID }}"
+      repo_name: "nova/api"
+      app_name: "nova/api"
+      version: ${{ needs.versioning.outputs.version }}
 
   frontend-push-to-ECR:
     needs: [frontend-ci, versioning]
