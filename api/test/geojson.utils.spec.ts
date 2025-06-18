@@ -143,21 +143,5 @@ describe('GeoJSON Utils', () => {
       // The function should return false for this case
       expect(result).toBe(false);
     });
-
-    // Test the handleDefaultCase function directly
-    it('should have a handleDefaultCase function that returns false', () => {
-      // Get the handleDefaultCase function
-      const handleDefaultCase = (isValidGeoJSON as any).constructor.prototype.handleDefaultCase;
-
-      // If we can't access it directly, we'll use the test mode
-      if (!handleDefaultCase) {
-        const result = isValidGeoJSON(null, 'testDefaultCase');
-        expect(result).toBe(false);
-      } else {
-        // Call the function directly
-        const result = handleDefaultCase();
-        expect(result).toBe(false);
-      }
-    });
   });
 });

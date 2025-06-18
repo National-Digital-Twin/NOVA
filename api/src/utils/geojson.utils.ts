@@ -1,5 +1,4 @@
 import { 
-  GeoJSON, 
   Feature, 
   FeatureCollection, 
   Geometry, 
@@ -72,43 +71,42 @@ export interface GeoJSONDTO {
  * @param testMode Optional parameter for testing purposes
  * @returns True if the data is a valid GeoJSON object, false otherwise
  */
-export function isValidGeoJSON(data: any, testMode?: string): boolean {
-  // Special test mode for coverage testing
+export function isValidGeoJSON(data: unknown, testMode?: string): boolean {
   if (testMode === 'testDefaultCase') {
     return handleDefaultCase();
   }
 
   // Check if data exists and has a type property
-  if (!data || !data.type) {
+  if (!data || typeof data !== 'object' || !('type' in data)) {
     return false;
   }
 
   // Valid GeoJSON types
   const validTypes = [
-    "Point", "MultiPoint", "LineString", "MultiLineString", 
-    "Polygon", "MultiPolygon", "GeometryCollection", 
+    "Point", "MultiPoint", "LineString", "MultiLineString",
+    "Polygon", "MultiPolygon", "GeometryCollection",
     "Feature", "FeatureCollection"
   ];
 
   // Check if the type is valid
-  if (!validTypes.includes(data.type)) {
+  const type = (data as { type: string }).type;
+  if (!validTypes.includes(type)) {
     return false;
   }
 
   // Additional validation based on type
-  switch (data.type) {
+  switch (type) {
     case "Feature":
       // A Feature must have a geometry property
-      return data.geometry !== undefined && typeof data.geometry === 'object';
+      return 'geometry' in data && typeof (data as Feature).geometry === 'object';
 
     case "FeatureCollection":
       // A FeatureCollection must have a features array
-      return Array.isArray(data.features);
+      return 'features' in data && Array.isArray((data as FeatureCollection).features);
 
     case "GeometryCollection":
       // A GeometryCollection must have a geometries array
-      // Note: This is not in our GeoJSON model but is part of the GeoJSON spec
-      return Array.isArray(data.geometries);
+      return 'geometries' in data && Array.isArray((data as GeometryCollection).geometries);
 
     // For geometry types, they must have coordinates
     case "Point":
@@ -118,7 +116,7 @@ export function isValidGeoJSON(data: any, testMode?: string): boolean {
     case "Polygon":
     case "MultiPolygon":
       // These are direct geometry objects
-      return data.coordinates !== undefined;
+      return 'coordinates' in data;
 
     default:
       return handleDefaultCase();

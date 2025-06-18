@@ -32,25 +32,25 @@
  * SpecificationDTO interface representing a specific attribute of an asset variation
  */
 export interface SpecificationDTO {
-  /**
-   * Key identifier for the specification
-   */
-  key: string;
+    /**
+     * Key identifier for the specification
+     */
+    key: string;
 
-  /**
-   * Value of the specification
-   */
-  value: string;
+    /**
+     * Value of the specification
+     */
+    value: string;
 
-  /**
-   * Unit of measurement for the specification value
-   */
-  unit: string;
+    /**
+     * Unit of measurement for the specification value
+     */
+    unit: string;
 
-  /**
-   * Human-readable display name for the specification
-   */
-  displayName: string;
+    /**
+     * Human-readable display name for the specification
+     */
+    displayName: string;
 }
 
 /**
@@ -77,15 +77,15 @@ export interface SpecificationDTO {
  * VariationDTO interface representing a specific type of asset
  */
 export interface VariationDTO {
-  /**
-   * Name of the variation
-   */
-  name: string;
+    /**
+     * Name of the variation
+     */
+    name: string;
 
-  /**
-   * List of specifications for this variation
-   */
-  specification: SpecificationDTO[];
+    /**
+     * List of specifications for this variation
+     */
+    specification: SpecificationDTO[];
 }
 
 /**
@@ -116,20 +116,20 @@ export interface VariationDTO {
  * AssetDTO interface representing a specific asset type
  */
 export interface AssetDTO {
-  /**
-   * Unique identifier for the asset
-   */
-  id: string;
+    /**
+     * Unique identifier for the asset
+     */
+    id: string;
 
-  /**
-   * Human-readable name of the asset
-   */
-  name: string;
+    /**
+     * Human-readable name of the asset
+     */
+    name: string;
 
-  /**
-   * List of variations for this asset
-   */
-  variations: VariationDTO[];
+    /**
+     * List of variations for this asset
+     */
+    variations: VariationDTO[];
 }
 
 /**

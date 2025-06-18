@@ -1,4 +1,3 @@
-
 export const MAPTILER_TOKEN = import.meta.env.VITE_MAPTILER_API_KEY;
 
 export type MapStyle = 'basic' | 'osm' | 'hybrid' | 'bright';

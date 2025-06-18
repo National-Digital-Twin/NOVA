@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
 
 vi.mock('./components/map/MapComponent', () => ({
@@ -7,10 +7,41 @@ vi.mock('./components/map/MapComponent', () => ({
 }));
 
 describe('App', () => {
+    const mockFetch = vi.fn();
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        window.fetch = mockFetch;
+    });
+
     it('renders the header and map', () => {
         render(<App />);
         expect(screen.getByRole('banner')).toBeInTheDocument();
         expect(screen.getByAltText('NOVA Logo')).toBeInTheDocument();
         expect(screen.getByTestId('map')).toBeInTheDocument();
+    });
+
+    it('renders app with header', async () => {
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            json: () => Promise.resolve({ email: 'test@example.com' }),
+        });
+
+        render(<App />);
+        expect(screen.getByAltText('NOVA Logo')).toBeInTheDocument();
+        expect(screen.getByTestId('map')).toBeInTheDocument();
+    });
+
+    it('handles fetch error gracefully', async () => {
+        mockFetch.mockRejectedValueOnce(new Error('Network error'));
+
+        render(<App />);
+        expect(screen.getByAltText('NOVA Logo')).toBeInTheDocument();
+        expect(screen.getByTestId('map')).toBeInTheDocument();
+
+        await waitFor(() => {
+            expect(consoleErrorSpy).toHaveBeenCalledWith('Error fetching user data:', expect.any(Error));
+        });
     });
 });

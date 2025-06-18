@@ -1,70 +1,74 @@
-import express, { Application, Router, Request, Response, NextFunction } from "express";
-import { SwaggerConfig } from "./config/swagger";
-import { healthRoutes } from "./routes/health.routes";
-import { uiRoutes } from "./routes/ui.routes";
-import { errorMiddleware } from "./middleware/error.middleware";
+import express, { Application, Request, Response, Router } from 'express';
+import { SwaggerConfig } from './config/swagger';
+import { errorMiddleware } from './middleware/error.middleware';
+import { authRoutes } from './routes/auth.routes';
+import { healthRoutes } from './routes/health.routes';
+import { uiRoutes } from './routes/ui.routes';
 
 /**
  * Application class
  */
 export class App {
-  public app: Application;
-  private readonly apiRouter: Router;
+    public app: Application;
+    private readonly apiRouter: Router;
 
-  /**
-   * Constructor for App
-   */
-  constructor() {
-    this.app = express();
-    this.apiRouter = Router();
+    /**
+     * Constructor for App
+     */
+    constructor() {
+        this.app = express();
+        this.apiRouter = Router();
 
-    this.initializeMiddlewares();
-    this.initializeRoutes();
-    this.initializeSwagger();
-    this.initializeErrorHandling();
-  }
+        this.initializeMiddlewares();
+        this.initializeRoutes();
+        this.initializeSwagger();
+        this.initializeErrorHandling();
+    }
 
-  /**
-   * Initialize middlewares
-   */
-  private initializeMiddlewares(): void {
-    this.app.use(express.json());
-  }
+    /**
+     * Initialize middlewares
+     */
+    private initializeMiddlewares(): void {
+        this.app.use(express.json());
+    }
 
-  /**
-   * Initialize routes
-   */
-  private initializeRoutes(): void {
-    // Add health routes
-    this.apiRouter.use(healthRoutes.router);
+    /**
+     * Initialize routes
+     */
+    private initializeRoutes(): void {
+        // Add health routes
+        this.apiRouter.use(healthRoutes.router);
 
-    // Add UI routes (including layers as a subset)
-    this.apiRouter.use(uiRoutes.router);
+        // Add Auth routes
+        this.apiRouter.use(authRoutes.router);
 
-    // Mount routers
-    this.app.use("/api", this.apiRouter);
-  }
+        // Add UI routes (including layers as a subset)
+        this.apiRouter.use(uiRoutes.router);
 
-  /**
-   * Initialize Swagger
-   */
-  private initializeSwagger(): void {
-    const swaggerConfig = new SwaggerConfig();
-    swaggerConfig.setup(this.app);
-  }
+        // Mount routers
+        this.app.use('/api', this.apiRouter);
+    }
 
-  /**
-   * Initialize error handling
-   */
-  private initializeErrorHandling(): void {
-    // Global error handler - converts errors to JSON responses
-    this.app.use(errorMiddleware);
+    /**
+     * Initialize Swagger
+     */
+    private initializeSwagger(): void {
+        const swaggerConfig = new SwaggerConfig();
+        swaggerConfig.setup(this.app);
+    }
 
-    // 404 handler
-    this.app.use((req: Request, res: Response) => {
-      res.status(404).json({ error: "Not found" });
-    });
-  }
+    /**
+     * Initialize error handling
+     */
+    private initializeErrorHandling(): void {
+        // Global error handler - converts errors to JSON responses
+        this.app.use(errorMiddleware);
+
+        // 404 handler
+        this.app.use((req: Request, res: Response) => {
+            res.status(404).json({ error: 'Not found' });
+        });
+    }
 }
 
 // Export a singleton instance

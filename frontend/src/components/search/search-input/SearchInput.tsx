@@ -1,90 +1,117 @@
-import { useState, useEffect } from 'react';
-import {
-  Autocomplete,
-  TextField,
-  InputAdornment,
-  CircularProgress,
-} from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import { Autocomplete, CircularProgress, InputAdornment, styled, TextField } from '@mui/material';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { SearchResponse } from '../../../types/searchResponse';
 
+const StyledTextField = styled(TextField)(({ theme }) => ({
+    '& .MuiOutlinedInput-root': {
+        minHeight: 48,
+        height: 48,
+        padding: '0 16px',
+        '& fieldset': {
+            top: 0,
+            margin: 0,
+            border: 'none',
+        },
+        '&:hover fieldset': {
+            outline: '4px solid',
+            outlineColor: theme.palette.secondary.dark,
+        },
+        '&.Mui-focused fieldset': {
+            outline: '4px solid',
+            outlineColor: theme.palette.secondary.main,
+        },
+    },
+}));
+
 interface SearchInputProps {
-  onSearchResultClick: (lat: number, lon: number, zoom : number) => void;
+    onSearchResultClick: (lat: number, lon: number, zoom: number) => void;
 }
 
-const SearchInput = ({ onSearchResultClick }: SearchInputProps) => {
-  const [input, setInput] = useState('');
-  const [options, setOptions] = useState<SearchResponse[]>([]);
-  const [loading, setLoading] = useState(false);
+const MIN_INPUT_LENGTH = 2;
 
-  useEffect(() => {
-    const controller = new AbortController();
+const SearchInput: React.FC<SearchInputProps> = ({ onSearchResultClick }) => {
+    const [input, setInput] = useState('');
+    const [options, setOptions] = useState<SearchResponse[]>([]);
+    const [loading, setLoading] = useState(false);
 
-    if (input.trim().length < 2) {
-      setOptions([]);
-      return;
-    }
+    useEffect(() => {
+        const controller = new AbortController();
 
-    setLoading(true);
-
-    const timeout = setTimeout(() => {
-      fetch(`/api/ui/search?location=${encodeURIComponent(input)}`, {
-        signal: controller.signal,
-      })
-        .then(res => res.json())
-        .then((data: SearchResponse[]) => {
-          setOptions(data);
-        })
-        .catch(() => setOptions([]))
-        .finally(() => setLoading(false));
-    }, 300);
-
-    return () => {
-      clearTimeout(timeout);
-      controller.abort();
-    };
-  }, [input]);
-
-  return (
-    <Autocomplete<SearchResponse>  
-      fullWidth
-      loading={loading}
-      options={options}
-      getOptionLabel={(option) => option.name}
-      onInputChange={(_e, value) => setInput(value)}
-      onChange={(_e, value) => {
-        if (value && 'latitude' in value && 'longitude' in value) {
-          onSearchResultClick(value.latitude, value.longitude, value.zoom);
+        if (input.trim().length < MIN_INPUT_LENGTH) {
+            setOptions([]);
+            return;
         }
-      }}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          placeholder="Search by region, county"
-          variant="outlined"
-          fullWidth
-          InputProps={{
-            ...params.InputProps,
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <>
-                {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                {params.InputProps.endAdornment}
-              </>
-            ),
-            inputProps: {
-              ...params.inputProps,
-              'aria-label': 'Search by region or county',
-            },
-          }}
+
+        setLoading(true);
+
+        const timeout = setTimeout(() => {
+            fetch(`/api/ui/search?location=${encodeURIComponent(input)}`, { signal: controller.signal })
+                .then((res) => res.json())
+                .then((data: SearchResponse[]) => setOptions(data))
+                .catch(() => setOptions([]))
+                .finally(() => setLoading(false));
+        }, 300);
+
+        return () => {
+            clearTimeout(timeout);
+            controller.abort();
+        };
+    }, [input]);
+
+    const handleInputChange = useCallback((_e: unknown, value: string) => setInput(value), []);
+    const handleChange = useCallback(
+        (_e: unknown, value: SearchResponse | null) => {
+            if (value && 'latitude' in value && 'longitude' in value) {
+                onSearchResultClick(value.latitude, value.longitude, value.zoom);
+            }
+        },
+        [onSearchResultClick]
+    );
+
+    return (
+        <Autocomplete<SearchResponse>
+            fullWidth
+            loading={loading}
+            options={options}
+            getOptionLabel={(option) => option.name}
+            onInputChange={handleInputChange}
+            onChange={handleChange}
+            slotProps={{
+                popper: {
+                    modifiers: [{ name: 'offset', options: { offset: [0, 8] } }],
+                },
+            }}
+            renderInput={(params) => (
+                <StyledTextField
+                    {...params}
+                    placeholder="Search by region, county"
+                    variant="outlined"
+                    fullWidth
+                    slotProps={{
+                        input: {
+                            'aria-label': 'Search by region or county',
+                            ...params.InputProps,
+                            inputProps: {
+                                ...params.inputProps,
+                            },
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchIcon />
+                                </InputAdornment>
+                            ),
+                            endAdornment: (
+                                <>
+                                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                    {params.InputProps.endAdornment}
+                                </>
+                            ),
+                        },
+                    }}
+                />
+            )}
         />
-      )}
-    />
-  );
+    );
 };
 
 export default SearchInput;

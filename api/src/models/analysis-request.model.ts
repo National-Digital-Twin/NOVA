@@ -1,9 +1,9 @@
 /**
  * Data model for analysis request
  */
-import { GeoJSON } from "geojson";
-import { LayersDTO } from "./layers.model";
-import { AssetDTO } from "./asset.model";
+import { GeoJSON } from 'geojson';
+import { AssetDTO } from './asset.model';
+import { LayersDTO } from './layers.model';
 
 /**
  * @swagger
@@ -28,18 +28,18 @@ import { AssetDTO } from "./asset.model";
  *         - asset
  */
 export interface AnalysisRequestDTO {
-  /**
-   * GeoJSON of the selected area
-   */
-  location: GeoJSON;
+    /**
+     * GeoJSON of the selected area
+     */
+    location: GeoJSON;
 
-  /**
-   * Layers configuration for the analysis
-   */
-  layers: LayersDTO;
+    /**
+     * Layers configuration for the analysis
+     */
+    layers: LayersDTO;
 
-  /**
-   * Asset to be analyzed
-   */
-  asset: AssetDTO;
+    /**
+     * Asset to be analyzed
+     */
+    asset: AssetDTO;
 }

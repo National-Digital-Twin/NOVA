@@ -24,13 +24,13 @@
  * SuitabilityResponseDTO interface representing the result of an asset suitability analysis
  */
 export interface SuitabilityResponseDTO {
-  /**
-   * Percentage indicating how suitable the asset is for the location
-   */
-  suitabilityPercentage: number;
+    /**
+     * Percentage indicating how suitable the asset is for the location
+     */
+    suitabilityPercentage: number;
 
-  /**
-   * Textual description of the suitability analysis
-   */
-  suitabilityDescription: string;
+    /**
+     * Textual description of the suitability analysis
+     */
+    suitabilityDescription: string;
 }
