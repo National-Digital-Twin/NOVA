@@ -20,80 +20,77 @@ vi.mock('./search-input/SearchInput', () => ({
 }));
 
 vi.mock('./draw-polygon/DrawPolygonButton', () => ({
-  default: ({ onPolygonDrawn }: { onPolygonDrawn: (feature: FeatureCollection<Geometry>) => void }) => (
-    <button
-      data-testid="draw-polygon-button"
-      onClick={() => {
-        onPolygonDrawn({
-          type: 'FeatureCollection',
-          features: [
-            {
-              type: 'Feature',
-              geometry: {
-                type: 'Polygon',
-                coordinates: [
-                  [
-                    [0, 0],
-                    [0, 1],
-                    [1, 1],
-                    [1, 0],
-                    [0, 0],
-                  ],
-                ],
-              },
-              properties: {},
-            },
-          ],
-        });
-      }}
-    >
-      Draw Polygon
-    </button>
-  ),
+    default: ({ onPolygonDrawn }: { onPolygonDrawn: (feature: FeatureCollection<Geometry>) => void }) => (
+        <button
+            data-testid="draw-polygon-button"
+            onClick={() => {
+                onPolygonDrawn({
+                    type: 'FeatureCollection',
+                    features: [
+                        {
+                            type: 'Feature',
+                            geometry: {
+                                type: 'Polygon',
+                                coordinates: [
+                                    [
+                                        [0, 0],
+                                        [0, 1],
+                                        [1, 1],
+                                        [1, 0],
+                                        [0, 0],
+                                    ],
+                                ],
+                            },
+                            properties: {},
+                        },
+                    ],
+                });
+            }}
+        >
+            Draw Polygon
+        </button>
+    ),
 }));
 
 vi.mock('./delete-polygon/DeletePolygonButton', () => ({
-  default: ({ onPolygonDeleted }: { onPolygonDeleted: () => void }) => (
-    <button data-testid="delete-polygon-button" onClick={onPolygonDeleted}>
-      Delete Polygon
-    </button>
-  ),
+    default: ({ onPolygonDeleted }: { onPolygonDeleted: () => void }) => (
+        <button data-testid="delete-polygon-button" onClick={onPolygonDeleted}>
+            Delete Polygon
+        </button>
+    ),
 }));
 
 vi.mock('./edit-polygon/EditPolygonButton', () => ({
-  default: ({ onPolygonEdited }: { onPolygonEdited: () => void }) => (
-    <button data-testid="edit-polygon-button" onClick={onPolygonEdited}>
-      Edit Polygon
-    </button>
-  ),
+    default: ({ onPolygonEdited }: { onPolygonEdited: () => void }) => (
+        <button data-testid="edit-polygon-button" onClick={onPolygonEdited}>
+            Edit Polygon
+        </button>
+    ),
 }));
 
 vi.mock('./polygon-layer/PolygonLayer', () => ({
-  default: ({ data }: { data: FeatureCollection<Geometry> }) => (
-    <div data-testid="polygon-layer" data-features={JSON.stringify(data.features)} />
-  ),
+    default: ({ data }: { data: FeatureCollection<Geometry> }) => <div data-testid="polygon-layer" data-features={JSON.stringify(data.features)} />,
 }));
 
 describe('SearchPanel', () => {
+    const mockMapRef = createMockMapRef();
 
-  const mockMapRef = createMockMapRef();
+    beforeEach(() => {
+        vi.clearAllMocks();
+        window.fetch = vi.fn().mockImplementation(() =>
+            Promise.resolve({
+                json: () =>
+                    Promise.resolve({
+                        coordinates: [-2.0943, 57.1497],
+                        zoom: 12,
+                    }),
+            })
+        );
+    });
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-    window.fetch = vi.fn().mockImplementation(() =>
-      Promise.resolve({
-        json: () =>
-          Promise.resolve({
-            coordinates: [-2.0943, 57.1497],
-            zoom: 12,
-          }),
-      })
-    );
-  });
-
-  it('renders search input and draw button by default', () => {
-    render(<SearchPanel mapRef={mockMapRef} showLayerControl={() => {}} hideLayerControl={() => {}} />);
-    expect(screen.getByTestId('search-input')).toBeInTheDocument();
-    expect(screen.getByTestId('draw-polygon-button')).toBeInTheDocument();
-  });
+    it('renders search input and draw button by default', () => {
+        render(<SearchPanel mapRef={mockMapRef} showLayerControl={() => {}} hideLayerControl={() => {}} />);
+        expect(screen.getByTestId('search-input')).toBeInTheDocument();
+        expect(screen.getByTestId('draw-polygon-button')).toBeInTheDocument();
+    });
 });

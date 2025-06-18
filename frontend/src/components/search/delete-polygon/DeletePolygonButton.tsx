@@ -36,12 +36,7 @@ interface DeletePolygonButtonProps {
  * @param {DeletePolygonButtonProps} props - Component props.
  * @returns {JSX.Element | null} The rendered delete button or null if hidden.
  */
-const DeletePolygonButton = ({
-    drawRef,
-    isVisible,
-    onPolygonDeleted,
-    hideLayerControl,
-}: DeletePolygonButtonProps) => {
+const DeletePolygonButton = ({ drawRef, isVisible, onPolygonDeleted, hideLayerControl }: DeletePolygonButtonProps) => {
     /**
      * Handles click on the delete button. Deletes all drawn polygons,
      * calls the onPolygonDeleted callback, and hides the layer control.
@@ -58,12 +53,7 @@ const DeletePolygonButton = ({
 
     return (
         <ControlButton onClick={handleClick} aria-label="Delete polygon" showTooltip={true}>
-            <img
-                src="/icons/delete-polygon.svg"
-                alt="Delete polygon icon"
-                width={24}
-                height={24}
-            />
+            <img src="/icons/delete-polygon.svg" alt="Delete polygon icon" width={24} height={24} />
         </ControlButton>
     );
 };

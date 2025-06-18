@@ -1,7 +1,7 @@
 import { Box, IconButton, Tooltip, tooltipClasses, type TooltipProps } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
-const StyledIconButton = styled(IconButton, { shouldForwardProp: prop => prop !== 'isActive' })<{ isActive?: boolean }>(({ theme, isActive }) => {
+const StyledIconButton = styled(IconButton, { shouldForwardProp: (prop) => prop !== 'isActive' })<{ isActive?: boolean }>(({ theme, isActive }) => {
     const borderRadius = isActive ? '2px !important' : '8px !important';
 
     return {
@@ -19,7 +19,7 @@ const StyledIconButton = styled(IconButton, { shouldForwardProp: prop => prop !=
         },
         '&:hover': {
             backgroundColor: isActive ? theme.palette.secondary.dark : theme.palette.action.hover,
-        }
+        },
     };
 });
 
@@ -76,19 +76,14 @@ const ControlButton = ({ onClick, children, 'aria-label': ariaLabel, isActive, d
                             isActive={isActive}
                             disabled={disabled}
                             aria-pressed={ariaPressed}
-                            aria-label={ariaLabel + " button"}>
+                            aria-label={ariaLabel + ' button'}
+                        >
                             {children}
                         </StyledIconButton>
                     </span>
                 </StyledTooltip>
             ) : (
-                <StyledIconButton
-                    onClick={onClick}
-                    aria-label={ariaLabel}
-                    isActive={isActive}
-                    disabled={disabled}
-                    aria-pressed={ariaPressed}
-                >
+                <StyledIconButton onClick={onClick} aria-label={ariaLabel} isActive={isActive} disabled={disabled} aria-pressed={ariaPressed}>
                     {children}
                 </StyledIconButton>
             )}

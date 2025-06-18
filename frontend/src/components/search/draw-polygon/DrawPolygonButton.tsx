@@ -38,13 +38,7 @@ interface DrawPolygonButtonProps {
  * using Mapbox Draw. Once a polygon is drawn, it triggers a confirmation popup, disables further editing,
  * and prevents users from drawing multiple polygons unless the existing one is removed.
  */
-const DrawPolygonButton = ({
-    onPolygonDrawn,
-    mapRef,
-    drawRef,
-    isVisible,
-    polygonDrawn
-}: DrawPolygonButtonProps) => {
+const DrawPolygonButton = ({ onPolygonDrawn, mapRef, drawRef, isVisible, polygonDrawn }: DrawPolygonButtonProps) => {
     const [isActive, setIsActive] = useState(false);
 
     /**
@@ -113,19 +107,8 @@ const DrawPolygonButton = ({
     if (!isVisible) return null;
 
     return (
-        <ControlButton
-            onClick={handleClick}
-            isActive={isActive}
-            aria-label="Draw Polygon"
-            aria-pressed={isActive}
-            showTooltip={true}
-        >
-            <img
-                src={isActive ? '/icons/polygon-white.svg' : '/icons/polygon.svg'}
-                alt="Draw polygon icon"
-                width={24}
-                height={24}
-            />
+        <ControlButton onClick={handleClick} isActive={isActive} aria-label="Draw Polygon" aria-pressed={isActive} showTooltip={true}>
+            <img src={isActive ? '/icons/polygon-white.svg' : '/icons/polygon.svg'} alt="Draw polygon icon" width={24} height={24} />
         </ControlButton>
     );
 };

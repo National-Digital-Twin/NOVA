@@ -50,11 +50,7 @@ const SearchPanel = ({ mapRef, showLayerControl, hideLayerControl }: SearchPanel
     const [polygonDrawn, setPolygonDrawn] = useState(false);
     const [polygonConfirmed, setPolygonConfirmed] = useState(false);
 
-    const {
-        handlePolygonDrawn,
-        handlePolygonEdited,
-        handlePolygonDeleted
-    } = usePolygonHandlers({
+    const { handlePolygonDrawn, handlePolygonEdited, handlePolygonDeleted } = usePolygonHandlers({
         mapRef,
         popupRef,
         setPolygonDrawn,

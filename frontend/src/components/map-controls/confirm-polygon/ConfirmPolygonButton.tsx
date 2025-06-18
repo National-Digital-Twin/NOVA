@@ -36,12 +36,7 @@ const ConfirmPolygonButton = ({ onConfirm }: ConfirmPolygonButtonProps) => {
                 padding: '8px 12px',
             }}
         >
-            <img
-                src="/icons/confirm-polygon.svg"
-                alt="Set polygon"
-                width={24}
-                height={24}
-            />
+            <img src="/icons/confirm-polygon.svg" alt="Set polygon" width={24} height={24} />
             Set
         </button>
     );

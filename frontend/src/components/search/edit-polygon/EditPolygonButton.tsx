@@ -44,14 +44,7 @@ interface EditPolygonButtonProps {
  * using Mapbox Draw on a MapLibre map. It enables direct selection of the polygon,
  * displays a confirmation popup after dragging, and updates the polygon's geometry.
  */
-const EditPolygonButton = ({
-    onPolygonEdited,
-    hideLayerControl,
-    mapRef,
-    drawRef,
-    polygonConfirmationPopUpRef,
-    isVisible,
-}: EditPolygonButtonProps) => {
+const EditPolygonButton = ({ onPolygonEdited, hideLayerControl, mapRef, drawRef, polygonConfirmationPopUpRef, isVisible }: EditPolygonButtonProps) => {
     /**
      * Handles the edit button click. It activates direct_select mode,
      * sets up a one-time drag completion listener, and displays a confirmation popup.
@@ -87,7 +80,7 @@ const EditPolygonButton = ({
             const popup = new maplibregl.Popup({
                 closeButton: false,
                 closeOnClick: false,
-                offset: [0, 10]
+                offset: [0, 10],
             })
                 .setLngLat(MapVisualHelper.getConfirmationPopupCoordinates(latestPolygon))
                 .setDOMContent(popupNode)

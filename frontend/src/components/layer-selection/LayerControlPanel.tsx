@@ -9,7 +9,7 @@
  * - Request a heatmap be calculated based on selected layers
  */
 
-import React, { useState, useMemo, useId } from "react";
+import React, { useState, useMemo, useId } from 'react';
 import {
     Paper,
     Accordion,
@@ -23,14 +23,14 @@ import {
     InputAdornment,
     IconButton,
     Box,
-} from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import HighlightOffIcon from "@mui/icons-material/HighlightOff";
-import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
-import SearchIcon from "@mui/icons-material/Search";
-import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+} from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined';
+import SearchIcon from '@mui/icons-material/Search';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 
-import "../../App.scss";
+import '../../App.scss';
 
 // Types used internally by the component
 type LayerItem = { name: string };
@@ -38,28 +38,27 @@ type LayerGroup = { [group: string]: LayerItem[] };
 
 // Static layer data grouped by category
 const layers: LayerGroup = {
-    "Environmental protected sites": [
-        { name: "Areas of outstanding natural beauty" },
-        { name: "Special protection areas" },
-        { name: "Sites of special scientific interest" },
-        { name: "Special areas of conservation" },
+    'Environmental protected sites': [
+        { name: 'Areas of outstanding natural beauty' },
+        { name: 'Special protection areas' },
+        { name: 'Sites of special scientific interest' },
+        { name: 'Special areas of conservation' },
     ],
-    "Weather": [{ name: "Wind speed" }],
-    "Residential": [{ name: "Built up areas" }],
-    "Network infrastructure": [],
-    "Consumption": [],
+    Weather: [{ name: 'Wind speed' }],
+    Residential: [{ name: 'Built up areas' }],
+    'Network infrastructure': [],
+    Consumption: [],
 };
 
 // Main layer panel component
 const LayerControlPanel = () => {
     // Determine first non-empty category for initial expansion
-    const defaultExpandedCategory =
-        Object.entries(layers).find(([, items]) => items.length > 0)?.[0] || "";
+    const defaultExpandedCategory = Object.entries(layers).find(([, items]) => items.length > 0)?.[0] || '';
 
     const idPrefix = useId(); // Unique prefix for form controls
 
     // State for search text input
-    const [searchTerm, setSearchTerm] = useState("");
+    const [searchTerm, setSearchTerm] = useState('');
 
     // Whether the panel is expanded or collapsed
     const [open, setOpen] = useState(true);
@@ -67,8 +66,8 @@ const LayerControlPanel = () => {
     // Tracks which layers are checked
     const [checkedLayers, setCheckedLayers] = useState<Record<string, boolean>>(() => {
         const initial: Record<string, boolean> = {};
-        Object.values(layers).forEach(group => {
-            group.forEach(item => {
+        Object.values(layers).forEach((group) => {
+            group.forEach((item) => {
                 initial[item.name] = true; // all checked by default
             });
         });
@@ -76,13 +75,11 @@ const LayerControlPanel = () => {
     });
 
     // Which accordion panels are expanded
-    const [expandedPanels, setExpandedPanels] = useState<string[]>(
-        defaultExpandedCategory ? [defaultExpandedCategory] : []
-    );
+    const [expandedPanels, setExpandedPanels] = useState<string[]>(defaultExpandedCategory ? [defaultExpandedCategory] : []);
 
     // Checkbox toggle handler
     const handleCheckboxChange = (layerName: string) => {
-        setCheckedLayers(prev => ({
+        setCheckedLayers((prev) => ({
             ...prev,
             [layerName]: !prev[layerName],
         }));
@@ -90,11 +87,7 @@ const LayerControlPanel = () => {
 
     // Accordion toggle handler
     const handleAccordionToggle = (category: string) => {
-        setExpandedPanels(prev =>
-            prev.includes(category)
-                ? prev.filter(c => c !== category)
-                : [...prev, category]
-        );
+        setExpandedPanels((prev) => (prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]));
     };
 
     // Search change handler
@@ -102,11 +95,11 @@ const LayerControlPanel = () => {
         const value = e.target.value;
         setSearchTerm(value);
 
-        if (value.trim() === "") return;
+        if (value.trim() === '') return;
 
         const lower = value.toLowerCase();
         const matching = Object.entries(layers)
-            .filter(([, items]) => items.some(item => item.name.toLowerCase().includes(lower)))
+            .filter(([, items]) => items.some((item) => item.name.toLowerCase().includes(lower)))
             .map(([category]) => category);
 
         setExpandedPanels(matching);
@@ -114,21 +107,19 @@ const LayerControlPanel = () => {
 
     // Clear search and reset expanded panel
     const clearSearch = () => {
-        setSearchTerm("");
+        setSearchTerm('');
         setExpandedPanels(defaultExpandedCategory ? [defaultExpandedCategory] : []);
     };
 
     // Handle Apply button
     const handleApply = () => {
-        console.log("Apply clicked");
+        console.log('Apply clicked');
     };
 
     // Memoised list of filtered layer entries
     const filteredLayerEntries = useMemo(() => {
         return Object.entries(layers).map(([category, items]) => {
-            const filteredItems = items.filter(item =>
-                item.name.toLowerCase().includes(searchTerm.toLowerCase())
-            );
+            const filteredItems = items.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase()));
             if (filteredItems.length === 0) return null;
 
             return (
@@ -139,14 +130,11 @@ const LayerControlPanel = () => {
                     className="layer-accordion"
                     disableGutters
                 >
-                    <AccordionSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        className="layer-accordion-summary"
-                    >
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />} className="layer-accordion-summary">
                         <Typography>{category}</Typography>
                     </AccordionSummary>
                     <AccordionDetails sx={{ pt: 0.5, pb: 0 }}>
-                        {filteredItems.map(item => {
+                        {filteredItems.map((item) => {
                             const checkboxId = `${idPrefix}-${item.name.replace(/\s+/g, '-')}`;
                             return (
                                 <Box key={item.name} className="layer-item">
@@ -172,15 +160,9 @@ const LayerControlPanel = () => {
     return (
         <>
             {/* Toggle button */}
-            <Box
-                className="layer-panel-toggle"
-                sx={{ left: open ? "430px" : "1rem" }}
-            >
+            <Box className="layer-panel-toggle" sx={{ left: open ? '430px' : '1rem' }}>
                 <IconButton onClick={() => setOpen(!open)}>
-                    <ArrowBackIosNewIcon
-                        fontSize="small"
-                        sx={{ transform: !open ? "rotate(180deg)" : "none" }}
-                    />
+                    <ArrowBackIosNewIcon fontSize="small" sx={{ transform: !open ? 'rotate(180deg)' : 'none' }} />
                 </IconButton>
             </Box>
 
@@ -204,7 +186,7 @@ const LayerControlPanel = () => {
                                 input: {
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <SearchIcon sx={{ fontSize: 20, color: "grey.600" }} />
+                                            <SearchIcon sx={{ fontSize: 20, color: 'grey.600' }} />
                                         </InputAdornment>
                                     ),
                                     endAdornment: searchTerm && (
@@ -215,13 +197,15 @@ const LayerControlPanel = () => {
                                         </InputAdornment>
                                     ),
                                     sx: { borderRadius: 2 },
-                                }
+                                },
                             }}
                         />
                     </Box>
 
                     <Box className="layer-panel-selectable-layers">
-                        {hasSearchResults ? filteredLayerEntries : (
+                        {hasSearchResults ? (
+                            filteredLayerEntries
+                        ) : (
                             <Box sx={{ px: 2, pt: 2 }}>
                                 <Typography variant="body2" color="text.secondary">
                                     No results

@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
 import type { FeatureCollection, Geometry, Polygon } from 'geojson';
@@ -35,14 +34,7 @@ interface UsePolygonHandlersProps {
  * @returns {(geojson: FeatureCollection<Geometry>) => void} handlePolygonEdited - Called after polygon is edited. Reapplies mask and shows control.
  * @returns {() => void} handlePolygonDeleted - Removes polygon and any visual effects or popup.
  */
-export function usePolygonHandlers({
-    mapRef,
-    popupRef,
-    setPolygonDrawn,
-    setPolygonConfirmed,
-    showLayerControl,
-    clearLayerData,
-}: UsePolygonHandlersProps) {
+export function usePolygonHandlers({ mapRef, popupRef, setPolygonDrawn, setPolygonConfirmed, showLayerControl, clearLayerData }: UsePolygonHandlersProps) {
     const showConfirmationPopup = useCallback(
         (polygon: Polygon, onConfirm: () => void) => {
             const popupNode = document.createElement('div');

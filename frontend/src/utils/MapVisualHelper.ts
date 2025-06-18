@@ -12,7 +12,6 @@ export class MapVisualHelper {
     private static maskLayerSourceId = 'mask';
     private static maskLayerId = 'mask-layer';
 
-
     /**
      * Applies a dimmed mask over the entire map except inside the given polygon and centers the map on that polygon.
      * If the mask source or layer already exists, it will update them.
@@ -31,19 +30,19 @@ export class MapVisualHelper {
                         [180, -85],
                         [180, 85],
                         [-180, 85],
-                        [-180, -85]
+                        [-180, -85],
                     ],
-                    polygon.coordinates[0]
-                ]
+                    polygon.coordinates[0],
+                ],
             },
-            properties: {}
+            properties: {},
         };
 
         // Add or update source
         if (!map.getSource(MapVisualHelper.maskLayerSourceId)) {
             map.addSource(MapVisualHelper.maskLayerSourceId, {
                 type: 'geojson',
-                data: maskFeature
+                data: maskFeature,
             });
         } else {
             const source = map.getSource(MapVisualHelper.maskLayerSourceId) as GeoJSONSource;
@@ -58,8 +57,8 @@ export class MapVisualHelper {
                 source: MapVisualHelper.maskLayerSourceId,
                 paint: {
                     'fill-color': '#000000',
-                    'fill-opacity': 0.5
-                }
+                    'fill-opacity': 0.5,
+                },
             });
         }
 
@@ -80,16 +79,16 @@ export class MapVisualHelper {
         map.fitBounds(
             [
                 [minLng, minLat],
-                [maxLng, maxLat]
+                [maxLng, maxLat],
             ],
             {
                 padding: {
                     top: 50,
                     bottom: 50,
-                    left: 450,   // 400px layer switcher width + 50px buffer
-                    right: 66   // 50px default + 16px (typically 1rem control panel)
+                    left: 450, // 400px layer switcher width + 50px buffer
+                    right: 66, // 50px default + 16px (typically 1rem control panel)
                 },
-                duration: 2000
+                duration: 2000,
             }
         );
     }
@@ -122,7 +121,7 @@ export class MapVisualHelper {
         const avgLng = coords.reduce((sum, [lng]) => sum + lng, 0) / coords.length;
 
         // Offset the popup upward slightly above the top point to make sure the polygon point is always visible for editing.
-        const offsetLat = topLat + 0.0050;
+        const offsetLat = topLat + 0.005;
 
         return [avgLng, offsetLat];
     }
@@ -176,12 +175,12 @@ export class MapVisualHelper {
     }
 
     /*
-    * Extracts the first polygon from a GeoJSON FeatureCollection.
-    * If no polygon exists, returns null.
-    *
-    * @param geojson - The GeoJSON FeatureCollection to extract from
-    * @returns The first polygon geometry or null if none exists
-    */
+     * Extracts the first polygon from a GeoJSON FeatureCollection.
+     * If no polygon exists, returns null.
+     *
+     * @param geojson - The GeoJSON FeatureCollection to extract from
+     * @returns The first polygon geometry or null if none exists
+     */
     static extractFirstPolygon(geojson: FeatureCollection<Geometry>): Polygon | null {
         const geometry = geojson.features[0]?.geometry;
         return geometry?.type === 'Polygon' ? (geometry as Polygon) : null;
@@ -196,5 +195,4 @@ export class MapVisualHelper {
     static getFeatureCollection(draw: MapboxDraw): FeatureCollection<Geometry> {
         return draw.getAll() as unknown as FeatureCollection<Geometry>;
     }
-
 }
