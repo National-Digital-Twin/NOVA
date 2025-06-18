@@ -64,7 +64,6 @@ jobs:
       - name: Run Linting
         working-directory: frontend
         run: npm run lint
-        continue-on-error: true
 
   unit-tests:
     name: Unit Tests
@@ -90,7 +89,6 @@ jobs:
         run: |
           mkdir -p .coverage
           npm run test:coverage
-        continue-on-error: true
 
   security-scanning:
     name: Security Scanning

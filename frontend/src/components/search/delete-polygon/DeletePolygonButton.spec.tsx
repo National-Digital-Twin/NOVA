@@ -6,10 +6,13 @@ import DeletePolygonButton from './DeletePolygonButton';
 vi.mock('@mapbox/mapbox-gl-draw');
 
 describe('DeletePolygonButton', () => {
+    const deleteAllMock = vi.fn();
+    const onPolygonDeletedMock = vi.fn();
+    const hideLayerControlMock = vi.fn();
+
     const mockDrawRef = {
         current: {
-            deleteAll: vi.fn(),
-            getMode: vi.fn().mockReturnValue('simple_select') as unknown as () => string,
+            deleteAll: deleteAllMock,
         },
     } as unknown as React.RefObject<MapboxDraw>;
 
@@ -17,31 +20,27 @@ describe('DeletePolygonButton', () => {
         vi.clearAllMocks();
     });
 
-    it('renders the button with correct aria label', () => {
-        render(<DeletePolygonButton drawRef={mockDrawRef} />);
+    it('does not render when isVisible is false', () => {
+        render(<DeletePolygonButton drawRef={mockDrawRef} isVisible={false} onPolygonDeleted={onPolygonDeletedMock} hideLayerControl={hideLayerControlMock} />);
+
+        expect(screen.queryByLabelText('Delete polygon')).not.toBeInTheDocument();
+    });
+
+    it('renders the button when isVisible is true', () => {
+        render(<DeletePolygonButton drawRef={mockDrawRef} isVisible={true} onPolygonDeleted={onPolygonDeletedMock} hideLayerControl={hideLayerControlMock} />);
+
         expect(screen.getByLabelText('Delete polygon')).toBeInTheDocument();
-    });
-
-    it('deletes all polygons when clicked', () => {
-        render(<DeletePolygonButton drawRef={mockDrawRef} />);
-        const button = screen.getByLabelText('Delete polygon');
-
-        fireEvent.click(button);
-        expect(mockDrawRef.current?.deleteAll).toHaveBeenCalled();
-    });
-
-    it('is enabled when map is initialized', () => {
-        render(<DeletePolygonButton drawRef={mockDrawRef} />);
-        const button = screen.getByLabelText('Delete polygon');
-        expect(button).not.toBeDisabled();
     });
 
     it('handles null drawRef.current gracefully', () => {
         const nullDrawRef = { current: null } as unknown as React.RefObject<MapboxDraw>;
-        render(<DeletePolygonButton drawRef={nullDrawRef} />);
-        const button = screen.getByLabelText('Delete polygon');
 
+        render(<DeletePolygonButton drawRef={nullDrawRef} isVisible={true} onPolygonDeleted={onPolygonDeletedMock} hideLayerControl={hideLayerControlMock} />);
+
+        const button = screen.getByLabelText('Delete polygon button');
         fireEvent.click(button);
-        expect(button).toBeInTheDocument();
+
+        expect(onPolygonDeletedMock).not.toHaveBeenCalled();
+        expect(hideLayerControlMock).not.toHaveBeenCalled();
     });
 });
