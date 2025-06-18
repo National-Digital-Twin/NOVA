@@ -16,7 +16,7 @@ const Toolbar = styled(AppBar)(({ theme }) => ({
 const Header: React.FC = () => {
     return (
         <Toolbar position="relative">
-            <Box component="img" src={novaLogo} alt="NOVA Logo" sx={{ height: '1rem' }} />
+            <Box component="img" src={novaLogo} alt="NOVA Logo" sx={{ height: '1.5rem' }} />
             <UserMenu />
         </Toolbar>
     );

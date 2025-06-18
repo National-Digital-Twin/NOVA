@@ -16,12 +16,24 @@ const StyledMenu = styled(Menu)(({ theme }) => ({
     },
 }));
 
+const StyledDivider = styled(Divider)(({ theme }) => ({
+    backgroundColor: theme.palette.divider,
+    opacity: 0.3,
+    margin: theme.spacing(1) + ' 0',
+}));
+
 const UsernameTypography = styled(Typography)(({ theme }) => ({
-    color: theme.palette.text.secondary,
+    color: theme.palette.text.disabled,
+    padding: theme.spacing(1) + ' ' + theme.spacing(2),
 }));
 
 const StyledLogoutIcon = styled(LogoutIcon)(({ theme }) => ({
+    color: theme.palette.secondary.main,
     marginRight: theme.spacing(1),
+}));
+
+const SignOutTypography = styled(Typography)(({ theme }) => ({
+    color: theme.palette.secondary.main,
 }));
 
 const UserMenu = () => {
@@ -33,7 +45,7 @@ const UserMenu = () => {
         const fetchUserData = async () => {
             try {
                 const userData = await userService.getUserData();
-                setUsername(userData.email);
+                setUsername(userData.displayName);
             } catch (err) {
                 console.error('Failed to fetch user data:', err);
             }
@@ -71,13 +83,11 @@ const UserMenu = () => {
                 open={open}
                 onClose={handleClose}
             >
-                <MenuItem onClick={handleClose}>
-                    <UsernameTypography>{username}</UsernameTypography>
-                </MenuItem>
-                <Divider />
+                <UsernameTypography>{username}</UsernameTypography>
+                <StyledDivider />
                 <MenuItem onClick={handleSignOut}>
                     <StyledLogoutIcon />
-                    Sign out
+                    <SignOutTypography>Sign out</SignOutTypography>
                 </MenuItem>
             </StyledMenu>
         </>

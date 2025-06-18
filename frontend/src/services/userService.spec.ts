@@ -40,7 +40,7 @@ describe('userService', () => {
 
             const result = await userService.getUserData();
             expect(result).toEqual(mockUserData);
-            expect(mockFetch).toHaveBeenCalledWith(`/data/user.json`);
+            expect(mockFetch).toHaveBeenCalledWith(`/api/auth/user`);
         });
 
         it('handles fetch failure', async () => {

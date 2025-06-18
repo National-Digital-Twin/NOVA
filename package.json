@@ -11,8 +11,8 @@
     "clean": "rm -rf ./**/*dist && rm -rf node_modules && rm -rf ./**/node_modules"
   },
   "workspaces": [
-    "frontend",
-    "api"
+    "api",
+    "frontend"
   ],
   "private": true
 }

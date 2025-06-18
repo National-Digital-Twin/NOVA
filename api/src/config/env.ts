@@ -2,18 +2,22 @@
  * Environment configuration class
  */
 export class EnvConfig {
-
-  // Server configuration
-  public readonly port: number;
-
-  /**
-   * Constructor for EnvConfig
-   */
-  constructor() {
-
     // Server configuration
-    this.port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
-  }
+    public readonly nodeEnv: string;
+    public readonly port: number;
+    public readonly identityApiUrl: string;
+    public readonly landingPageUrl: string;
+
+    /**
+     * Constructor for EnvConfig
+     */
+    constructor() {
+        // Server configuration
+        this.nodeEnv = process.env.NODE_ENV || 'development';
+        this.port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+        this.identityApiUrl = process.env.IDENTITY_API_URL || 'http://localhost:3001';
+        this.landingPageUrl = process.env.LANDING_PAGE_URL || 'http://localhost:3002';
+    }
 }
 
 // Export a singleton instance

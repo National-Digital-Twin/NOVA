@@ -1,12 +1,12 @@
 export interface UserData {
     username: string;
     email: string;
-    role: string;
+    displayName: string;
 }
 
 export interface LogoutResponse {
-    success: boolean;
     redirectUrl: string;
+    logoutUrl: string;
 }
 
 export const userService = {
@@ -47,6 +47,7 @@ export const userService = {
             }
 
             sessionStorage.clear();
+            await fetch(data.logoutUrl, { method: 'GET', redirect: 'manual', credentials: 'include' });
             window.location.href = data.redirectUrl;
             return data;
         } catch (error) {
