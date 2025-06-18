@@ -1,7 +1,7 @@
 /**
  * Data models for location information
  */
-import { GeoJSONDTO } from "./geojson.model";
+import { Feature } from "geojson";
 
 /**
  * @swagger
@@ -32,7 +32,7 @@ export interface LocationDTO {
   /**
    * GeoJSON representation of the location
    */
-  location: GeoJSONDTO;
+  location: Feature;
 
   /**
    * Name of the location

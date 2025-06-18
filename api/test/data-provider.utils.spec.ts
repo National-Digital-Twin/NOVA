@@ -3,7 +3,7 @@ import * as path from 'path';
 import { dataProviderUtils } from '../src/utils/data-provider.utils';
 import { LayersDTO } from '../src/models/layers.model';
 import { AssetsDTO } from '../src/models/asset.model';
-import { GeoJSONDTO } from '../src/models/geojson.model';
+import { GeoJSONDTO } from '../src/utils/geojson.utils';
 import { LocationsDTO } from '../src/models/location.model';
 
 // Mock fs module
@@ -15,6 +15,7 @@ describe('DataProviderUtils', () => {
   const mockAssetsPath = path.join(__dirname, '../src/data/assets.json');
   const mockGeoJsonPath = path.join(__dirname, '../src/data/sampleGeoJson.json');
   const mockSubstationsPath = path.join(__dirname, '../src/data/substations.json');
+  const mockGSPPath = path.join(__dirname, '../src/data/GSP.geojson');
   const mockRegionsPath = path.join(__dirname, '../src/data/regions.json');
 
   // Sample data for mocking file reads
@@ -87,6 +88,40 @@ describe('DataProviderUtils', () => {
       distance: 1.5
     }
   ];
+
+  const mockGSPData: GeoJSONDTO = {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        properties: {
+          'Owner Type': 'SSEN',
+          'Owner Name': 'DOAN',
+          'Type': 'Primary',
+          'Class': 'Distribution',
+          'Number': 'BEAP'
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: [0.01, 0.01]
+        }
+      },
+      {
+        type: 'Feature',
+        properties: {
+          'Owner Type': 'SSEN',
+          'Owner Name': 'DOAN',
+          'Type': 'Secondary',
+          'Class': 'Transmission',
+          'Number': '79181002'
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: [-0.01, 0.02]
+        }
+      }
+    ]
+  };
 
   beforeEach(() => {
     // Reset all mocks

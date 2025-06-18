@@ -1,6 +1,6 @@
 import { isValidGeoJSON } from '../src/utils/geojson.utils';
 
-describe('GeoJSON Model', () => {
+describe('GeoJSON Utils', () => {
   describe('isValidGeoJSON', () => {
     it('should return false for null or undefined input', () => {
       expect(isValidGeoJSON(null)).toBe(false);

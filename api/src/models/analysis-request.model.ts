@@ -1,7 +1,7 @@
 /**
  * Data model for analysis request
  */
-import { GeoJSONDTO } from "./geojson.model";
+import { GeoJSON } from "geojson";
 import { LayersDTO } from "./layers.model";
 import { AssetDTO } from "./asset.model";
 
@@ -31,7 +31,7 @@ export interface AnalysisRequestDTO {
   /**
    * GeoJSON of the selected area
    */
-  location: GeoJSONDTO;
+  location: GeoJSON;
 
   /**
    * Layers configuration for the analysis
