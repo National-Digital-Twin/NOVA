@@ -27,7 +27,7 @@ const MapComponent = () => {
             <Map
                 ref={mapRef}
                 {...viewState}
-                onMove={evt => setViewState(evt.viewState)}
+                onMove={(evt) => setViewState(evt.viewState)}
                 onLoad={handleMapLoad}
                 mapStyle={MAP_STYLES[mapStyle]}
                 style={{ width: '100%', height: '100%' }}

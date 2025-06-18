@@ -122,7 +122,7 @@ describe('PolygonLayer', () => {
         const moderateFill = screen.getByTestId('layer-Moderate Suitability-fill');
         const mostSuitableFill = screen.getByTestId('layer-Most Suitable-fill');
 
-        [leastSuitableFill, moderateFill, mostSuitableFill].forEach(layer => {
+        [leastSuitableFill, moderateFill, mostSuitableFill].forEach((layer) => {
             expect(layer).toHaveAttribute('data-type', 'fill');
             const paint = JSON.parse(layer.getAttribute('data-paint') || '{}');
             expect(paint).toHaveProperty('fill-opacity', 0.3);
@@ -144,7 +144,7 @@ describe('PolygonLayer', () => {
         const moderateOutline = screen.getByTestId('layer-Moderate Suitability-outline');
         const mostSuitableOutline = screen.getByTestId('layer-Most Suitable-outline');
 
-        [leastSuitableOutline, moderateOutline, mostSuitableOutline].forEach(layer => {
+        [leastSuitableOutline, moderateOutline, mostSuitableOutline].forEach((layer) => {
             expect(layer).toHaveAttribute('data-type', 'line');
             const paint = JSON.parse(layer.getAttribute('data-paint') || '{}');
             expect(paint).toHaveProperty('line-width', 2);

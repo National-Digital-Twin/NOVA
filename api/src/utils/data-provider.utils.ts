@@ -1,11 +1,11 @@
-import * as fs from "fs";
-import * as path from "path";
-import Fuse from 'fuse.js';
-import { LayersDTO } from "../models/layers.model";
-import { AssetsDTO } from "../models/asset.model";
-import {FeatureCollection, GeoJSON} from "geojson";
-import { LocationsDTO } from "../models/location.model";
-import { SearchOptionDTO } from "../models/search.model";
+import * as fs from 'fs';
+import Fuse, { FuseResult } from 'fuse.js';
+import { FeatureCollection, GeoJSON } from 'geojson';
+import * as path from 'path';
+import { AssetsDTO } from '../models/asset.model';
+import { LayersDTO } from '../models/layers.model';
+import { LocationsDTO } from '../models/location.model';
+import { SearchOptionDTO } from '../models/search.model';
 
 /**
  * Utility class for data providers
@@ -17,17 +17,18 @@ export class DataProviderUtils {
     private readonly substationsDataFilePath: string;
     private readonly gspDataFilePath: string;
     private readonly regionsDataFilePath: string;
+    private fuse: Fuse<SearchOptionDTO> | undefined;
 
     /**
      * Constructor for DataProviderUtils
      */
     constructor() {
         this.regionsDataFilePath = path.join(__dirname, '../data/regions.json');
-        this.layersDataFilePath = path.join(__dirname, "../data/layers.json");
-        this.assetsDataFilePath = path.join(__dirname, "../data/assets.json");
-        this.sampleGeoJsonFilePath = path.join(__dirname, "../data/sampleGeoJson.json");
-        this.substationsDataFilePath = path.join(__dirname, "../data/substations.json");
-        this.gspDataFilePath = path.join(__dirname, "../data/GSP.geojson");
+        this.layersDataFilePath = path.join(__dirname, '../data/layers.json');
+        this.assetsDataFilePath = path.join(__dirname, '../data/assets.json');
+        this.sampleGeoJsonFilePath = path.join(__dirname, '../data/sampleGeoJson.json');
+        this.substationsDataFilePath = path.join(__dirname, '../data/substations.json');
+        this.gspDataFilePath = path.join(__dirname, '../data/GSP.geojson');
     }
 
     /**
@@ -39,8 +40,8 @@ export class DataProviderUtils {
         const layersData = JSON.parse(fileContent) as LayersDTO;
 
         // Ensure each item has the active property
-        layersData.categories.forEach(category => {
-            category.items.forEach(item => {
+        layersData.categories.forEach((category) => {
+            category.items.forEach((item) => {
                 if (item.active === undefined) {
                     item.active = false; // Set default value if not present
                 }
@@ -104,11 +105,13 @@ export class DataProviderUtils {
      * @returns SearchOptionDTO array containing the matches relevant to the input string
      */
     public getSearchOptions(query: string): SearchOptionDTO[] {
-        if(!this.fuse) {
+        if (!this.fuse) {
             this.readRegionsData();
         }
 
-        return this.fuse.search(query).slice(0, 10).map(r => r.item);
+        return (this.fuse?.search(query) ?? [])
+            .slice(0, 10)
+            .map((r: FuseResult<SearchOptionDTO>) => r.item);
     }
 }
 

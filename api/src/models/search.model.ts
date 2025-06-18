@@ -29,20 +29,20 @@
  *         - zoom
  */
 export interface SearchOptionDTO {
-  /**
-   * Location name
-   */
-  name: string;
-  /**
-   * Latitude coordinate
-   */
-  latitude: number;
-  /**
-   * Longitude coordinate
-   */
-  longitude: number;
-  /**
-   * Zoom level
-   */
-  zoom: number;
+    /**
+     * Location name
+     */
+    name: string;
+    /**
+     * Latitude coordinate
+     */
+    latitude: number;
+    /**
+     * Longitude coordinate
+     */
+    longitude: number;
+    /**
+     * Zoom level
+     */
+    zoom: number;
 }

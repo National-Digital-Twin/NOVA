@@ -5,18 +5,18 @@ import SearchPanel from './SearchPanel';
 import { createMockMapRef } from '../../../test/test-utils';
 
 vi.mock('./search-input/SearchInput', () => ({
-  default: ({ onSearchResultClick }: { onSearchResultClick: (lat: number, lon: number, zoom: number) => void }) => (
-    <input
-      type="text"
-      data-testid="search-input"
-      onKeyDown={(e) => {
-        if (e.key === 'Enter') {
-          onSearchResultClick(57.1497, -2.0943, 10);
-        }
-      }}
-      aria-label="Search by region or country"
-    />
-  ),
+    default: ({ onSearchResultClick }: { onSearchResultClick: (lat: number, lon: number, zoom: number) => void }) => (
+        <input
+            type="text"
+            data-testid="search-input"
+            onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                    onSearchResultClick(57.1497, -2.0943, 10);
+                }
+            }}
+            aria-label="Search by region or country"
+        />
+    ),
 }));
 
 vi.mock('./draw-polygon/DrawPolygonButton', () => ({
