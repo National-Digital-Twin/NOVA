@@ -1,12 +1,24 @@
 FROM node:23-alpine
-RUN mkdir -p /home/node/dist
 
-WORKDIR /home/node
-COPY --chown=root:root --chmod=755 ./api/dist ./dist
+# Set working directory
+WORKDIR /home/node/app
 
+# Install dependencies
+COPY ./api/package*.json ./
+RUN npm ci
+
+# Copy the full source code
+COPY ./api ./
+
+# Build the TypeScript code
+RUN npm run build
+
+# Use non-root user
 USER node
 
+# Expose the API port
 EXPOSE 3000
 ENV HOST=0.0.0.0
 
-CMD ["node", "--enable-source-maps", "dist/server.cjs"]
+# Run the compiled app
+CMD ["node", "dist/server.js"]
