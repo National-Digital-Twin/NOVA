@@ -17,30 +17,20 @@ spec:
     spec:
       serviceAccountName: nova-backend-sa
       containers:
-        - name: nova
-          image: nova-backend-image:template
-          ports:
-            - containerPort: 3000
-              protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /api
-              port: 3000
-            failureThreshold: 5
-            periodSeconds: 30
-            timeoutSeconds: 20
-          readinessProbe:
-            httpGet:
-              path: /api
-              port: 3000
-            failureThreshold: 5
-            periodSeconds: 30
-            timeoutSeconds: 20
+        - image: nova-backend-image:template
+          env:
+            - name: IMAGE_DIGEST
+              value: "none"
+          name: backend
           resources:
             limits:
-              memory: "2Gi"
-            requests:
-              cpu: "0.5"
               memory: "1Gi"
+            requests:
+              cpu: "0.25"
+              memory: "256Mi"
               ephemeral-storage: "2Gi"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              protocol: TCP
       restartPolicy: Always
