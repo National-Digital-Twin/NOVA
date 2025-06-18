@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    reloader.stakater.com/auto: "true"
+
+  name: nova-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: nova-backend
+  template:
+    metadata:
+      annotations: {}
+      labels:
+        io.kompose.service: nova-backend
+    spec:
+      serviceAccountName: nova-backend-sa
+      containers:
+        livenessProbe:
+          httpGet:
+            path: /api
+            port: 3000
+          failureThreshold: 5
+          periodSeconds: 30
+          timeoutSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /api
+            port: 3000
+          failureThreshold: 5
+          periodSeconds: 30
+          timeoutSeconds: 20
+        name: nova
+        image: nova-backend-image:template
+        resources:
+          limits:
+            memory: "2Gi"
+          requests:
+            cpu: "0.5"
+            memory: "1Gi"
+            ephemeral-storage: "2Gi"
+        ports:
+          - containerPort: 3000
+            protocol: TCP
+      restartPolicy: Always

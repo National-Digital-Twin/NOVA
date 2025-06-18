@@ -1,0 +1,20 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-ingress-to-nova-backend
+spec:
+  selector:
+    matchLabels:
+      io.kompose.service: nova-backend
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals: ["cluster.local/ns/istio-ingress/sa/istio-ingress"]
+      to:
+        - operation:
+            methods: ["GET", "PATCH", "POST", "PUT"]
+      when:
+        - key: request.auth.claims[groups]
+          values:
+            - nova_access

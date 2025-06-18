@@ -73,8 +73,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        repo_name:
-          ["nova/frontend"]
+        repo_name: ["nova/frontend", "nova/api"]
     steps:
       # Set up AWS credentials for the source account
       - name: Set up AWS Credentials for Source Account
