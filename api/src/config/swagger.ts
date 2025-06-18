@@ -128,45 +128,265 @@ export class SwaggerConfig {
             },
             GeoJSONDTO: {
               type: "object",
+              description: "A GeoJSON object as defined by RFC 7946",
+              oneOf: [
+                { $ref: "#/components/schemas/GeometryObject" },
+                { $ref: "#/components/schemas/Feature" },
+                { $ref: "#/components/schemas/FeatureCollection" }
+              ]
+            },
+            GeometryObject: {
+              type: "object",
+              description: "A GeoJSON Geometry object",
+              oneOf: [
+                { $ref: "#/components/schemas/Point" },
+                { $ref: "#/components/schemas/MultiPoint" },
+                { $ref: "#/components/schemas/LineString" },
+                { $ref: "#/components/schemas/MultiLineString" },
+                { $ref: "#/components/schemas/Polygon" },
+                { $ref: "#/components/schemas/MultiPolygon" },
+                { $ref: "#/components/schemas/GeometryCollection" }
+              ]
+            },
+            Position: {
+              type: "array",
+              description: "A position is an array of numbers representing a point in space. In GeoJSON, positions are in the format [longitude, latitude] or [longitude, latitude, elevation]",
+              items: {
+                type: "number"
+              },
+              minItems: 2
+            },
+            Point: {
+              type: "object",
+              description: "A GeoJSON Point geometry",
               properties: {
                 type: {
                   type: "string",
-                  description: "Type of GeoJSON object"
+                  enum: ["Point"],
+                  description: "The geometry type"
                 },
-                properties: {
-                  type: "object",
-                  description: "Properties of the GeoJSON object"
+                coordinates: {
+                  $ref: "#/components/schemas/Position",
+                  description: "The coordinates of the point"
                 },
-                geometry: {
-                  type: "object",
-                  properties: {
-                    type: {
-                      type: "string",
-                      description: "Type of geometry"
-                    },
-                    coordinates: {
-                      type: "array",
-                      description: "Coordinates of the geometry"
+                bbox: {
+                  $ref: "#/components/schemas/BBox",
+                  description: "Optional bounding box"
+                }
+              },
+              required: ["type", "coordinates"]
+            },
+            MultiPoint: {
+              type: "object",
+              description: "A GeoJSON MultiPoint geometry",
+              properties: {
+                type: {
+                  type: "string",
+                  enum: ["MultiPoint"],
+                  description: "The geometry type"
+                },
+                coordinates: {
+                  type: "array",
+                  items: {
+                    $ref: "#/components/schemas/Position"
+                  },
+                  description: "Array of positions"
+                },
+                bbox: {
+                  $ref: "#/components/schemas/BBox",
+                  description: "Optional bounding box"
+                }
+              },
+              required: ["type", "coordinates"]
+            },
+            LineString: {
+              type: "object",
+              description: "A GeoJSON LineString geometry",
+              properties: {
+                type: {
+                  type: "string",
+                  enum: ["LineString"],
+                  description: "The geometry type"
+                },
+                coordinates: {
+                  type: "array",
+                  items: {
+                    $ref: "#/components/schemas/Position"
+                  },
+                  description: "Array of positions forming the line"
+                },
+                bbox: {
+                  $ref: "#/components/schemas/BBox",
+                  description: "Optional bounding box"
+                }
+              },
+              required: ["type", "coordinates"]
+            },
+            MultiLineString: {
+              type: "object",
+              description: "A GeoJSON MultiLineString geometry",
+              properties: {
+                type: {
+                  type: "string",
+                  enum: ["MultiLineString"],
+                  description: "The geometry type"
+                },
+                coordinates: {
+                  type: "array",
+                  items: {
+                    type: "array",
+                    items: {
+                      $ref: "#/components/schemas/Position"
                     }
                   },
-                  description: "Geometry of the GeoJSON object"
+                  description: "Array of LineString coordinate arrays"
+                },
+                bbox: {
+                  $ref: "#/components/schemas/BBox",
+                  description: "Optional bounding box"
+                }
+              },
+              required: ["type", "coordinates"]
+            },
+            Polygon: {
+              type: "object",
+              description: "A GeoJSON Polygon geometry",
+              properties: {
+                type: {
+                  type: "string",
+                  enum: ["Polygon"],
+                  description: "The geometry type"
+                },
+                coordinates: {
+                  type: "array",
+                  items: {
+                    type: "array",
+                    items: {
+                      $ref: "#/components/schemas/Position"
+                    }
+                  },
+                  description: "Array of linear ring coordinate arrays. The first ring is the exterior ring, and any subsequent rings are interior rings (holes)"
+                },
+                bbox: {
+                  $ref: "#/components/schemas/BBox",
+                  description: "Optional bounding box"
+                }
+              },
+              required: ["type", "coordinates"]
+            },
+            MultiPolygon: {
+              type: "object",
+              description: "A GeoJSON MultiPolygon geometry",
+              properties: {
+                type: {
+                  type: "string",
+                  enum: ["MultiPolygon"],
+                  description: "The geometry type"
+                },
+                coordinates: {
+                  type: "array",
+                  items: {
+                    type: "array",
+                    items: {
+                      type: "array",
+                      items: {
+                        $ref: "#/components/schemas/Position"
+                      }
+                    }
+                  },
+                  description: "Array of Polygon coordinate arrays"
+                },
+                bbox: {
+                  $ref: "#/components/schemas/BBox",
+                  description: "Optional bounding box"
+                }
+              },
+              required: ["type", "coordinates"]
+            },
+            GeometryCollection: {
+              type: "object",
+              description: "A GeoJSON GeometryCollection",
+              properties: {
+                type: {
+                  type: "string",
+                  enum: ["GeometryCollection"],
+                  description: "The geometry type"
+                },
+                geometries: {
+                  type: "array",
+                  items: {
+                    $ref: "#/components/schemas/GeometryObject"
+                  },
+                  description: "Array of geometry objects"
+                },
+                bbox: {
+                  $ref: "#/components/schemas/BBox",
+                  description: "Optional bounding box"
+                }
+              },
+              required: ["type", "geometries"]
+            },
+            Feature: {
+              type: "object",
+              description: "A GeoJSON Feature",
+              properties: {
+                type: {
+                  type: "string",
+                  enum: ["Feature"],
+                  description: "The feature type"
+                },
+                geometry: {
+                  oneOf: [
+                    { $ref: "#/components/schemas/GeometryObject" },
+                    { type: "null" }
+                  ],
+                  description: "The feature geometry"
+                },
+                properties: {
+                  type: ["object", "null"],
+                  description: "Properties associated with this feature"
+                },
+                id: {
+                  type: ["string", "number"],
+                  description: "Optional feature identifier"
+                },
+                bbox: {
+                  $ref: "#/components/schemas/BBox",
+                  description: "Optional bounding box"
+                }
+              },
+              required: ["type", "properties", "geometry"]
+            },
+            FeatureCollection: {
+              type: "object",
+              description: "A GeoJSON FeatureCollection",
+              properties: {
+                type: {
+                  type: "string",
+                  enum: ["FeatureCollection"],
+                  description: "The collection type"
                 },
                 features: {
                   type: "array",
                   items: {
-                    $ref: "#/components/schemas/GeoJSONDTO"
+                    $ref: "#/components/schemas/Feature"
                   },
-                  description: "Features of the GeoJSON object (for FeatureCollection)"
+                  description: "Array of features"
                 },
                 bbox: {
-                  type: "array",
-                  items: {
-                    type: "number"
-                  },
-                  description: "Bounding box of the GeoJSON object. For 2D coordinates: [west, south, east, north]. For 3D coordinates: [west, south, min_elevation, east, north, max_elevation]"
+                  $ref: "#/components/schemas/BBox",
+                  description: "Optional bounding box"
                 }
               },
-              required: ["type"]
+              required: ["type", "features"]
+            },
+            BBox: {
+              type: "array",
+              description: "A GeoJSON bounding box. For 2D coordinates: [west, south, east, north]. For 3D coordinates: [west, south, min_elevation, east, north, max_elevation]",
+              items: {
+                type: "number"
+              },
+              minItems: 4
             },
             AnalysisRequestDTO: {
               type: "object",
