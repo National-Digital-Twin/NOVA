@@ -1,10 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: nova-backend
   annotations:
     reloader.stakater.com/auto: "true"
-
-  name: nova-backend
 spec:
   replicas: 1
   selector:
@@ -18,30 +17,30 @@ spec:
     spec:
       serviceAccountName: nova-backend-sa
       containers:
-        livenessProbe:
-          httpGet:
-            path: /api
-            port: 3000
-          failureThreshold: 5
-          periodSeconds: 30
-          timeoutSeconds: 20
-        readinessProbe:
-          httpGet:
-            path: /api
-            port: 3000
-          failureThreshold: 5
-          periodSeconds: 30
-          timeoutSeconds: 20
-        name: nova
-        image: nova-backend-image:template
-        resources:
-          limits:
-            memory: "2Gi"
-          requests:
-            cpu: "0.5"
-            memory: "1Gi"
-            ephemeral-storage: "2Gi"
-        ports:
-          - containerPort: 3000
-            protocol: TCP
+        - name: nova
+          image: nova-backend-image:template
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /api
+              port: 3000
+            failureThreshold: 5
+            periodSeconds: 30
+            timeoutSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /api
+              port: 3000
+            failureThreshold: 5
+            periodSeconds: 30
+            timeoutSeconds: 20
+          resources:
+            limits:
+              memory: "2Gi"
+            requests:
+              cpu: "0.5"
+              memory: "1Gi"
+              ephemeral-storage: "2Gi"
       restartPolicy: Always
