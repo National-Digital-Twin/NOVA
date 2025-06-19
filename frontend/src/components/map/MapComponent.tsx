@@ -6,7 +6,7 @@ import { MAP_STYLES, type MapStyle } from '../../types/map';
 import MapControls from '../map-controls/MapControls';
 import SearchPanel from '../search/SearchPanel';
 import LayerControlPanel from '../layer-selection/LayerControlPanel';
-import MapMarker from '../map-marker/MapMarker';
+import AssetMarker from '../asset-marker';
 
 const MapComponent = () => {
     const mapRef = useRef<MapRef>(null!);
@@ -37,7 +37,7 @@ const MapComponent = () => {
                     <>
                         <SearchPanel mapRef={mapRef} hideLayerControl={() => setShowLayerControl(false)} showLayerControl={() => setShowLayerControl(true)} />
                         <MapControls mapRef={mapRef} onStyleChange={handleStyleChange} currentStyle={mapStyle} />
-                        <MapMarker
+                        <AssetMarker
                             longitude={-1.2865476658108719}
                             latitude={50.69639014404933}
                             mapRef={mapRef}

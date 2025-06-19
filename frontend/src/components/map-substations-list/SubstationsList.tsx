@@ -16,15 +16,9 @@ interface SubstationsListProps {
  * A component that displays a list of substations with a confirmation button.
  */
 const SubstationsList: React.FC<SubstationsListProps> = ({
-                                                         items = [
-                                                             { text: 'Item 1', distance: '100km' },
-                                                             { text: 'Item 2', distance: '200km' },
-                                                             { text: 'Item 3', distance: '300km' },
-                                                             { text: 'Item 4', distance: '400km' },
-                                                             { text: 'Item 5', distance: '500km' }
-                                                         ],
-                                                         onConfirm = () => console.log('Confirmed'),
-                                                     }) => {
+                                                             items = [],
+                                                             onConfirm = () => console.log('Confirmed'),
+                                                         }) => {
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
     const handleItemClick = (index: number) => {

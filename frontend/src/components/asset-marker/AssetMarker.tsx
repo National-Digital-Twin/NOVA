@@ -6,7 +6,7 @@ import windTurbineSelectedIcon from '../../assets/Windturbine_blue_selected.svg'
 import { SubstationsList, fetchSubstations } from '../map-substations-list';
 import type {ListItem} from "../map-substations-list/SubstationsList";
 
-interface MapMarkerProps {
+interface AssetMarkerProps {
   longitude: number;
   latitude: number;
   mapRef?: React.RefObject<MapRef>;
@@ -15,7 +15,7 @@ interface MapMarkerProps {
 /**
  * A reusable component for displaying a wind turbine marker on the map
  */
-const MapMarker: React.FC<MapMarkerProps> = ({ longitude, latitude }) => {
+const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude }) => {
   const [isListVisible, setIsListVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -159,4 +159,4 @@ const MapMarker: React.FC<MapMarkerProps> = ({ longitude, latitude }) => {
   );
 };
 
-export default MapMarker;
+export default AssetMarker;

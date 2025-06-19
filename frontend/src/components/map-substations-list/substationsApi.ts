@@ -24,7 +24,7 @@ export const fetchSubstations = async (
       coordinates: [longitude, latitude]
     };
 
-    const response = await fetch('http://localhost:3000/api/ui/substations', {
+    const response = await fetch('/api/ui/substations', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
