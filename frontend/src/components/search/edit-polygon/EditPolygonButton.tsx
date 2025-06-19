@@ -6,6 +6,7 @@ import type { MapRef } from 'react-map-gl/maplibre';
 import maplibregl from 'maplibre-gl';
 import ConfirmPolygonButton from '../../map-controls/confirm-polygon/ConfirmPolygonButton';
 import { createRoot } from 'react-dom/client';
+import { useState } from 'react';
 
 interface EditPolygonButtonProps {
     /**
@@ -45,15 +46,19 @@ interface EditPolygonButtonProps {
  * displays a confirmation popup after dragging, and updates the polygon's geometry.
  */
 const EditPolygonButton = ({ onPolygonEdited, hideLayerControl, mapRef, drawRef, polygonConfirmationPopUpRef, isVisible }: EditPolygonButtonProps) => {
+    const [isActive, setIsActive] = useState(false);
+
     /**
      * Handles the edit button click. It activates direct_select mode,
      * sets up a one-time drag completion listener, and displays a confirmation popup.
      */
     const handleClick = () => {
+        if (isActive) return; // Exit if already in edit mode
         const draw = drawRef.current;
         const map = mapRef.current?.getMap();
         if (!map || !draw) return;
 
+        setIsActive(true);
         hideLayerControl();
         MapVisualHelper.removeDimmedMask(map);
         MapVisualHelper.removeExistingPopup(polygonConfirmationPopUpRef);
@@ -93,6 +98,7 @@ const EditPolygonButton = ({ onPolygonEdited, hideLayerControl, mapRef, drawRef,
                     onConfirm={() => {
                         draw.changeMode('simple_select', { featureIds: [] });
                         MapVisualHelper.removeExistingPopup(polygonConfirmationPopUpRef);
+                        setIsActive(false);
                         onPolygonEdited(MapVisualHelper.getFeatureCollection(draw));
                     }}
                 />
@@ -123,8 +129,8 @@ const EditPolygonButton = ({ onPolygonEdited, hideLayerControl, mapRef, drawRef,
     if (!isVisible) return null;
 
     return (
-        <ControlButton onClick={handleClick} aria-label="Edit polygon" showTooltip={true}>
-            <img src="/icons/edit-polygon.svg" alt="Edit polygon icon" width={24} height={24} />
+        <ControlButton onClick={handleClick} isActive={isActive} aria-label="Edit polygon" showTooltip={true}>
+            <img src={isActive ? '/icons/edit-polygon-white.svg' : '/icons/edit-polygon.svg'} alt="Edit polygon icon" width={24} height={24} />
         </ControlButton>
     );
 };
