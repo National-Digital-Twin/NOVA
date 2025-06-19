@@ -6,7 +6,7 @@
     "author": "NDTP",
     "main": "dist/server.js",
     "scripts": {
-        "build": "tsc",
+        "build": "tsc && cp -r src/data dist/src/",
         "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
