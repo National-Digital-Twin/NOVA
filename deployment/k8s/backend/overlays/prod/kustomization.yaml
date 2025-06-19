@@ -3,6 +3,11 @@ resources:
 
 namespace: nova
 
+configMapGenerator:
+  - name: nova-backend-configs
+    envs:
+      - params.env
+
 patches:
   - path: patches/service-account.yaml
     target:
@@ -11,14 +16,10 @@ patches:
   - path: patches/allow-ingress.yaml
     target:
       kind: AuthorizationPolicy
-  - path: patches/set-node-env.yaml
-    target:
-      kind: Deployment
-      name: nova-backend-env
 
 labels:
   - pairs:
-      env: dev
+      env: prod
 
 images:
   - name: nova-backend-image:template

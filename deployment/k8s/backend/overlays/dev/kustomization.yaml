@@ -3,6 +3,11 @@ resources:
 
 namespace: nova
 
+configMapGenerator:
+  - name: nova-backend-configs
+    envs:
+      - params.env
+
 patches:
   - path: patches/service-account.yaml
     target:
