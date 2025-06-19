@@ -88,7 +88,7 @@ const EditPolygonButton = ({ onPolygonEdited, hideLayerControl, mapRef, drawRef,
                 closeOnClick: false,
                 offset: [0, 10],
             })
-                .setLngLat(MapVisualHelper.getConfirmationPopupCoordinates(latestPolygon))
+                .setLngLat(MapVisualHelper.getConfirmationPopupCoordinates(latestPolygon, mapRef.current))
                 .setDOMContent(popupNode)
                 .addTo(map);
 
@@ -111,7 +111,7 @@ const EditPolygonButton = ({ onPolygonEdited, hideLayerControl, mapRef, drawRef,
             const updatePopupPosition = () => {
                 const updatedPolygon = MapVisualHelper.getFirstPolygon(draw);
                 if (updatedPolygon) {
-                    popup.setLngLat(MapVisualHelper.getConfirmationPopupCoordinates(updatedPolygon));
+                    popup.setLngLat(MapVisualHelper.getConfirmationPopupCoordinates(updatedPolygon, mapRef.current));
                 }
             };
 

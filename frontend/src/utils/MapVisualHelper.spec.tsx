@@ -75,15 +75,30 @@ describe('MapVisualHelper', () => {
                 [
                     [1, 1],
                     [5, 1],
-                    [3, 6],
+                    [3, 6], // topLat
                     [1, 1],
                 ],
             ],
         };
 
-        const [lng, lat] = MapVisualHelper.getConfirmationPopupCoordinates(polygon);
-        expect(lng).toBeCloseTo((1 + 5 + 3 + 1) / 4);
-        expect(lat).toBeCloseTo(6.005); // 6 is topLat, plus 0.005 offset
+        const avgLng = (1 + 5 + 3 + 1) / 4; // 2.5
+        const topLat = 6;
+
+        const mockMap = {
+            project: vi.fn().mockImplementation(() => ({ x: 100, y: 100 })), // arbitrary screen point
+            unproject: vi.fn().mockImplementation(({ }) => ({
+                lng: avgLng,
+                lat: topLat + 0.005, // simulate what real map.unproject would return
+            })),
+        };
+
+        const [lng, lat] = MapVisualHelper.getConfirmationPopupCoordinates(polygon, mockMap as any);
+
+        expect(mockMap.project).toHaveBeenCalled();
+        expect(mockMap.unproject).toHaveBeenCalled();
+
+        expect(lng).toBeCloseTo(avgLng);
+        expect(lat).toBeCloseTo(topLat + 0.005); // Match what your helper is intended to do
     });
 
     it('removes existing popup if it exists', () => {

@@ -1,4 +1,4 @@
-import type { Map } from 'maplibre-gl';
+import { LngLat, type Map } from 'maplibre-gl';
 import type { Feature, FeatureCollection, Geometry, Polygon } from 'geojson';
 import type { GeoJSONSource } from 'maplibre-gl';
 import type { MapRef } from 'react-map-gl/maplibre';
@@ -114,16 +114,20 @@ export class MapVisualHelper {
      * @param polygon - The GeoJSON Polygon to base the popup position on
      * @returns A tuple containing the longitude and latitude for the popup position
      */
-    static getConfirmationPopupCoordinates(polygon: Polygon): [number, number] {
+    static getConfirmationPopupCoordinates(polygon: Polygon, map: MapRef): [number, number] {
         const coords = polygon.coordinates[0];
 
         const topLat = Math.max(...coords.map(([, lat]) => lat));
         const avgLng = coords.reduce((sum, [lng]) => sum + lng, 0) / coords.length;
 
-        // Offset the popup upward slightly above the top point to make sure the polygon point is always visible for editing.
-        const offsetLat = topLat + 0.005;
+        const lngLat = new LngLat(avgLng, topLat);
+        const point = map.project(lngLat); // Screen coords
 
-        return [avgLng, offsetLat];
+        point.y -= 20; // Shift upward by 20 pixels
+
+        const offsetLngLat = map.unproject(point); // Back to geographic coords
+
+        return [offsetLngLat.lng, offsetLngLat.lat];
     }
 
     /**
