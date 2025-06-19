@@ -91,6 +91,7 @@ const DrawPolygonButton = ({ onPolygonDrawn, mapRef, drawRef, isVisible, polygon
 
         setIsActive(true);
         draw.changeMode('draw_polygon');
+        map.getCanvas().style.cursor = 'crosshair';
 
         const handleModeChange = () => {
             const polygon = MapVisualHelper.getFirstPolygon(draw);
@@ -98,6 +99,7 @@ const DrawPolygonButton = ({ onPolygonDrawn, mapRef, drawRef, isVisible, polygon
                 draw.changeMode('simple_select', { featureIds: [] });
                 map.off('draw.modechange', handleModeChange);
                 onPolygonDrawn(MapVisualHelper.getFeatureCollection(draw));
+                map.getCanvas().style.cursor = 'grab';
             }
         };
 

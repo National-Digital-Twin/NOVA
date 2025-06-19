@@ -71,6 +71,7 @@ const DRAW_STYLES: DrawStyle[] = [
         paint: {
             'line-color': '#3bb2d0',
             'line-width': 2,
+            'line-dasharray': [0.2, 2], // Sets dashed array when polygon drawn but not yet confirmed
         },
     },
     {

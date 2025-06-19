@@ -33,6 +33,9 @@ describe('DrawPolygonButton', () => {
         }),
         off: vi.fn(),
         queryRenderedFeatures: vi.fn().mockReturnValue([]),
+        getCanvas: vi.fn(() => ({
+            style: { cursor: '' },
+        })),
     };
 
     const mockMapRef = {
