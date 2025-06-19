@@ -64,7 +64,7 @@ const DrawPolygonButton = ({ onPolygonDrawn, mapRef, drawRef, isVisible, polygon
             });
 
             if (features.length > 0) {
-                draw.changeMode('static', { featureIds: [] });
+                draw.changeMode('simple_select', { featureIds: [] });
                 e.preventDefault();
             }
         };
