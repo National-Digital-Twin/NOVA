@@ -6,7 +6,7 @@ import { MAP_STYLES, type MapStyle } from '../../types/map';
 import MapControls from '../map-controls/MapControls';
 import SearchPanel from '../search/SearchPanel';
 import LayerControlPanel from '../layer-selection/LayerControlPanel';
-import AssetMarker from '../asset-marker';
+import AssetMarkerLayer from '../asset-marker/AssetMarkerLayer';
 
 const MapComponent = () => {
     const mapRef = useRef<MapRef>(null!);
@@ -37,9 +37,14 @@ const MapComponent = () => {
                     <>
                         <SearchPanel mapRef={mapRef} hideLayerControl={() => setShowLayerControl(false)} showLayerControl={() => setShowLayerControl(true)} />
                         <MapControls mapRef={mapRef} onStyleChange={handleStyleChange} currentStyle={mapStyle} />
-                        <AssetMarker
-                            longitude={-1.2865476658108719}
-                            latitude={50.69639014404933}
+                        <AssetMarkerLayer
+                            assets={[
+                                {
+                                    id: "wind-turbine-1",
+                                    longitude: -1.2865476658108719,
+                                    latitude: 50.69639014404933
+                                }
+                            ]}
                             mapRef={mapRef}
                         />
                         {showLayerControl && <LayerControlPanel />}
