@@ -54,6 +54,7 @@ const EditPolygonButton = ({ onPolygonEdited, hideLayerControl, mapRef, drawRef,
      */
     const handleClick = () => {
         if (isActive) return; // Exit if already in edit mode
+
         const draw = drawRef.current;
         const map = mapRef.current?.getMap();
         if (!map || !draw) return;
