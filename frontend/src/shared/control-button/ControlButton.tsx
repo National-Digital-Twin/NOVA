@@ -18,7 +18,7 @@ const StyledIconButton = styled(IconButton, { shouldForwardProp: (prop) => prop 
             borderRadius: borderRadius,
         },
         '&:hover': {
-            backgroundColor: isActive ? theme.palette.secondary.dark : theme.palette.action.hover,
+            backgroundColor: isActive ? theme.palette.secondary.dark : theme.palette.grey[200],
         },
     };
 });
