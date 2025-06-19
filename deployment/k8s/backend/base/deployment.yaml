@@ -17,6 +17,11 @@ spec:
     spec:
       serviceAccountName: nova-backend-sa
       containers:
+        - envFrom:
+            - configMapRef:
+                name: nova-backend-configs
+            - secretRef:
+                name: nova-backend-secrets
         - image: nova-backend-image:template
           env:
             - name: IMAGE_DIGEST
