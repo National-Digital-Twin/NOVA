@@ -64,7 +64,7 @@ const DrawPolygonButton = ({ onPolygonDrawn, mapRef, drawRef, isVisible, polygon
             });
 
             if (features.length > 0) {
-                draw.changeMode('simple_select', { featureIds: [] });
+                draw.changeMode('static', { featureIds: [] });
                 e.preventDefault();
             }
         };
@@ -89,9 +89,9 @@ const DrawPolygonButton = ({ onPolygonDrawn, mapRef, drawRef, isVisible, polygon
         const map = mapRef.current;
         const draw = drawRef.current;
 
-        map.getCanvas().style.cursor = 'crosshair';
         setIsActive(true);
         draw.changeMode('draw_polygon');
+        map.getCanvas().style.cursor = 'crosshair';
 
         const handleModeChange = () => {
             const polygon = MapVisualHelper.getFirstPolygon(draw);
