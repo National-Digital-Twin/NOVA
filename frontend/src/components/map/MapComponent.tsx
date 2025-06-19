@@ -7,7 +7,7 @@ import MapControls from '../map-controls/MapControls';
 import SearchPanel from '../search/SearchPanel';
 import LayerControlPanel from '../layer-selection/LayerControlPanel';
 import AssetMarker from '../asset-marker/AssetMarker';
-import { SubstationsList } from '../map-substations-list';
+import { SubstationsListContainer } from '../map-substations-list';
 
 const MapComponent = () => {
     const mapRef = useRef<MapRef>(null!);
@@ -30,9 +30,6 @@ const MapComponent = () => {
 
     // State for tracking marker selection and popup
     const [isMarkerSelected, setIsMarkerSelected] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [substations, setSubstations] = useState<any[]>([]);
 
     // Handle map click to update marker position or toggle selection
     const handleMapClick = useCallback((e: any) => {
@@ -51,32 +48,11 @@ const MapComponent = () => {
     }, [isMarkerSelected]);
 
 
-    // Handle bolt click to fetch substations
+    // Handle bolt click to show substations list
     const handleBoltClick = useCallback(() => {
         // Set marker as selected
         setIsMarkerSelected(true);
-
-        // If marker position exists, fetch substations data
-        if (markerPosition) {
-            setIsLoading(true);
-            setError(null);
-
-            import('../map-substations-list').then(({ fetchSubstations }) => {
-                fetchSubstations(markerPosition.longitude!, markerPosition.latitude!)
-                    .then(result => {
-                        setSubstations(result.items);
-                        setError(result.error);
-                    })
-                    .catch(err => {
-                        console.error('Error fetching substations:', err);
-                        setError('Failed to load substations');
-                    })
-                    .finally(() => {
-                        setIsLoading(false);
-                    });
-            });
-        }
-    }, [markerPosition]);
+    }, []);
 
     // Handle marker drag end to update marker position
     const handleMarkerDragEnd = useCallback((longitude: number, latitude: number) => {
@@ -123,36 +99,14 @@ const MapComponent = () => {
                                     width: '250px'
                                 }}
                             >
-                                {isLoading ? (
-                                    <div style={{ 
-                                        backgroundColor: 'white', 
-                                        padding: '10px', 
-                                        borderRadius: '4px',
-                                        textAlign: 'center',
-                                        boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
-                                    }}>
-                                        Loading substations...
-                                    </div>
-                                ) : error ? (
-                                    <div style={{ 
-                                        backgroundColor: 'white', 
-                                        padding: '10px', 
-                                        borderRadius: '4px',
-                                        textAlign: 'center',
-                                        color: 'red',
-                                        boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
-                                    }}>
-                                        {error}
-                                    </div>
-                                ) : (
-                                    <SubstationsList
-                                        items={substations}
-                                        onConfirm={(selected) => {
-                                            console.log(`Selected turbine: ${selected.text}`);
-                                            setIsMarkerSelected(false);
-                                        }}
-                                    />
-                                )}
+                                <SubstationsListContainer
+                                    longitude={markerPosition?.longitude}
+                                    latitude={markerPosition?.latitude}
+                                    onConfirm={(selected) => {
+                                        console.log(`Selected turbine: ${selected.text}`);
+                                        setIsMarkerSelected(false);
+                                    }}
+                                />
                             </div>
                         )}
                         {showLayerControl && <LayerControlPanel />}
