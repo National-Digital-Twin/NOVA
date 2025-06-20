@@ -6,6 +6,7 @@ import { MAP_STYLES, type MapStyle } from '../../types/map';
 import MapControls from '../map-controls/MapControls';
 import SearchPanel from '../search/SearchPanel';
 import LayerControlPanel from '../layer-selection/LayerControlPanel';
+import PathDemo from '../path/PathDemo';
 
 const MAP_VIEW_BOUNDS: [[number, number], [number, number]] = [
     [-25.0, 42.0],
@@ -43,6 +44,7 @@ const MapComponent = () => {
                         <SearchPanel mapRef={mapRef} hideLayerControl={() => setShowLayerControl(false)} showLayerControl={() => setShowLayerControl(true)} />
                         <MapControls mapRef={mapRef} onStyleChange={handleStyleChange} currentStyle={mapStyle} />
                         {showLayerControl && <LayerControlPanel />}
+                        <PathDemo mapRef={mapRef} />
                     </>
                 )}
             </Map>
