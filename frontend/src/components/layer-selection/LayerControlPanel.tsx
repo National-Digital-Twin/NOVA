@@ -1,43 +1,21 @@
-/**
- * LayerControlPanel
- *
- * A React component that provides an interactive panel for selecting map layers to be used in Heatmap calculations.
- * Users can:
- * - Search for layers
- * - Expand/collapse grouped layer categories
- * - Toggle checkboxes to include/exclude layers
- * - Request a heatmap be calculated based on selected layers
- */
-
 import React, { useState, useMemo, useId } from 'react';
 import {
-    Paper,
-    Accordion,
-    AccordionSummary,
-    AccordionDetails,
-    Checkbox,
-    TextField,
-    Button,
-    Typography,
-    Divider,
-    InputAdornment,
-    IconButton,
-    Box,
+    Paper, Accordion, AccordionSummary, AccordionDetails, Checkbox, TextField,
+    Button, Typography, Divider, InputAdornment, IconButton, Box
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import maplibregl from 'maplibre-gl';
+import type { MapRef } from 'react-map-gl/maplibre';
 
-import '../../App.scss';
+interface LayerControlPanelProps {
+    mapRef: React.RefObject<MapRef>;
+}
 
-// Types used internally by the component
-type LayerItem = { name: string };
-type LayerGroup = { [group: string]: LayerItem[] };
-
-// Static layer data grouped by category
-const layers: LayerGroup = {
+const layers = {
     'Environmental protected sites': [
         { name: 'Areas of outstanding natural beauty' },
         { name: 'Special protection areas' },
@@ -50,34 +28,20 @@ const layers: LayerGroup = {
     Consumption: [],
 };
 
-// Main layer panel component
-const LayerControlPanel = () => {
-    // Determine first non-empty category for initial expansion
+const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
     const defaultExpandedCategory = Object.entries(layers).find(([, items]) => items.length > 0)?.[0] || '';
-
-    const idPrefix = useId(); // Unique prefix for form controls
-
-    // State for search text input
+    const idPrefix = useId();
     const [searchTerm, setSearchTerm] = useState('');
-
-    // Whether the panel is expanded or collapsed
     const [open, setOpen] = useState(true);
-
-    // Tracks which layers are checked
     const [checkedLayers, setCheckedLayers] = useState<Record<string, boolean>>(() => {
         const initial: Record<string, boolean> = {};
         Object.values(layers).forEach((group) => {
-            group.forEach((item) => {
-                initial[item.name] = true; // all checked by default
-            });
+            group.forEach((item) => { initial[item.name] = true; });
         });
         return initial;
     });
-
-    // Which accordion panels are expanded
     const [expandedPanels, setExpandedPanels] = useState<string[]>(defaultExpandedCategory ? [defaultExpandedCategory] : []);
 
-    // Checkbox toggle handler
     const handleCheckboxChange = (layerName: string) => {
         setCheckedLayers((prev) => ({
             ...prev,
@@ -85,16 +49,13 @@ const LayerControlPanel = () => {
         }));
     };
 
-    // Accordion toggle handler
     const handleAccordionToggle = (category: string) => {
         setExpandedPanels((prev) => (prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]));
     };
 
-    // Search change handler
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setSearchTerm(value);
-
         if (value.trim() === '') return;
 
         const lower = value.toLowerCase();
@@ -105,18 +66,59 @@ const LayerControlPanel = () => {
         setExpandedPanels(matching);
     };
 
-    // Clear search and reset expanded panel
     const clearSearch = () => {
         setSearchTerm('');
         setExpandedPanels(defaultExpandedCategory ? [defaultExpandedCategory] : []);
     };
 
-    // Handle Apply button
-    const handleApply = () => {
-        console.log('Apply clicked');
+    const handleApply = async () => {
+        if (!mapRef.current) {
+            console.error('Map instance not available.');
+            return;
+        }
+
+        try {
+            const response = await fetch('/data/sample-polygons.json');
+            if (!response.ok) throw new Error('Failed to fetch GeoJSON');
+            const geojson = await response.json();
+
+            const sourceId = 'heatmap';
+
+            if (!mapRef.current.getSource(sourceId)) {
+                // First time: add source and layers
+                mapRef.current.getMap().addSource(sourceId, {
+                    type: 'geojson',
+                    data: geojson,
+                });
+
+                mapRef.current.getMap().addLayer({
+                    id: 'heatmap',
+                    type: 'fill',
+                    source: sourceId,
+                    paint: {
+                        'fill-color': [
+                            'match',
+                            ['get', 'suitability'],
+                            'red', '#e74c3c',
+                            'amber', '#f39c12',
+                            'green', '#27ae60',
+                            '#cccccc' // default
+                        ],
+                        'fill-opacity': 0.5,
+                    },
+                });
+            } else {
+                // Already exists: just update the data
+                const source = mapRef.current.getMap().getSource(sourceId) as maplibregl.GeoJSONSource;
+                source.setData(geojson);
+            }
+
+            console.log('GeoJSON loaded and rendered');
+        } catch (error) {
+            console.error('Error fetching or applying GeoJSON:', error);
+        }
     };
 
-    // Memoised list of filtered layer entries
     const filteredLayerEntries = useMemo(() => {
         return Object.entries(layers).map(([category, items]) => {
             const filteredItems = items.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -159,14 +161,12 @@ const LayerControlPanel = () => {
 
     return (
         <>
-            {/* Toggle button */}
             <Box className="layer-panel-toggle" sx={{ left: open ? '430px' : '1rem' }}>
                 <IconButton onClick={() => setOpen(!open)}>
                     <ArrowBackIosNewIcon fontSize="small" sx={{ transform: !open ? 'rotate(180deg)' : 'none' }} />
                 </IconButton>
             </Box>
 
-            {/* Panel content */}
             {open && (
                 <Paper className="layer-panel" elevation={4}>
                     <Box className="layer-panel-header">

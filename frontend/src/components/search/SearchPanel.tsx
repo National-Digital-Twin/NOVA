@@ -5,7 +5,6 @@ import type { MapRef } from 'react-map-gl/maplibre';
 import useMapboxDraw from '../../hooks/useMapboxDraw';
 import DeletePolygonButton from './delete-polygon/DeletePolygonButton';
 import DrawPolygonButton from './draw-polygon/DrawPolygonButton';
-import PolygonLayer from './polygon-layer/PolygonLayer';
 import SearchInput from './search-input/SearchInput';
 import { MapVisualHelper } from '../../utils/MapVisualHelper';
 import EditPolygonButton from './edit-polygon/EditPolygonButton';
@@ -45,8 +44,6 @@ interface SearchPanelProps {
 const SearchPanel = ({ mapRef, showLayerControl, hideLayerControl }: SearchPanelProps) => {
     const drawRef = useMapboxDraw(mapRef) as React.RefObject<MapboxDraw>;
     const popupRef = useRef<maplibregl.Popup | null>(null);
-
-    const [layerData, setLayerData] = useState<FeatureCollection<Geometry> | null>(null);
     const [polygonDrawn, setPolygonDrawn] = useState(false);
     const [polygonConfirmed, setPolygonConfirmed] = useState(false);
 
@@ -55,8 +52,7 @@ const SearchPanel = ({ mapRef, showLayerControl, hideLayerControl }: SearchPanel
         popupRef,
         setPolygonDrawn,
         setPolygonConfirmed,
-        showLayerControl,
-        clearLayerData: () => setLayerData(null),
+        showLayerControl
     });
 
     const handleLocationSelect = useCallback(
@@ -96,8 +92,6 @@ const SearchPanel = ({ mapRef, showLayerControl, hideLayerControl }: SearchPanel
                     polygonDrawn={polygonDrawn}
                 />
             </SearchGroup>
-
-            {layerData && <PolygonLayer data={layerData} />}
         </SearchContainer>
     );
 };

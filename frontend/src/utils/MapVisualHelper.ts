@@ -199,4 +199,21 @@ export class MapVisualHelper {
     static getFeatureCollection(draw: MapboxDraw): FeatureCollection<Geometry> {
         return draw.getAll() as unknown as FeatureCollection<Geometry>;
     }
+
+    /**
+     * Removes a generated heatmap layer showing suitability from the map instance.
+     * @param mapRef - A React ref to the MapLibre map instance
+     */
+    static removeHeatmapLayer(mapRef: React.RefObject<MapRef>) {
+        const map = mapRef.current?.getMap();
+        if (!map) return;
+    
+        if (map.getLayer('heatmap')) {
+            map.removeLayer('heatmap');
+        }
+    
+        if (map.getSource('heatmap')) {
+            map.removeSource('heatmap');
+        }
+    }
 }
