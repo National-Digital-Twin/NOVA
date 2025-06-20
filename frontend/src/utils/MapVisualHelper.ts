@@ -9,8 +9,9 @@ import type MapboxDraw from '@mapbox/mapbox-gl-draw';
  */
 export class MapVisualHelper {
     // Unique ID for the source and layer used for masking
-    private static maskLayerSourceId = 'mask';
-    private static maskLayerId = 'mask-layer';
+    private static readonly maskLayerSourceId = 'mask';
+    private static readonly maskLayerId = 'mask-layer';
+    private static readonly heatmapLayerId = 'heatmap-layer';
 
     /**
      * Applies a dimmed mask over the entire map except inside the given polygon and centers the map on that polygon.
@@ -201,19 +202,68 @@ export class MapVisualHelper {
     }
 
     /**
-     * Removes a generated heatmap layer showing suitability from the map instance.
+     * Adds or updates a polygon fill layer showing suitability scores on the map.
+     * If the heatmap source does not exist, it creates a new GeoJSON source and adds a fill layer with colouring
+     * based on the "suitability" property in the features.
+     * If the source already exists, it updates its data.
+     *
+     * @param mapRef - A React ref to the MapLibre map instance
+     * @param geojson - The FeatureCollection containing polygons with a "suitability" property
+     */
+    static addOrUpdateHeatmapLayer(mapRef: React.RefObject<MapRef>, geojson: FeatureCollection) {
+        const map = mapRef.current?.getMap();
+        if (!map) {
+            console.error('Map instance not available.');
+            return;
+        }
+
+        const sourceId = MapVisualHelper.heatmapLayerId;
+
+        if (!map.getSource(sourceId)) {
+            map.addSource(sourceId, {
+                type: 'geojson',
+                data: geojson,
+            });
+
+            map.addLayer({
+                id: sourceId,
+                type: 'fill',
+                source: sourceId,
+                paint: {
+                    'fill-color': [
+                        'match',
+                        ['get', 'suitability'],
+                        'red', '#e74c3c',
+                        'amber', '#f39c12',
+                        'green', '#27ae60',
+                        '#cccccc' // fallback for unknown suitability
+                    ],
+                    'fill-opacity': 0.5,
+                },
+            });
+        } else {
+            const source = map.getSource(sourceId) as maplibregl.GeoJSONSource;
+            source.setData(geojson);
+        }
+    }
+
+    /**
+     * Removes the heatmap layer and its source from the map, if they exist.
+     *
      * @param mapRef - A React ref to the MapLibre map instance
      */
     static removeHeatmapLayer(mapRef: React.RefObject<MapRef>) {
         const map = mapRef.current?.getMap();
         if (!map) return;
-    
-        if (map.getLayer('heatmap')) {
-            map.removeLayer('heatmap');
+
+        const id = MapVisualHelper.heatmapLayerId;
+
+        if (map.getLayer(id)) {
+            map.removeLayer(id);
         }
-    
-        if (map.getSource('heatmap')) {
-            map.removeSource('heatmap');
+
+        if (map.getSource(id)) {
+            map.removeSource(id);
         }
     }
 }

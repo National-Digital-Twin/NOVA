@@ -10,6 +10,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import maplibregl from 'maplibre-gl';
 import type { MapRef } from 'react-map-gl/maplibre';
+import { MapVisualHelper } from '../../utils/MapVisualHelper';
 
 interface LayerControlPanelProps {
     mapRef: React.RefObject<MapRef>;
@@ -82,38 +83,7 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
             if (!response.ok) throw new Error('Failed to fetch GeoJSON');
             const geojson = await response.json();
 
-            const sourceId = 'heatmap';
-
-            if (!mapRef.current.getSource(sourceId)) {
-                // First time: add source and layers
-                mapRef.current.getMap().addSource(sourceId, {
-                    type: 'geojson',
-                    data: geojson,
-                });
-
-                mapRef.current.getMap().addLayer({
-                    id: 'heatmap',
-                    type: 'fill',
-                    source: sourceId,
-                    paint: {
-                        'fill-color': [
-                            'match',
-                            ['get', 'suitability'],
-                            'red', '#e74c3c',
-                            'amber', '#f39c12',
-                            'green', '#27ae60',
-                            '#cccccc' // default
-                        ],
-                        'fill-opacity': 0.5,
-                    },
-                });
-            } else {
-                // Already exists: just update the data
-                const source = mapRef.current.getMap().getSource(sourceId) as maplibregl.GeoJSONSource;
-                source.setData(geojson);
-            }
-
-            console.log('GeoJSON loaded and rendered');
+            MapVisualHelper.addOrUpdateHeatmapLayer(mapRef, geojson);
         } catch (error) {
             console.error('Error fetching or applying GeoJSON:', error);
         }
