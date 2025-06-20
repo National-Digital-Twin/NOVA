@@ -7,7 +7,6 @@ import MapControls from '../map-controls/MapControls';
 import SearchPanel from '../search/SearchPanel';
 import LayerControlPanel from '../layer-selection/LayerControlPanel';
 import AssetMarker from '../asset-marker/AssetMarker';
-import { SubstationsListContainer } from '../map-substations-list';
 
 const MapComponent = () => {
     const mapRef = useRef<MapRef>(null!);
@@ -28,31 +27,17 @@ const MapComponent = () => {
         setIsMapInitialized(true);
     };
 
-    // State for tracking marker selection and popup
-    const [isMarkerSelected, setIsMarkerSelected] = useState(false);
-
-    // Handle map click to update marker position or toggle selection
+    // Handle map click to update marker position
     const handleMapClick = useCallback((e: any) => {
         if (!mapRef.current) return;
 
-        // If marker is selected, deselect it
-        if (isMarkerSelected) {
-            setIsMarkerSelected(false);
-        } else {
-            // Otherwise, create or update marker position
-            setMarkerPosition({
-                longitude: e.lngLat.lng,
-                latitude: e.lngLat.lat
-            });
-        }
-    }, [isMarkerSelected]);
-
-
-    // Handle bolt click to show substations list
-    const handleBoltClick = useCallback(() => {
-        // Set marker as selected
-        setIsMarkerSelected(true);
+        // Create or update marker position
+        setMarkerPosition({
+            longitude: e.lngLat.lng,
+            latitude: e.lngLat.lat
+        });
     }, []);
+
 
     // Handle marker drag end to update marker position
     const handleMarkerDragEnd = useCallback((longitude: number, latitude: number) => {
@@ -80,34 +65,8 @@ const MapComponent = () => {
                                 longitude={markerPosition.longitude}
                                 latitude={markerPosition.latitude}
                                 mapRef={mapRef}
-                                onBoltClick={handleBoltClick}
-                                isSelected={isMarkerSelected}
                                 onDragEnd={handleMarkerDragEnd}
                             />
-                        )}
-
-                        {/* Popup for selected marker */}
-                        {isMarkerSelected && markerPosition && (
-                            <div
-                                style={{
-                                    position: 'absolute',
-                                    left: '50%',
-                                    top: '50%',
-                                    transform: 'translate(-50%, -100%)',
-                                    zIndex: 1000,
-                                    marginTop: '-30px',
-                                    width: '250px'
-                                }}
-                            >
-                                <SubstationsListContainer
-                                    longitude={markerPosition?.longitude}
-                                    latitude={markerPosition?.latitude}
-                                    onConfirm={(selected) => {
-                                        console.log(`Selected turbine: ${selected.text}`);
-                                        setIsMarkerSelected(false);
-                                    }}
-                                />
-                            </div>
                         )}
                         {showLayerControl && <LayerControlPanel />}
                     </>

@@ -4,6 +4,7 @@ import type { MapRef, MarkerDragEvent } from 'react-map-gl/maplibre';
 import windTurbineIcon from '../../assets/Windturbine_blue_unselected.svg';
 import windTurbineSelectedIcon from '../../assets/Windturbine_blue_selected.svg';
 import AssetControls from './AssetControls';
+import { SubstationsListContainer } from '../map-substations-list';
 
 interface AssetMarkerProps {
   longitude?: number;
@@ -21,6 +22,7 @@ interface AssetMarkerProps {
 const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onClick, onBoltClick, isSelected = false, onDragEnd }) => {
   const markerRef = useRef<HTMLDivElement>(null);
   const [showControls, setShowControls] = useState(false);
+  const [showSubstationsList, setShowSubstationsList] = useState(false);
 
   const handleMarkerClick = (e: React.MouseEvent) => {
     // Prevent event from bubbling up to the map
@@ -67,12 +69,34 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onClick,
       >
         {showControls && (
           <AssetControls 
-            onBoltClick={onBoltClick || (() => console.log('Bolt clicked'))}
+            onBoltClick={() => {
+              setShowSubstationsList(prev => !prev);
+              if (onBoltClick) onBoltClick();
+            }}
             onDeleteClick={() => console.log('Delete clicked')}
             onMoveClick={() => {
               console.log('Move clicked');
             }}
           />
+        )}
+        {showSubstationsList && (
+          <div style={{
+            position: 'absolute',
+            bottom: '-320px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 1000,
+            width: '250px'
+          }}>
+            <SubstationsListContainer
+              longitude={longitude}
+              latitude={latitude}
+              onConfirm={(selected) => {
+                console.log(`Selected substation: ${selected.text}`);
+                setShowSubstationsList(false);
+              }}
+            />
+          </div>
         )}
         <img 
           src={isSelected ? windTurbineSelectedIcon : windTurbineIcon} 
