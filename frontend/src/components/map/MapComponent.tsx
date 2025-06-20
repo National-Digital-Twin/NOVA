@@ -7,9 +7,14 @@ import MapControls from '../map-controls/MapControls';
 import SearchPanel from '../search/SearchPanel';
 import LayerControlPanel from '../layer-selection/LayerControlPanel';
 
+const MAP_VIEW_BOUNDS: [[number, number], [number, number]] = [
+    [-25.0, 42.0],
+    [15.0, 67.0],
+];
+
 const MapComponent = () => {
     const mapRef = useRef<MapRef>(null!);
-    const [viewState, setViewState] = useState({ longitude: -1.33, latitude: 50.65, zoom: 10, pitch: 60, bearing: 0 });
+    const [viewState, setViewState] = useState({ longitude: -1.611, latitude: 54.5, pitch: 0, bearing: 0 });
     const [mapStyle, setMapStyle] = useState<MapStyle>('hybrid');
     const [isMapInitialized, setIsMapInitialized] = useState(false);
     const [showLayerControl, setShowLayerControl] = useState(false);
@@ -26,6 +31,7 @@ const MapComponent = () => {
         <div style={{ position: 'relative', width: '100%', height: '100%' }}>
             <Map
                 ref={mapRef}
+                maxBounds={MAP_VIEW_BOUNDS}
                 {...viewState}
                 onMove={(evt) => setViewState(evt.viewState)}
                 onLoad={handleMapLoad}
