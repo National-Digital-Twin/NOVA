@@ -173,7 +173,7 @@ export class MapVisualHelper {
 
     /**
      * Adds or updates a polygon fill layer showing suitability scores on the map.
-     * Also adds interactivity for hover (issue count) and click (issue descriptions).
+     * Also adds interactivity for click (issue descriptions).
      *
      * @param mapRef - A React ref to the MapLibre map instance
      * @param geojson - The FeatureCollection containing polygons with a "suitability" and "issues" property
@@ -208,15 +208,13 @@ export class MapVisualHelper {
             source.setData(geojson);
         }
 
-        // Remove old event listeners if present
-        map.off('mousemove', id, this._handleMouseMove);
-        map.off('mouseleave', id, this._handleMouseLeave);
+        // Remove any previously bound events
         map.off('click', id, this._handleClick);
 
-        // Add interactivity to layer
-        map.on('mousemove', id, this._handleMouseMove);
-        map.on('mouseleave', id, this._handleMouseLeave);
+        // Add only click interaction
         map.on('click', id, this._handleClick);
+
+        map.getCanvas().style.cursor = 'default';
     }
 
     /**
@@ -231,6 +229,11 @@ export class MapVisualHelper {
         const id = this.heatmapLayerId;
         if (map.getLayer(id)) map.removeLayer(id);
         if (map.getSource(id)) map.removeSource(id);
+
+        if (MapVisualHelper.issuesPopup) {
+            MapVisualHelper.issuesPopup.remove();
+            MapVisualHelper.issuesPopup = null;
+        }
     }
 
     /**
@@ -251,48 +254,10 @@ export class MapVisualHelper {
         }
     }
 
-    /**
-     * Shows a live popup near the cursor when hovering over a polygon.
-     * Displays the number of issues found in that feature.
-     *
-     * @param e - Mouse move event with feature context
-     */
-    private static _handleMouseMove(e: FeatureEvent) {
-        const map = e.target as Map;
-        map.getCanvas().style.cursor = 'pointer';
 
-        const feature = e.features?.[0];
-        if (!feature) return;
-
-        const issues = MapVisualHelper._parseIssues(feature);
-        const popupContent = `<strong>${issues.length} issue${issues.length === 1 ? '' : 's'} found</strong>`;
-
-        if (!MapVisualHelper.issuesPopup) {
-            MapVisualHelper.issuesPopup = new Popup({ closeButton: false, closeOnClick: false })
-                .setLngLat(e.lngLat)
-                .setHTML(popupContent)
-                .addTo(map);
-        } else {
-            MapVisualHelper.issuesPopup.setLngLat(e.lngLat).setHTML(popupContent);
-        }
-    }
 
     /**
-     * Hides the issue popup and resets the cursor when leaving a polygon.
-     *
-     * @param e - Mouse leave event
-     */
-    private static _handleMouseLeave(e: FeatureEvent) {
-        const map = e.target as Map;
-        map.getCanvas().style.cursor = '';
-        if (MapVisualHelper.issuesPopup) {
-            MapVisualHelper.issuesPopup.remove();
-            MapVisualHelper.issuesPopup = null;
-        }
-    }
-
-    /**
-     * Shows a popup when a polygon is clicked, listing all issues in bold.
+     * Shows a popup when a polygon is clicked, listing all issues.
      *
      * @param e - Click event with feature context
      */
@@ -302,24 +267,66 @@ export class MapVisualHelper {
         if (!feature) return;
 
         const issues = MapVisualHelper._parseIssues(feature);
+        const count = issues.length;
 
-        const html = issues.length > 0
-        ? `<div style="
-              display: inline-block;
-              white-space: normal;
-              overflow-wrap: break-word;
-              word-break: break-word;
-              padding: 4px 8px;
-          ">
-              ${issues.map(issue => `<div><strong>${issue}</strong></div>`).join('')}
-           </div>`
-        : '<strong>No issues found</strong>';
+        const html = `
+            <div style="
+                max-width: 250px;
+            ">
+                <div style="font-weight: bold;">
+                    ${count === 0 ? 'No issues found' : `${count} issue${count > 1 ? 's' : ''} found`}
+                </div>
+                ${count > 0
+                ? issues.map(issue => `<div style="margin-bottom: 4px;">${issue}</div>`).join('')
+                : ''
+            }
+            </div>
+        `;
 
         if (MapVisualHelper.issuesPopup) MapVisualHelper.issuesPopup.remove();
 
-        MapVisualHelper.issuesPopup = new Popup({ closeButton: false })
+        MapVisualHelper.issuesPopup = new Popup({ closeButton: true })
             .setLngLat(e.lngLat)
             .setHTML(html)
             .addTo(map);
+    }
+
+    /**
+     * Hides all non-base layers on the map and returns the IDs of those hidden layers.
+     * Base layers are identified by names like 'background', 'tile', or 'basemap'.
+     *
+     * @param map - The MapLibre map instance
+     * @returns An array of layer IDs that were hidden
+     */
+    static hideNonBaseLayers(map: Map): string[] {
+        const allLayerIds = map.getStyle().layers?.map((layer) => layer.id) || [];
+        const layersToHide = allLayerIds.filter((id) =>
+            id.startsWith('gl-') || id === MapVisualHelper.heatmapLayerId || id == MapVisualHelper.maskLayerId
+        );
+
+        const toHide = allLayerIds.filter((id) => layersToHide.includes(id));
+        toHide.forEach((id) => {
+            if (map.getLayer(id)) {
+                map.setLayoutProperty(id, 'visibility', 'none');
+            }
+        });
+
+        if (MapVisualHelper.issuesPopup) MapVisualHelper.issuesPopup.remove();
+
+        return toHide;
+    }
+
+    /**
+     * Restores visibility for previously hidden layers.
+     *
+     * @param map - The MapLibre map instance
+     * @param layerIds - Array of layer IDs to show
+     */
+    static showLayers(map: Map, layerIds: string[]) {
+        layerIds.forEach((id) => {
+            if (map.getLayer(id)) {
+                map.setLayoutProperty(id, 'visibility', 'visible');
+            }
+        });
     }
 }

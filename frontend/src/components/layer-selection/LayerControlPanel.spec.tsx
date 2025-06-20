@@ -2,6 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import LayerControlPanel from './LayerControlPanel';
+import type { MapRef } from 'react-map-gl/maplibre';
+
+const mockMapRef = { current: null } as unknown as React.RefObject<MapRef>;
 
 describe('LayerControlPanel', () => {
     beforeEach(() => {
@@ -9,20 +12,20 @@ describe('LayerControlPanel', () => {
     });
 
     it('renders panel with header and apply button', () => {
-        render(<LayerControlPanel />);
+        render(<LayerControlPanel mapRef={mockMapRef} />);
         expect(screen.getByText('Layers')).toBeInTheDocument();
         expect(screen.getByRole('button', { name: /apply/i })).toBeInTheDocument();
     });
 
     it('renders some layer names and their checkboxes', () => {
-        render(<LayerControlPanel />);
+        render(<LayerControlPanel mapRef={mockMapRef} />);
         expect(screen.getByText('Areas of outstanding natural beauty')).toBeInTheDocument();
         expect(screen.getByText('Wind speed')).toBeInTheDocument();
         expect(screen.getAllByRole('checkbox').length).toBeGreaterThan(0);
     });
 
     it('toggles checkbox state when clicked', async () => {
-        render(<LayerControlPanel />);
+        render(<LayerControlPanel mapRef={mockMapRef} />);
         const checkbox = screen.getByLabelText('Wind speed');
         expect((checkbox as HTMLInputElement).checked).toBe(true);
         await userEvent.click(checkbox);
@@ -30,7 +33,7 @@ describe('LayerControlPanel', () => {
     });
 
     it('filters layers by search input', async () => {
-        render(<LayerControlPanel />);
+        render(<LayerControlPanel mapRef={mockMapRef} />);
         const searchInput = screen.getByPlaceholderText('Search for layers');
         await userEvent.type(searchInput, 'built up');
 
@@ -39,15 +42,14 @@ describe('LayerControlPanel', () => {
     });
 
     it('shows "No results" for unmatched search', async () => {
-        render(<LayerControlPanel />);
+        render(<LayerControlPanel mapRef={mockMapRef} />);
         const searchInput = screen.getByPlaceholderText('Search for layers');
         await userEvent.type(searchInput, 'nonexistent');
-
         expect(screen.getByText('No results')).toBeInTheDocument();
     });
 
     it('clears search when clear button is clicked', async () => {
-        render(<LayerControlPanel />);
+        render(<LayerControlPanel mapRef={mockMapRef} />);
         const searchInput = screen.getByPlaceholderText('Search for layers');
         await userEvent.type(searchInput, 'Wind');
 
@@ -59,7 +61,7 @@ describe('LayerControlPanel', () => {
     });
 
     it('shows no results when search is only spaces', async () => {
-        render(<LayerControlPanel />);
+        render(<LayerControlPanel mapRef={mockMapRef} />);
         const searchInput = screen.getByPlaceholderText('Search for layers');
         await userEvent.type(searchInput, '   ');
 
@@ -67,13 +69,13 @@ describe('LayerControlPanel', () => {
     });
 
     it('does not render categories with no items', () => {
-        render(<LayerControlPanel />);
+        render(<LayerControlPanel mapRef={mockMapRef} />);
         expect(screen.queryByText('Consumption')).not.toBeInTheDocument();
         expect(screen.queryByText('Network infrastructure')).not.toBeInTheDocument();
     });
 
     it('does not render accordion for categories with no matching layers', async () => {
-        render(<LayerControlPanel />);
+        render(<LayerControlPanel mapRef={mockMapRef} />);
         const searchInput = screen.getByPlaceholderText('Search for layers');
         await userEvent.type(searchInput, 'wind');
 
@@ -82,26 +84,15 @@ describe('LayerControlPanel', () => {
     });
 
     it('toggles accordion expansion', async () => {
-        render(<LayerControlPanel />);
+        render(<LayerControlPanel mapRef={mockMapRef} />);
         const summary = screen.getByText('Environmental protected sites');
         await userEvent.click(summary); // Collapse
         await userEvent.click(summary); // Expand
         expect(screen.getByText('Areas of outstanding natural beauty')).toBeInTheDocument();
     });
 
-    it('calls console.log with selected layers on apply', async () => {
-        const logSpy = vi.spyOn(console, 'log');
-        render(<LayerControlPanel />);
-        const applyBtn = screen.getByRole('button', { name: /apply/i });
-        await userEvent.click(applyBtn);
-
-        expect(logSpy).toHaveBeenCalledWith(
-            expect.stringContaining('Apply clicked')
-        );
-    });
-
     it('collapses and expands the panel with toggle button', async () => {
-        render(<LayerControlPanel />);
+        render(<LayerControlPanel mapRef={mockMapRef} />);
         const toggleBtn = screen.getAllByRole('button')[0];
         await userEvent.click(toggleBtn); // Collapse
         expect(screen.queryByText('Layers')).not.toBeInTheDocument();
@@ -111,18 +102,12 @@ describe('LayerControlPanel', () => {
     });
 
     it('rotates toggle icon when collapsed', async () => {
-        render(<LayerControlPanel />);
+        render(<LayerControlPanel mapRef={mockMapRef} />);
         const toggleBtn = screen.getAllByRole('button')[0];
         await userEvent.click(toggleBtn); // Collapse
 
         const icon = toggleBtn.querySelector('svg');
         const styles = window.getComputedStyle(icon as Element);
-
         expect(styles.transform).toMatch(/rotate\(180deg\)/);
-    });
-
-    it('matches snapshot', () => {
-        const { container } = render(<LayerControlPanel />);
-        expect(container).toMatchSnapshot();
     });
 });

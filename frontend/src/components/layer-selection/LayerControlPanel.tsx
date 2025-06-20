@@ -8,7 +8,6 @@ import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
-import maplibregl from 'maplibre-gl';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { MapVisualHelper } from '../../utils/MapVisualHelper';
 

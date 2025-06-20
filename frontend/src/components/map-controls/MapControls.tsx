@@ -58,7 +58,7 @@ const MapControls = ({ mapRef, onStyleChange, currentStyle }: MapControlsProps) 
             </ControlGroup>
 
             <ControlGroup role="group" aria-label="Map legend controls">
-                <MapLegendPanel />
+                <MapLegendPanel mapRef={mapRef} />
             </ControlGroup>
         </ControlsContainer>
     );

@@ -1,5 +1,4 @@
 import { Box, Divider, styled } from '@mui/material';
-import type { FeatureCollection, Geometry } from 'geojson';
 import { useCallback, useRef, useState } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
 import useMapboxDraw from '../../hooks/useMapboxDraw';
@@ -11,6 +10,7 @@ import EditPolygonButton from './edit-polygon/EditPolygonButton';
 import { usePolygonHandlers } from '../../hooks/usePolygonHandlers';
 import maplibregl from 'maplibre-gl';
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
+import HideLayersButton from './hide-map-layers/HideLayersButton';
 
 const SearchContainer = styled(Box)({
     position: 'absolute',
@@ -46,13 +46,15 @@ const SearchPanel = ({ mapRef, showLayerControl, hideLayerControl }: SearchPanel
     const popupRef = useRef<maplibregl.Popup | null>(null);
     const [polygonDrawn, setPolygonDrawn] = useState(false);
     const [polygonConfirmed, setPolygonConfirmed] = useState(false);
+    const [heatmapDisplayed, setHeatMapDisplayed] = useState(false);
 
-    const { handlePolygonDrawn, handlePolygonEdited, handlePolygonDeleted } = usePolygonHandlers({
+    const { handlePolygonDrawn, handlePolygonEdited, handlePolygonDeleted  } = usePolygonHandlers({
         mapRef,
         popupRef,
         setPolygonDrawn,
         setPolygonConfirmed,
-        showLayerControl
+        showLayerControl,
+        setHeatMapDisplayed,
     });
 
     const handleLocationSelect = useCallback(
@@ -91,6 +93,8 @@ const SearchPanel = ({ mapRef, showLayerControl, hideLayerControl }: SearchPanel
                     onPolygonDrawn={handlePolygonDrawn}
                     polygonDrawn={polygonDrawn}
                 />
+                <StyledDivider orientation="vertical" flexItem />
+                <HideLayersButton mapRef={mapRef} />
             </SearchGroup>
         </SearchContainer>
     );
