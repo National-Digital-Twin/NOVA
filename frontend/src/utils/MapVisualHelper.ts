@@ -1,8 +1,13 @@
-import { LngLat, type Map } from 'maplibre-gl';
+import { LngLat, MapMouseEvent, type Map, Popup } from 'maplibre-gl';
 import type { Feature, FeatureCollection, Geometry, Polygon } from 'geojson';
 import type { GeoJSONSource } from 'maplibre-gl';
 import type { MapRef } from 'react-map-gl/maplibre';
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
+
+// Used to ensure mouse events include feature information
+type FeatureEvent = MapMouseEvent & {
+    features?: Feature<Geometry, { [key: string]: any }>[];
+};
 
 /**
  * Helper class for applying map visualisations when using MapLibre GL.
@@ -12,6 +17,7 @@ export class MapVisualHelper {
     private static readonly maskLayerSourceId = 'mask';
     private static readonly maskLayerId = 'mask-layer';
     private static readonly heatmapLayerId = 'heatmap-layer';
+    private static issuesPopup: Popup | null = null;
 
     /**
      * Applies a dimmed mask over the entire map except inside the given polygon and centers the map on that polygon.
@@ -39,23 +45,21 @@ export class MapVisualHelper {
             properties: {},
         };
 
-        // Add or update source
-        if (!map.getSource(MapVisualHelper.maskLayerSourceId)) {
-            map.addSource(MapVisualHelper.maskLayerSourceId, {
+        if (!map.getSource(this.maskLayerSourceId)) {
+            map.addSource(this.maskLayerSourceId, {
                 type: 'geojson',
                 data: maskFeature,
             });
         } else {
-            const source = map.getSource(MapVisualHelper.maskLayerSourceId) as GeoJSONSource;
+            const source = map.getSource(this.maskLayerSourceId) as GeoJSONSource;
             source.setData(maskFeature);
         }
 
-        // Add layer if not present
-        if (!map.getLayer(MapVisualHelper.maskLayerId)) {
+        if (!map.getLayer(this.maskLayerId)) {
             map.addLayer({
-                id: MapVisualHelper.maskLayerId,
+                id: this.maskLayerId,
                 type: 'fill',
-                source: MapVisualHelper.maskLayerSourceId,
+                source: this.maskLayerSourceId,
                 paint: {
                     'fill-color': '#000000',
                     'fill-opacity': 0.5,
@@ -63,32 +67,17 @@ export class MapVisualHelper {
             });
         }
 
-        // Centre the map on the polygon
         const coords = polygon.coordinates[0];
-        let minLng = coords[0][0];
-        let minLat = coords[0][1];
-        let maxLng = coords[0][0];
-        let maxLat = coords[0][1];
-
-        coords.forEach(([lng, lat]) => {
-            if (lng < minLng) minLng = lng;
-            if (lat < minLat) minLat = lat;
-            if (lng > maxLng) maxLng = lng;
-            if (lat > maxLat) maxLat = lat;
-        });
+        const lats = coords.map(([, lat]) => lat);
+        const lngs = coords.map(([lng]) => lng);
 
         map.fitBounds(
             [
-                [minLng, minLat],
-                [maxLng, maxLat],
+                [Math.min(...lngs), Math.min(...lats)],
+                [Math.max(...lngs), Math.max(...lats)],
             ],
             {
-                padding: {
-                    top: 50,
-                    bottom: 50,
-                    left: 450, // 400px layer switcher width + 50px buffer
-                    right: 66, // 50px default + 16px (typically 1rem control panel)
-                },
+                padding: { top: 50, bottom: 50, left: 450, right: 66 },
                 duration: 2000,
             }
         );
@@ -100,12 +89,8 @@ export class MapVisualHelper {
      * @param map - The MapLibre map instance
      */
     static removeDimmedMask(map: Map) {
-        if (map.getLayer(MapVisualHelper.maskLayerId)) {
-            map.removeLayer(MapVisualHelper.maskLayerId);
-        }
-        if (map.getSource(MapVisualHelper.maskLayerSourceId)) {
-            map.removeSource(MapVisualHelper.maskLayerSourceId);
-        }
+        if (map.getLayer(this.maskLayerId)) map.removeLayer(this.maskLayerId);
+        if (map.getSource(this.maskLayerSourceId)) map.removeSource(this.maskLayerSourceId);
     }
 
     /**
@@ -113,21 +98,17 @@ export class MapVisualHelper {
      * The popup will be positioned at the average longitude and the maximum latitude of the polygon.
      *
      * @param polygon - The GeoJSON Polygon to base the popup position on
-     * @returns A tuple containing the longitude and latitude for the popup position
+     * @param map - The React MapLibre map reference
+     * @returns A [lng, lat] tuple of the suggested popup position
      */
     static getConfirmationPopupCoordinates(polygon: Polygon, map: MapRef): [number, number] {
         const coords = polygon.coordinates[0];
-
         const topLat = Math.max(...coords.map(([, lat]) => lat));
         const avgLng = coords.reduce((sum, [lng]) => sum + lng, 0) / coords.length;
 
-        const lngLat = new LngLat(avgLng, topLat);
-        const point = map.project(lngLat); // Screen coords
-
-        point.y -= 20; // Shift upward by 20 pixels
-
-        const offsetLngLat = map.unproject(point); // Back to geographic coords
-
+        const point = map.project(new LngLat(avgLng, topLat));
+        point.y -= 20;
+        const offsetLngLat = map.unproject(point);
         return [offsetLngLat.lng, offsetLngLat.lat];
     }
 
@@ -136,11 +117,9 @@ export class MapVisualHelper {
      *
      * @param popupRef - A React ref to the popup instance
      */
-    static removeExistingPopup(popupRef: React.RefObject<maplibregl.Popup | null>) {
-        if (popupRef.current) {
-            popupRef.current.remove();
-            popupRef.current = null;
-        }
+    static removeExistingPopup(popupRef: React.RefObject<Popup | null>) {
+        popupRef.current?.remove();
+        popupRef.current = null;
     }
 
     /**
@@ -155,12 +134,7 @@ export class MapVisualHelper {
     static flyToLocation(mapRef: React.RefObject<MapRef>, lat: number, lng: number, zoom: number, duration = 2000) {
         const map = mapRef.current?.getMap();
         if (!map) return;
-
-        map.flyTo({
-            center: [lng, lat],
-            zoom,
-            duration,
-        });
+        map.flyTo({ center: [lng, lat], zoom, duration });
     }
 
     /**
@@ -171,15 +145,11 @@ export class MapVisualHelper {
      * @returns The first polygon geometry or null if none exists
      */
     static getFirstPolygon(draw: MapboxDraw): Polygon | null {
-        const collection = draw.getAll() as unknown as FeatureCollection<Geometry>;
-        const feature = collection.features[0];
-
-        if (!feature || feature.geometry.type !== 'Polygon') return null;
-
-        return feature.geometry as Polygon;
+        const feature = (draw.getAll() as unknown as FeatureCollection).features[0];
+        return feature?.geometry?.type === 'Polygon' ? feature.geometry as Polygon : null;
     }
 
-    /*
+    /**
      * Extracts the first polygon from a GeoJSON FeatureCollection.
      * If no polygon exists, returns null.
      *
@@ -188,7 +158,7 @@ export class MapVisualHelper {
      */
     static extractFirstPolygon(geojson: FeatureCollection<Geometry>): Polygon | null {
         const geometry = geojson.features[0]?.geometry;
-        return geometry?.type === 'Polygon' ? (geometry as Polygon) : null;
+        return geometry?.type === 'Polygon' ? geometry as Polygon : null;
     }
 
     /**
@@ -203,32 +173,24 @@ export class MapVisualHelper {
 
     /**
      * Adds or updates a polygon fill layer showing suitability scores on the map.
-     * If the heatmap source does not exist, it creates a new GeoJSON source and adds a fill layer with colouring
-     * based on the "suitability" property in the features.
-     * If the source already exists, it updates its data.
+     * Also adds interactivity for hover (issue count) and click (issue descriptions).
      *
      * @param mapRef - A React ref to the MapLibre map instance
-     * @param geojson - The FeatureCollection containing polygons with a "suitability" property
+     * @param geojson - The FeatureCollection containing polygons with a "suitability" and "issues" property
      */
     static addOrUpdateHeatmapLayer(mapRef: React.RefObject<MapRef>, geojson: FeatureCollection) {
         const map = mapRef.current?.getMap();
-        if (!map) {
-            console.error('Map instance not available.');
-            return;
-        }
+        if (!map) return;
 
-        const sourceId = MapVisualHelper.heatmapLayerId;
+        const id = this.heatmapLayerId;
 
-        if (!map.getSource(sourceId)) {
-            map.addSource(sourceId, {
-                type: 'geojson',
-                data: geojson,
-            });
+        if (!map.getSource(id)) {
+            map.addSource(id, { type: 'geojson', data: geojson });
 
             map.addLayer({
-                id: sourceId,
+                id,
                 type: 'fill',
-                source: sourceId,
+                source: id,
                 paint: {
                     'fill-color': [
                         'match',
@@ -236,15 +198,25 @@ export class MapVisualHelper {
                         'red', '#e74c3c',
                         'amber', '#f39c12',
                         'green', '#27ae60',
-                        '#cccccc' // fallback for unknown suitability
+                        '#cccccc'
                     ],
                     'fill-opacity': 0.5,
                 },
             });
         } else {
-            const source = map.getSource(sourceId) as maplibregl.GeoJSONSource;
+            const source = map.getSource(id) as GeoJSONSource;
             source.setData(geojson);
         }
+
+        // Remove old event listeners if present
+        map.off('mousemove', id, this._handleMouseMove);
+        map.off('mouseleave', id, this._handleMouseLeave);
+        map.off('click', id, this._handleClick);
+
+        // Add interactivity to layer
+        map.on('mousemove', id, this._handleMouseMove);
+        map.on('mouseleave', id, this._handleMouseLeave);
+        map.on('click', id, this._handleClick);
     }
 
     /**
@@ -256,14 +228,98 @@ export class MapVisualHelper {
         const map = mapRef.current?.getMap();
         if (!map) return;
 
-        const id = MapVisualHelper.heatmapLayerId;
+        const id = this.heatmapLayerId;
+        if (map.getLayer(id)) map.removeLayer(id);
+        if (map.getSource(id)) map.removeSource(id);
+    }
 
-        if (map.getLayer(id)) {
-            map.removeLayer(id);
+    /**
+     * Extracts and normalises the "issues" array from a polygon feature.
+     * Handles both array and stringified JSON input.
+     *
+     * @param feature - A GeoJSON feature to extract issues from
+     * @returns A string array of issues (can be empty)
+     */
+    private static _parseIssues(feature: Feature): string[] {
+        const raw = feature.properties?.issues;
+        if (Array.isArray(raw)) return raw;
+        try {
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
         }
+    }
 
-        if (map.getSource(id)) {
-            map.removeSource(id);
+    /**
+     * Shows a live popup near the cursor when hovering over a polygon.
+     * Displays the number of issues found in that feature.
+     *
+     * @param e - Mouse move event with feature context
+     */
+    private static _handleMouseMove(e: FeatureEvent) {
+        const map = e.target as Map;
+        map.getCanvas().style.cursor = 'pointer';
+
+        const feature = e.features?.[0];
+        if (!feature) return;
+
+        const issues = MapVisualHelper._parseIssues(feature);
+        const popupContent = `<strong>${issues.length} issue${issues.length === 1 ? '' : 's'} found</strong>`;
+
+        if (!MapVisualHelper.issuesPopup) {
+            MapVisualHelper.issuesPopup = new Popup({ closeButton: false, closeOnClick: false })
+                .setLngLat(e.lngLat)
+                .setHTML(popupContent)
+                .addTo(map);
+        } else {
+            MapVisualHelper.issuesPopup.setLngLat(e.lngLat).setHTML(popupContent);
         }
+    }
+
+    /**
+     * Hides the issue popup and resets the cursor when leaving a polygon.
+     *
+     * @param e - Mouse leave event
+     */
+    private static _handleMouseLeave(e: FeatureEvent) {
+        const map = e.target as Map;
+        map.getCanvas().style.cursor = '';
+        if (MapVisualHelper.issuesPopup) {
+            MapVisualHelper.issuesPopup.remove();
+            MapVisualHelper.issuesPopup = null;
+        }
+    }
+
+    /**
+     * Shows a popup when a polygon is clicked, listing all issues in bold.
+     *
+     * @param e - Click event with feature context
+     */
+    private static _handleClick(e: FeatureEvent) {
+        const map = e.target as Map;
+        const feature = e.features?.[0];
+        if (!feature) return;
+
+        const issues = MapVisualHelper._parseIssues(feature);
+
+        const html = issues.length > 0
+        ? `<div style="
+              display: inline-block;
+              white-space: normal;
+              overflow-wrap: break-word;
+              word-break: break-word;
+              padding: 4px 8px;
+          ">
+              ${issues.map(issue => `<div><strong>${issue}</strong></div>`).join('')}
+           </div>`
+        : '<strong>No issues found</strong>';
+
+        if (MapVisualHelper.issuesPopup) MapVisualHelper.issuesPopup.remove();
+
+        MapVisualHelper.issuesPopup = new Popup({ closeButton: false })
+            .setLngLat(e.lngLat)
+            .setHTML(html)
+            .addTo(map);
     }
 }
