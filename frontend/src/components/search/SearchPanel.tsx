@@ -46,15 +46,13 @@ const SearchPanel = ({ mapRef, showLayerControl, hideLayerControl }: SearchPanel
     const popupRef = useRef<maplibregl.Popup | null>(null);
     const [polygonDrawn, setPolygonDrawn] = useState(false);
     const [polygonConfirmed, setPolygonConfirmed] = useState(false);
-    const [heatmapDisplayed, setHeatMapDisplayed] = useState(false);
 
-    const { handlePolygonDrawn, handlePolygonEdited, handlePolygonDeleted  } = usePolygonHandlers({
+    const { handlePolygonDrawn, handlePolygonEdited, handlePolygonDeleted } = usePolygonHandlers({
         mapRef,
         popupRef,
         setPolygonDrawn,
         setPolygonConfirmed,
         showLayerControl,
-        setHeatMapDisplayed,
     });
 
     const handleLocationSelect = useCallback(

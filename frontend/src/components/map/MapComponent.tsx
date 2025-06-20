@@ -42,7 +42,7 @@ const MapComponent = () => {
                     <>
                         <SearchPanel mapRef={mapRef} hideLayerControl={() => setShowLayerControl(false)} showLayerControl={() => setShowLayerControl(true)} />
                         <MapControls mapRef={mapRef} onStyleChange={handleStyleChange} currentStyle={mapStyle} />
-                        {showLayerControl && <LayerControlPanel mapRef={mapRef}/>}
+                        {showLayerControl && <LayerControlPanel mapRef={mapRef} />}
                     </>
                 )}
             </Map>

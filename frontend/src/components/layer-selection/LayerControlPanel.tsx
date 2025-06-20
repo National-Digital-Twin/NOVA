@@ -1,7 +1,17 @@
 import React, { useState, useMemo, useId } from 'react';
 import {
-    Paper, Accordion, AccordionSummary, AccordionDetails, Checkbox, TextField,
-    Button, Typography, Divider, InputAdornment, IconButton, Box
+    Paper,
+    Accordion,
+    AccordionSummary,
+    AccordionDetails,
+    Checkbox,
+    TextField,
+    Button,
+    Typography,
+    Divider,
+    InputAdornment,
+    IconButton,
+    Box,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
@@ -36,7 +46,9 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
     const [checkedLayers, setCheckedLayers] = useState<Record<string, boolean>>(() => {
         const initial: Record<string, boolean> = {};
         Object.values(layers).forEach((group) => {
-            group.forEach((item) => { initial[item.name] = true; });
+            group.forEach((item) => {
+                initial[item.name] = true;
+            });
         });
         return initial;
     });

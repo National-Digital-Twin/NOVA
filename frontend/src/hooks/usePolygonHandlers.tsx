@@ -12,10 +12,9 @@ interface UsePolygonHandlersProps {
     setPolygonDrawn: (val: boolean) => void;
     setPolygonConfirmed: (val: boolean) => void;
     showLayerControl: () => void;
-    setHeatMapDisplayed: (val: boolean) => void;
 }
 
-export function usePolygonHandlers({ mapRef, popupRef, setPolygonDrawn, setPolygonConfirmed, showLayerControl, setHeatMapDisplayed }: UsePolygonHandlersProps) {
+export function usePolygonHandlers({ mapRef, popupRef, setPolygonDrawn, setPolygonConfirmed, showLayerControl }: UsePolygonHandlersProps) {
     const showConfirmationPopup = useCallback(
         (polygon: Polygon, onConfirm: () => void) => {
             const popupNode = document.createElement('div');
@@ -66,7 +65,6 @@ export function usePolygonHandlers({ mapRef, popupRef, setPolygonDrawn, setPolyg
     const handlePolygonEdited = useCallback(
         (geojson: FeatureCollection<Geometry>) => {
             setPolygonDrawn(true);
-            setHeatMapDisplayed(false);
 
             const polygon = MapVisualHelper.extractFirstPolygon(geojson);
             if (polygon) {
@@ -81,7 +79,6 @@ export function usePolygonHandlers({ mapRef, popupRef, setPolygonDrawn, setPolyg
     const handlePolygonDeleted = useCallback(() => {
         setPolygonDrawn(false);
         setPolygonConfirmed(false);
-        setHeatMapDisplayed(false);
 
         const map = mapRef.current?.getMap();
         if (map) {

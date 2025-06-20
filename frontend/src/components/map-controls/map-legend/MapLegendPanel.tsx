@@ -69,25 +69,14 @@ const MapLegendPanel = ({ mapRef }: MapLegendPanelProps) => {
 
     if (!isHeatmapPresent) return null;
 
-
     return (
         <div style={{ position: 'relative' }}>
-            <ControlButton
-                onClick={() => setShowPanel(!showPanel)}
-                aria-label="Show map legend"
-                aria-expanded={showPanel}
-                aria-controls="map-legend-panel"
-            >
+            <ControlButton onClick={() => setShowPanel(!showPanel)} aria-label="Show map legend" aria-expanded={showPanel} aria-controls="map-legend-panel">
                 <img src="/icons/legend.svg" alt="Legend" width={24} height={24} />
             </ControlButton>
 
             {showPanel && (
-                <StyledPanel
-                    id="map-legend-panel"
-                    role="dialog"
-                    aria-label="Map legend"
-                    style={{ right: 'calc(100% + 1rem)' }}
-                >
+                <StyledPanel id="map-legend-panel" role="dialog" aria-label="Map legend" style={{ right: 'calc(100% + 1rem)' }}>
                     <LegendTitle variant="subtitle1">Legend</LegendTitle>
                     <LegendSubtitle variant="subtitle2">Location Suitability</LegendSubtitle>
                     <LegendItem>

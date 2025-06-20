@@ -58,12 +58,7 @@ const HideLayersButton = ({ mapRef }: HideLayersButtonProps) => {
     // Note that in the below, this button works in reverse to others (i.e., blue when not clicked).
     return (
         <ControlButton onClick={handleClick} isActive={!isActive} aria-label="Toggle layer visibility" showTooltip={true}>
-            <img
-                src={isActive ? '/icons/hide-layers-white.svg' : '/icons/hide-layers.svg'}
-                alt="Toggle layer visibility icon"
-                width={24}
-                height={24}
-            />
+            <img src={isActive ? '/icons/hide-layers-white.svg' : '/icons/hide-layers.svg'} alt="Toggle layer visibility icon" width={24} height={24} />
         </ControlButton>
     );
 };

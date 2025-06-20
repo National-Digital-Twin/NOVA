@@ -4,8 +4,9 @@ import type { GeoJSONSource } from 'maplibre-gl';
 import type { MapRef } from 'react-map-gl/maplibre';
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 
-// Used to ensure mouse events include feature information
+// Used to ensure mouse events include feature information. any type is used as property could be of any object.
 type FeatureEvent = MapMouseEvent & {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     features?: Feature<Geometry, { [key: string]: any }>[];
 };
 
@@ -146,7 +147,7 @@ export class MapVisualHelper {
      */
     static getFirstPolygon(draw: MapboxDraw): Polygon | null {
         const feature = (draw.getAll() as unknown as FeatureCollection).features[0];
-        return feature?.geometry?.type === 'Polygon' ? feature.geometry as Polygon : null;
+        return feature?.geometry?.type === 'Polygon' ? (feature.geometry as Polygon) : null;
     }
 
     /**
@@ -158,7 +159,7 @@ export class MapVisualHelper {
      */
     static extractFirstPolygon(geojson: FeatureCollection<Geometry>): Polygon | null {
         const geometry = geojson.features[0]?.geometry;
-        return geometry?.type === 'Polygon' ? geometry as Polygon : null;
+        return geometry?.type === 'Polygon' ? (geometry as Polygon) : null;
     }
 
     /**
@@ -192,14 +193,7 @@ export class MapVisualHelper {
                 type: 'fill',
                 source: id,
                 paint: {
-                    'fill-color': [
-                        'match',
-                        ['get', 'suitability'],
-                        'red', '#e74c3c',
-                        'amber', '#f39c12',
-                        'green', '#27ae60',
-                        '#cccccc'
-                    ],
+                    'fill-color': ['match', ['get', 'suitability'], 'red', '#e74c3c', 'amber', '#f39c12', 'green', '#27ae60', '#cccccc'],
                     'fill-opacity': 0.5,
                 },
             });
@@ -254,8 +248,6 @@ export class MapVisualHelper {
         }
     }
 
-
-
     /**
      * Shows a popup when a polygon is clicked, listing all issues.
      *
@@ -276,19 +268,13 @@ export class MapVisualHelper {
                 <div style="font-weight: bold;">
                     ${count === 0 ? 'No issues found' : `${count} issue${count > 1 ? 's' : ''} found`}
                 </div>
-                ${count > 0
-                ? issues.map(issue => `<div style="margin-bottom: 4px;">${issue}</div>`).join('')
-                : ''
-            }
+                ${count > 0 ? issues.map((issue) => `<div style="margin-bottom: 4px;">${issue}</div>`).join('') : ''}
             </div>
         `;
 
         if (MapVisualHelper.issuesPopup) MapVisualHelper.issuesPopup.remove();
 
-        MapVisualHelper.issuesPopup = new Popup({ closeButton: true })
-            .setLngLat(e.lngLat)
-            .setHTML(html)
-            .addTo(map);
+        MapVisualHelper.issuesPopup = new Popup({ closeButton: true }).setLngLat(e.lngLat).setHTML(html).addTo(map);
     }
 
     /**
@@ -300,9 +286,7 @@ export class MapVisualHelper {
      */
     static hideNonBaseLayers(map: Map): string[] {
         const allLayerIds = map.getStyle().layers?.map((layer) => layer.id) || [];
-        const layersToHide = allLayerIds.filter((id) =>
-            id.startsWith('gl-') || id === MapVisualHelper.heatmapLayerId || id == MapVisualHelper.maskLayerId
-        );
+        const layersToHide = allLayerIds.filter((id) => id.startsWith('gl-') || id === MapVisualHelper.heatmapLayerId || id == MapVisualHelper.maskLayerId);
 
         const toHide = allLayerIds.filter((id) => layersToHide.includes(id));
         toHide.forEach((id) => {
