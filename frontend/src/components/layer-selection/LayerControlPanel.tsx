@@ -61,7 +61,10 @@ const layers: Record<string, LayerItem[]> = {
     Weather: [
         {
             name: 'Wind speed',
-            userAdjustableParameters: [{ label: 'Distance from layer', type: 'number', default: 2 }],
+            userAdjustableParameters: [
+                { label: 'Set minimum windspeed (MW)', type: 'number', default: 2 },
+                { label: 'Set maximum windspeed (MW)', type: 'number', default: 2 },
+            ],
         },
     ],
     Residential: [
@@ -337,11 +340,6 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
                                         fullWidth
                                         value={layerSettings[currentLayer][param.label]}
                                         onChange={(e) => handleParamChange(param.label, e)}
-                                        slotProps={{
-                                            input: {
-                                                endAdornment: <InputAdornment position="end">km</InputAdornment>,
-                                            },
-                                        }}
                                         sx={{ mb: 3 }}
                                     />
                                 ))}
