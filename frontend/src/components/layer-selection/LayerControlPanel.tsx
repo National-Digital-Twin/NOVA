@@ -95,14 +95,15 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
     const defaultExpanded = Object.entries(layers).find(([, items]) => items.length > 0)?.[0] || '';
     const [expandedPanels, setExpandedPanels] = useState<string[]>(defaultExpanded ? [defaultExpanded] : []);
 
-    const [layerSettings, setLayerSettings] = useState<Record<string, Record<string, number>>>(() => {
-        const init: Record<string, Record<string, number>> = {};
+    // Now holds strings, not numbers
+    const [layerSettings, setLayerSettings] = useState<Record<string, Record<string, string>>>(() => {
+        const init: Record<string, Record<string, string>> = {};
         Object.values(layers)
             .flat()
             .forEach((item) => {
                 init[item.name] = {};
                 item.userAdjustableParameters.forEach((p) => {
-                    init[item.name][p.label] = p.default;
+                    init[item.name][p.label] = String(p.default);
                 });
             });
         return init;
@@ -110,15 +111,10 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
 
     const [propOpen, setPropOpen] = useState(false);
     const [currentLayer, setCurrentLayer] = useState<string | null>(null);
-
-    // new loading flag
     const [loading, setLoading] = useState(false);
 
     const handleCheckboxChange = (name: string) => {
-        setCheckedLayers((prev) => ({
-            ...prev,
-            [name]: !prev[name],
-        }));
+        setCheckedLayers((prev) => ({ ...prev, [name]: !prev[name] }));
     };
 
     const handleAccordionToggle = (category: string) => {
@@ -157,39 +153,51 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
         setCurrentLayer(null);
     };
 
+    // Store raw text on change
     const handleParamChange = (paramLabel: string, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         if (!currentLayer) return;
-        const value = Number(e.target.value);
+        const raw = e.target.value;
         setLayerSettings((prev) => ({
             ...prev,
             [currentLayer]: {
                 ...prev[currentLayer],
-                [paramLabel]: isNaN(value) ? 0 : value,
+                [paramLabel]: raw,
+            },
+        }));
+    };
+
+    // Only normalise when they leave the field
+    const handleParamBlur = (paramLabel: string) => {
+        if (!currentLayer) return;
+        const txt = layerSettings[currentLayer][paramLabel];
+        const num = Number(txt);
+        const final = isNaN(num) ? '' : String(num);
+        setLayerSettings((prev) => ({
+            ...prev,
+            [currentLayer]: {
+                ...prev[currentLayer],
+                [paramLabel]: final,
             },
         }));
     };
 
     const confirmProps = () => {
+        // Here you could convert all layerSettings[currentLayer] values
+        // to numbers and store in another state if needed
         closeProps();
     };
 
     const handleApply = async () => {
         if (!mapRef.current) return;
 
-        // show spinner
         setLoading(true);
+        await new Promise((r) => setTimeout(r, 10000));
 
-        // simulate a 10 s API call
-        await new Promise((r) => setTimeout(r, 10_000));
-
-        // fetch mocked GeoJSON
         const response = await fetch('/data/sample-polygons.json');
         if (!response.ok) throw new Error('Failed to fetch GeoJSON');
         const geojson = await response.json();
 
         MapVisualHelper.addOrUpdateHeatmapLayer(mapRef, geojson);
-
-        // hide spinner
         setLoading(false);
     };
 
@@ -234,15 +242,9 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
 
     return (
         <>
-            {/* hide/show toggle */}
             <Box className="layer-panel-toggle" sx={{ left: open ? '430px' : '1rem' }}>
                 <IconButton onClick={() => setOpen((o) => !o)}>
-                    <ArrowBackIosNewIcon
-                        fontSize="small"
-                        sx={{
-                            transform: !open ? 'rotate(180deg)' : 'none',
-                        }}
-                    />
+                    <ArrowBackIosNewIcon fontSize="small" sx={{ transform: !open ? 'rotate(180deg)' : 'none' }} />
                 </IconButton>
             </Box>
 
@@ -265,12 +267,7 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
                                 input: {
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <SearchIcon
-                                                sx={{
-                                                    fontSize: 20,
-                                                    color: 'grey.600',
-                                                }}
-                                            />
+                                            <SearchIcon sx={{ fontSize: 20, color: 'grey.600' }} />
                                         </InputAdornment>
                                     ),
                                     endAdornment: searchTerm && (
@@ -308,7 +305,6 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
                 </Paper>
             )}
 
-            {/* properties drawer */}
             <Drawer anchor="left" open={propOpen} onClose={closeProps}>
                 <Box sx={{ width: 280 }}>
                     <Box
@@ -337,10 +333,11 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
                                     <TextField
                                         key={param.label}
                                         label={param.label}
-                                        type={param.type}
+                                        type="number"
                                         fullWidth
                                         value={layerSettings[currentLayer][param.label]}
                                         onChange={(e) => handleParamChange(param.label, e)}
+                                        onBlur={() => handleParamBlur(param.label)}
                                         sx={{ mb: 3 }}
                                     />
                                 ))}
@@ -352,7 +349,6 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
                 </Box>
             </Drawer>
 
-            {/* loading spinner overlay */}
             {loading && (
                 <Box
                     sx={{
