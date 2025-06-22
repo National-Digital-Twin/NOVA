@@ -316,7 +316,8 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
-                            px: 2,
+                            pl: 2,
+                            pr: 1,
                             pt: 1,
                             mb: 2,
                         }}
