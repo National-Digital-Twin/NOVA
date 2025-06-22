@@ -13,6 +13,7 @@ import {
     InputAdornment,
     IconButton,
     Box,
+    CircularProgress,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
@@ -29,7 +30,7 @@ interface LayerControlPanelProps {
 
 interface UserParam {
     label: string;
-    type: 'number'; // for now always number
+    type: 'number';
     default: number;
 }
 
@@ -78,7 +79,6 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
 
     const [searchTerm, setSearchTerm] = useState('');
     const [open, setOpen] = useState(true);
-
     const [checkedLayers, setCheckedLayers] = useState<Record<string, boolean>>(() => {
         const init: Record<string, boolean> = {};
         Object.values(layers)
@@ -90,10 +90,8 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
     });
 
     const defaultExpanded = Object.entries(layers).find(([, items]) => items.length > 0)?.[0] || '';
-
     const [expandedPanels, setExpandedPanels] = useState<string[]>(defaultExpanded ? [defaultExpanded] : []);
 
-    // seed layerSettings from each layer's array of userAdjustableParameters
     const [layerSettings, setLayerSettings] = useState<Record<string, Record<string, number>>>(() => {
         const init: Record<string, Record<string, number>> = {};
         Object.values(layers)
@@ -109,6 +107,9 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
 
     const [propOpen, setPropOpen] = useState(false);
     const [currentLayer, setCurrentLayer] = useState<string | null>(null);
+
+    // new loading flag
+    const [loading, setLoading] = useState(false);
 
     const handleCheckboxChange = (name: string) => {
         setCheckedLayers((prev) => ({
@@ -166,35 +167,27 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
     };
 
     const confirmProps = () => {
-        // here you’d send layerSettings[currentLayer] to your API if needed
         closeProps();
     };
 
     const handleApply = async () => {
         if (!mapRef.current) return;
 
+        // show spinner
+        setLoading(true);
+
+        // simulate a 10 s API call
+        await new Promise((r) => setTimeout(r, 10_000));
+
+        // fetch mocked GeoJSON
         const response = await fetch('/data/sample-polygons.json');
         if (!response.ok) throw new Error('Failed to fetch GeoJSON');
         const geojson = await response.json();
 
-        // Awaiting API availability
-        // const payload = Object.entries(checkedLayers)
-        //   .filter(([, ok]) => ok)
-        //   .map(([name]) => ({
-        //     name,
-        //     settings: layerSettings[name],
-        //   }));
-
-        // const resp = await fetch('/api/process-layers', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({ layers: payload }),
-        // });
-
-        // const geojson = await resp.json();
-
-        // hand straight to your helper
         MapVisualHelper.addOrUpdateHeatmapLayer(mapRef, geojson);
+
+        // hide spinner
+        setLoading(false);
     };
 
     const filteredLayerEntries = useMemo(() => {
@@ -238,10 +231,15 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
 
     return (
         <>
-            {/* your original toggle, untouched */}
+            {/* hide/show toggle */}
             <Box className="layer-panel-toggle" sx={{ left: open ? '430px' : '1rem' }}>
                 <IconButton onClick={() => setOpen((o) => !o)}>
-                    <ArrowBackIosNewIcon fontSize="small" sx={{ transform: !open ? 'rotate(180deg)' : 'none' }} />
+                    <ArrowBackIosNewIcon
+                        fontSize="small"
+                        sx={{
+                            transform: !open ? 'rotate(180deg)' : 'none',
+                        }}
+                    />
                 </IconButton>
             </Box>
 
@@ -264,7 +262,12 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
                                 input: {
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <SearchIcon sx={{ fontSize: 20, color: 'grey.600' }} />
+                                            <SearchIcon
+                                                sx={{
+                                                    fontSize: 20,
+                                                    color: 'grey.600',
+                                                }}
+                                            />
                                         </InputAdornment>
                                     ),
                                     endAdornment: searchTerm && (
@@ -302,7 +305,7 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
                 </Paper>
             )}
 
-            {/* LEFT-HAND drawer with header padded to align the close icon */}
+            {/* properties drawer */}
             <Drawer anchor="left" open={propOpen} onClose={closeProps}>
                 <Box sx={{ width: 280 }}>
                     <Box
@@ -310,12 +313,12 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
-                            px: 2, // lines up with input fields
+                            px: 2,
                             pt: 1,
                             mb: 2,
                         }}
                     >
-                        <Typography variant="h6">Properties</Typography>
+                        <Typography variant="h6">Properties panel</Typography>
                         <IconButton onClick={closeProps}>
                             <HighlightOffIcon />
                         </IconButton>
@@ -349,6 +352,26 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
                     </Box>
                 </Box>
             </Drawer>
+
+            {/* loading spinner overlay */}
+            {loading && (
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        bgcolor: 'rgba(255,255,255,0.6)',
+                        zIndex: 1400,
+                    }}
+                >
+                    <CircularProgress />
+                </Box>
+            )}
         </>
     );
 };

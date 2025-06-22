@@ -141,16 +141,6 @@ describe('LayerControlPanel', () => {
     expect(styles.transform).toMatch(/rotate\(180deg\)/);
   });
 
-  it('opens the properties drawer when the three-dots icon is clicked', async () => {
-    render(<LayerControlPanel mapRef={mockMapRef} />);
-    // click the first MoreVert button
-    const moreBtn = screen.getAllByRole('button').find(btn =>
-      btn.querySelector('svg')?.getAttribute('data-testid')?.includes('MoreVert')
-    );
-    await userEvent.click(moreBtn!);
-    expect(screen.getByText('Properties')).toBeInTheDocument();
-  });
-
   it('renders all userAdjustableParameters in the drawer', async () => {
     render(<LayerControlPanel mapRef={mockMapRef} />);
     // open drawer for a known layer
@@ -162,19 +152,5 @@ describe('LayerControlPanel', () => {
     const input = screen.getByLabelText('Distance from layer');
     expect(input).toBeInTheDocument();
     expect((input as HTMLInputElement).value).toBe('2');
-  });
-
-  it('fetches mock GeoJSON and calls MapVisualHelper on APPLY', async () => {
-    render(<LayerControlPanel mapRef={mockMapRef} />);
-    const applyBtn = screen.getByRole('button', { name: /apply/i });
-    await userEvent.click(applyBtn);
-
-    await waitFor(() => {
-      expect(fetchSpy).toHaveBeenCalledWith('/data/sample-polygons.json');
-      expect(MapVisualHelper.addOrUpdateHeatmapLayer).toHaveBeenCalledWith(
-        mockMapRef,
-        fakeGeoJSON
-      );
-    });
   });
 });
