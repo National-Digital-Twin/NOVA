@@ -24,9 +24,11 @@ import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { MapVisualHelper } from '../../utils/MapVisualHelper';
+import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 
 interface LayerControlPanelProps {
     mapRef: React.RefObject<MapRef>;
+    drawRef: React.RefObject<MapboxDraw | null>;
 }
 
 interface Attribute {
@@ -50,7 +52,7 @@ interface LayerApiResponse {
     }[];
 }
 
-const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
+const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
     const idPrefix = useId();
 
     const [layers, setLayers] = useState<Record<string, LayerItem[]>>({});
@@ -187,12 +189,57 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
     };
 
     const handleApply = async () => {
-        if (!mapRef.current) return;
+        if (!mapRef.current || !drawRef.current) return;
+
+        const userDrawnPolygon = MapVisualHelper.getFirstPolygon(drawRef.current);
+        if (!userDrawnPolygon) {
+            console.warn('No user drawn polygon found');
+            return;
+        }
+        const featureCollection = MapVisualHelper.getFeatureCollection(drawRef.current);
+
+        // Fetch user selected layers and attributes
+        const allLayers: LayerItem[] = Object.values(layers).flat();
+
+        const dataLayers = allLayers.map((layer) => {
+            const attributes = layer.attributes.map((attr) => ({
+                id: attr.id,
+                value: layerSettings[layer.name]?.[attr.description] ?? '',
+            }));
+
+            return {
+                id: layer.id,
+                attributes,
+                analyze: checkedLayers[layer.name] ?? true,
+            };
+        });
+
+        const payload = {
+            location: featureCollection,
+            dataLayers,
+        };
+
         setLoading(true);
-        const response = await fetch('/data/sample-polygons.json');
-        if (!response.ok) throw new Error('Failed to fetch GeoJSON');
-        const geojson = await response.json();
-        MapVisualHelper.addOrUpdateHeatmapLayer(mapRef, geojson);
+        try {
+            const response = await fetch('/api/ui/location/analyse', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to submit analysis request');
+            }
+
+            const geojson = await response.json();
+            MapVisualHelper.addOrUpdateHeatmapLayer(mapRef, geojson);
+        } catch (err) {
+            console.error('Analysis request failed', err);
+        } finally {
+            setLoading(false);
+        }
         setLoading(false);
     };
 

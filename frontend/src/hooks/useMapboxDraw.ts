@@ -106,26 +106,18 @@ const DRAW_CONFIG = {
     mode: 'simple_select',
 } as const;
 
-const useMapboxDraw = (mapRef: React.RefObject<MapRef>) => {
+const useMapboxDraw = (mapRef: React.RefObject<MapRef>, isReady: boolean): React.RefObject<MapboxDraw | null> => {
     const drawRef = useRef<MapboxDraw | null>(null);
 
     useEffect(() => {
-        if (!mapRef.current) return;
+        if (!isReady || !mapRef.current || drawRef.current) return;
 
         const map = mapRef.current.getMap();
-        if (!map) return;
-
         const draw = new MapboxDraw(DRAW_CONFIG);
+
         map.addControl(draw);
         drawRef.current = draw;
-
-        return () => {
-            if (draw && map) {
-                map.removeControl(draw);
-                drawRef.current = null;
-            }
-        };
-    }, [mapRef]);
+    }, [isReady, mapRef]);
 
     return drawRef;
 };

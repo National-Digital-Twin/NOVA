@@ -6,6 +6,7 @@ import { MAP_STYLES, type MapStyle } from '../../types/map';
 import MapControls from '../map-controls/MapControls';
 import SearchPanel from '../search/SearchPanel';
 import LayerControlPanel from '../layer-selection/LayerControlPanel';
+import useMapboxDraw from '../../hooks/useMapboxDraw';
 
 const MAP_VIEW_BOUNDS: [[number, number], [number, number]] = [
     [-25.0, 42.0],
@@ -18,6 +19,7 @@ const MapComponent = () => {
     const [mapStyle, setMapStyle] = useState<MapStyle>('hybrid');
     const [isMapInitialized, setIsMapInitialized] = useState(false);
     const [showLayerControl, setShowLayerControl] = useState(false);
+    const drawRef = useMapboxDraw(mapRef, isMapInitialized);
 
     const handleStyleChange = (newStyle: MapStyle) => {
         setMapStyle(newStyle);
@@ -40,9 +42,14 @@ const MapComponent = () => {
             >
                 {isMapInitialized && (
                     <>
-                        <SearchPanel mapRef={mapRef} hideLayerControl={() => setShowLayerControl(false)} showLayerControl={() => setShowLayerControl(true)} />
+                        <SearchPanel
+                            mapRef={mapRef}
+                            drawRef={drawRef}
+                            hideLayerControl={() => setShowLayerControl(false)}
+                            showLayerControl={() => setShowLayerControl(true)}
+                        />
                         <MapControls mapRef={mapRef} onStyleChange={handleStyleChange} currentStyle={mapStyle} />
-                        {showLayerControl && <LayerControlPanel mapRef={mapRef} />}
+                        {showLayerControl && <LayerControlPanel mapRef={mapRef} drawRef={drawRef} />}
                     </>
                 )}
             </Map>

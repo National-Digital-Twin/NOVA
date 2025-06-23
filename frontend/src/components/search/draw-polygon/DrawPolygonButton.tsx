@@ -20,7 +20,7 @@ interface DrawPolygonButtonProps {
     /**
      * Reference to the Mapbox Draw instance.
      */
-    drawRef: React.RefObject<MapboxDraw>;
+    drawRef: React.RefObject<MapboxDraw | null>;
 
     /**
      * Controls whether the button should be visible.

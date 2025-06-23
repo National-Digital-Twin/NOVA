@@ -1,7 +1,6 @@
 import { Box, Divider, styled } from '@mui/material';
 import { useCallback, useRef, useState } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
-import useMapboxDraw from '../../hooks/useMapboxDraw';
 import DeletePolygonButton from './delete-polygon/DeletePolygonButton';
 import DrawPolygonButton from './draw-polygon/DrawPolygonButton';
 import SearchInput from './search-input/SearchInput';
@@ -37,12 +36,12 @@ const StyledDivider = styled(Divider)(({ theme }) => ({
 
 interface SearchPanelProps {
     mapRef: React.RefObject<MapRef>;
+    drawRef: React.RefObject<MapboxDraw | null>;
     showLayerControl: () => void;
     hideLayerControl: () => void;
 }
 
-const SearchPanel = ({ mapRef, showLayerControl, hideLayerControl }: SearchPanelProps) => {
-    const drawRef = useMapboxDraw(mapRef) as React.RefObject<MapboxDraw>;
+const SearchPanel = ({ mapRef, drawRef, showLayerControl, hideLayerControl }: SearchPanelProps) => {
     const popupRef = useRef<maplibregl.Popup | null>(null);
     const [polygonDrawn, setPolygonDrawn] = useState(false);
     const [polygonConfirmed, setPolygonConfirmed] = useState(false);

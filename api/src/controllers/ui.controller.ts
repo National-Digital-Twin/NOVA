@@ -221,19 +221,12 @@ export class UIController {
 
     /**
      * @swagger
-     * /api/ui/location/analyse/{assetType}:
+     * /api/ui/location/analyse:
      *   post:
      *     summary: Analyse location data for a specific asset type
      *     description: Accepts GeoJSON of the selected area, layers configuration, and asset to analyze, returns an array of GeoJSON objects.
      *     tags:
      *       - UI
-     *     parameters:
-     *       - in: path
-     *         name: assetType
-     *         schema:
-     *           type: string
-     *         required: true
-     *         description: Type of asset to analyse
      *     requestBody:
      *       required: true
      *       content:
@@ -255,10 +248,6 @@ export class UIController {
      *         description: Internal server error.
      */
     public analyseLocation(req: Request, res: Response): void {
-        const assetType = req.params.assetType;
-
-        console.debug(`Analysing location for asset type: ${assetType}`);
-
         try {
             const analysisRequest = req.body as AssetLocationRequestDto;
 
