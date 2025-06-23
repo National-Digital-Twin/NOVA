@@ -3,7 +3,6 @@ import { AssetsDTO } from '../src/models/asset.model';
 import { LayersDTO } from '../src/models/layers.model';
 import { LocationsDTO } from '../src/models/location.model';
 import { dataProviderUtils } from '../src/utils/data-provider.utils';
-import { CategoryDTO, ItemDTO } from '../src/models/layers.model';
 import { Feature } from 'geojson';
 
 // Mock fs module
@@ -20,7 +19,6 @@ describe('DataProviderUtils', () => {
                         id: 'testItem',
                         name: 'Test Item',
                         attributes: [],
-                        active: true,
                     },
                     {
                         id: 'testItem2',
@@ -87,35 +85,8 @@ describe('DataProviderUtils', () => {
             // Verify fs.readFileSync was called with the correct path
             expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringContaining('layers.json'), 'utf8');
 
-            // Since the method adds the active property, we need to add it to our expected result
-            mockData.categories.forEach((category: CategoryDTO) => {
-                category.items.forEach((item: ItemDTO) => {
-                    if (item.active === undefined) {
-                        item.active = false;
-                    }
-                });
-            });
-
             // Verify the result
             expect(result).toEqual(mockData);
-        });
-
-        it('should set active property to false if it is undefined', () => {
-            // Mock fs.readFileSync to return our mock data
-            (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockLayersData));
-
-            // Call the method
-            const result = dataProviderUtils.readLayersData();
-
-            // Verify that all items have the active property
-            result.categories.forEach((category) => {
-                category.items.forEach((item) => {
-                    expect(item).toHaveProperty('active');
-                });
-            });
-
-            // Verify that the second item now has active set to false
-            expect(result.categories[0].items[1].active).toBe(false);
         });
     });
 
