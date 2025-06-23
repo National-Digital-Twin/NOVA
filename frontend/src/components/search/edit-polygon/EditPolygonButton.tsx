@@ -63,6 +63,9 @@ const EditPolygonButton = ({ onPolygonEdited, hideLayerControl, mapRef, drawRef,
         hideLayerControl();
         MapVisualHelper.removeDimmedMask(map);
         MapVisualHelper.removeExistingPopup(polygonConfirmationPopUpRef);
+        MapVisualHelper.removeHeatmapLayer(mapRef);
+
+        map.getCanvas().style.cursor = 'grab';
 
         const polygon = MapVisualHelper.getFirstPolygon(draw);
         const polygonFeatureId = MapVisualHelper.getFeatureCollection(draw).features[0]?.id;

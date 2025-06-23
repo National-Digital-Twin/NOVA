@@ -59,19 +59,12 @@ export class UIController {
 
     /**
      * @swagger
-     * /api/ui/layers/{assetType}:
+     * /api/ui/layers:
      *   get:
-     *     summary: Get layers information by asset type such as wind turbine
-     *     description: Returns layer information for a specific asset type.
+     *     summary: Get layers information for presentation in the layer selection panel.
+     *     description: Returns layer information.
      *     tags:
      *       - UI
-     *     parameters:
-     *       - in: path
-     *         name: assetType
-     *         schema:
-     *           type: string
-     *         required: true
-     *         description: Type of asset to get layers for
      *     responses:
      *       200:
      *         description: Layers information retrieved successfully.

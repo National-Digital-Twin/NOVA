@@ -12,10 +12,9 @@ interface UsePolygonHandlersProps {
     setPolygonDrawn: (val: boolean) => void;
     setPolygonConfirmed: (val: boolean) => void;
     showLayerControl: () => void;
-    clearLayerData: () => void;
 }
 
-export function usePolygonHandlers({ mapRef, popupRef, setPolygonDrawn, setPolygonConfirmed, showLayerControl, clearLayerData }: UsePolygonHandlersProps) {
+export function usePolygonHandlers({ mapRef, popupRef, setPolygonDrawn, setPolygonConfirmed, showLayerControl }: UsePolygonHandlersProps) {
     const showConfirmationPopup = useCallback(
         (polygon: Polygon, onConfirm: () => void) => {
             const popupNode = document.createElement('div');
@@ -80,15 +79,14 @@ export function usePolygonHandlers({ mapRef, popupRef, setPolygonDrawn, setPolyg
     const handlePolygonDeleted = useCallback(() => {
         setPolygonDrawn(false);
         setPolygonConfirmed(false);
-        clearLayerData();
 
         const map = mapRef.current?.getMap();
         if (map) {
             MapVisualHelper.removeDimmedMask(map);
+            MapVisualHelper.removeExistingPopup(popupRef);
+            MapVisualHelper.removeHeatmapLayer(mapRef);
         }
-
-        MapVisualHelper.removeExistingPopup(popupRef);
-    }, [mapRef, popupRef, setPolygonDrawn, setPolygonConfirmed, clearLayerData]);
+    }, [mapRef, popupRef, setPolygonDrawn, setPolygonConfirmed]);
 
     return {
         handlePolygonDrawn,

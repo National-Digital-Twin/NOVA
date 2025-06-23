@@ -1,6 +1,7 @@
 import { Box, styled, Typography } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ControlButton from '../../../shared/control-button/ControlButton';
+import type { MapRef } from 'react-map-gl/maplibre';
 
 const StyledPanel = styled('div')(({ theme }) => ({
     position: 'absolute',
@@ -38,8 +39,35 @@ const ColorLine = styled(Box, {
     marginRight: theme.spacing(1),
 }));
 
-const MapLegendPanel = () => {
+interface MapLegendPanelProps {
+    /**
+     * Reference to the MapLibre map instance.
+     */
+    mapRef: React.RefObject<MapRef>;
+}
+
+const MapLegendPanel = ({ mapRef }: MapLegendPanelProps) => {
     const [showPanel, setShowPanel] = useState(false);
+    const [isHeatmapPresent, setIsHeatmapPresent] = useState(false);
+
+    useEffect(() => {
+        const map = mapRef.current?.getMap();
+        if (!map) return;
+
+        const checkLayer = () => {
+            const hasHeatmap = !!map.getLayer('heatmap-layer');
+            setIsHeatmapPresent(hasHeatmap);
+        };
+
+        map.on('styledata', checkLayer);
+        checkLayer();
+
+        return () => {
+            map.off('styledata', checkLayer);
+        };
+    }, [mapRef]);
+
+    if (!isHeatmapPresent) return null;
 
     return (
         <div style={{ position: 'relative' }}>

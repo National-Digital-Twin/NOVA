@@ -58,7 +58,6 @@ describe('usePolygonHandlers', () => {
     const setPolygonDrawn = vi.fn();
     const setPolygonConfirmed = vi.fn();
     const showLayerControl = vi.fn();
-    const clearLayerData = vi.fn();
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -75,8 +74,7 @@ describe('usePolygonHandlers', () => {
                 popupRef,
                 setPolygonDrawn,
                 setPolygonConfirmed,
-                showLayerControl,
-                clearLayerData,
+                showLayerControl
             })
         );
 

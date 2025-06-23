@@ -62,12 +62,4 @@ describe('MapComponent', () => {
         fireEvent.click(screen.getByTestId('map'));
         expect(screen.getByTestId('map')).toBeInTheDocument();
     });
-
-    it('shows the layer control panel when triggered from SearchPanel', () => {
-        render(<MapComponent />);
-        fireEvent.click(screen.getByTestId('map')); // Initialise map
-        fireEvent.click(screen.getByText('Show Layer Panel')); // Trigger setShowLayerControl(true)
-
-        expect(screen.getByText('Layers')).toBeInTheDocument(); // From LayerControlPanel
-    });
 });

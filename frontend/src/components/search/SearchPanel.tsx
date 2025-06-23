@@ -1,17 +1,16 @@
 import { Box, Divider, styled } from '@mui/material';
-import type { FeatureCollection, Geometry } from 'geojson';
 import { useCallback, useRef, useState } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
 import useMapboxDraw from '../../hooks/useMapboxDraw';
 import DeletePolygonButton from './delete-polygon/DeletePolygonButton';
 import DrawPolygonButton from './draw-polygon/DrawPolygonButton';
-import PolygonLayer from './polygon-layer/PolygonLayer';
 import SearchInput from './search-input/SearchInput';
 import { MapVisualHelper } from '../../utils/MapVisualHelper';
 import EditPolygonButton from './edit-polygon/EditPolygonButton';
 import { usePolygonHandlers } from '../../hooks/usePolygonHandlers';
 import maplibregl from 'maplibre-gl';
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
+import HideLayersButton from './hide-map-layers/HideLayersButton';
 
 const SearchContainer = styled(Box)({
     position: 'absolute',
@@ -45,8 +44,6 @@ interface SearchPanelProps {
 const SearchPanel = ({ mapRef, showLayerControl, hideLayerControl }: SearchPanelProps) => {
     const drawRef = useMapboxDraw(mapRef) as React.RefObject<MapboxDraw>;
     const popupRef = useRef<maplibregl.Popup | null>(null);
-
-    const [layerData, setLayerData] = useState<FeatureCollection<Geometry> | null>(null);
     const [polygonDrawn, setPolygonDrawn] = useState(false);
     const [polygonConfirmed, setPolygonConfirmed] = useState(false);
 
@@ -56,7 +53,6 @@ const SearchPanel = ({ mapRef, showLayerControl, hideLayerControl }: SearchPanel
         setPolygonDrawn,
         setPolygonConfirmed,
         showLayerControl,
-        clearLayerData: () => setLayerData(null),
     });
 
     const handleLocationSelect = useCallback(
@@ -95,9 +91,9 @@ const SearchPanel = ({ mapRef, showLayerControl, hideLayerControl }: SearchPanel
                     onPolygonDrawn={handlePolygonDrawn}
                     polygonDrawn={polygonDrawn}
                 />
+                <StyledDivider orientation="vertical" flexItem />
+                <HideLayersButton mapRef={mapRef} />
             </SearchGroup>
-
-            {layerData && <PolygonLayer data={layerData} />}
         </SearchContainer>
     );
 };

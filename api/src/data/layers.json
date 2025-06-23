@@ -4,7 +4,6 @@
       "name": "Environmental Protected Sites",
       "items": [
         {
-          "active": true,
           "id": "areasOfOutstandingNaturalBeauty",
           "name": "Areas of outstanding natural beauty",
           "attributes": [
@@ -17,7 +16,6 @@
           ]
         },
         {
-          "active": true,
           "id": "siteOfSpecialScientificInterest",
           "name": "Sites of Special Scientific Interest",
           "attributes": [
@@ -65,7 +63,6 @@
       "name": "Grid Service points",
       "items": [
         {
-          "active": true,
           "id": "substationLocations",
           "name": "Substation locations",
           "attributes": [
