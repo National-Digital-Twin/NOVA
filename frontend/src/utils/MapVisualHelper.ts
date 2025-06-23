@@ -231,21 +231,13 @@ export class MapVisualHelper {
     }
 
     /**
-     * Extracts and normalises the "issues" array from a polygon feature.
-     * Handles both array and stringified JSON input.
+     * Extracts the "issue" field from a polygon feature.
      *
      * @param feature - A GeoJSON feature to extract issues from
-     * @returns A string array of issues (can be empty)
+     * @returns A string of an issue description (can be empty)
      */
-    private static _parseIssues(feature: Feature): string[] {
-        const raw = feature.properties?.issues;
-        if (Array.isArray(raw)) return raw;
-        try {
-            const parsed = JSON.parse(raw);
-            return Array.isArray(parsed) ? parsed : [];
-        } catch {
-            return [];
-        }
+    private static _parseIssueFromFeature(feature: Feature): string | null {
+        return feature.properties?.issue || null;
     }
 
     /**
@@ -259,7 +251,7 @@ export class MapVisualHelper {
         if (features.length === 0) return;
 
         // Collect and flatten all issues from every feature, then de-duplicate.
-        const allIssues = features.flatMap((feature) => MapVisualHelper._parseIssues(feature));
+        const allIssues = features.flatMap((feature) => MapVisualHelper._parseIssueFromFeature(feature));
         const uniqueIssues = Array.from(new Set(allIssues));
         const count = uniqueIssues.length;
 

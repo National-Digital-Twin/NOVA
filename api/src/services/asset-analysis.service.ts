@@ -38,13 +38,13 @@ export class AssetAnalysisService {
         let matchedPolygons: Feature<MultiPolygon | Polygon, GeoJsonProperties>[] = [];
 
         dataLayers.forEach((dataLayer) => {
-            if (dataLayer.name === 'windspeed') {
+            if (dataLayer.id === 'windSpeed') {
                 const windspeedGoodLayer = this.dataProviderUtils.getWindspeedGoodLayerData();
                 matchedPolygons = matchedPolygons.concat(this.getMatchedPolygonsForLayer(windspeedGoodLayer, location, 'green'));
 
                 const windspeedBadLayerData = this.dataProviderUtils.getWindspeedBadLayerData();
                 matchedPolygons = matchedPolygons.concat(this.getMatchedPolygonsForLayer(windspeedBadLayerData, location, 'red', 'Bad windspeed - < 4m/s'));
-            } else if (dataLayer.name === 'special-areas-of-conservation') {
+            } else if (dataLayer.id === 'specialAreasOfConservation') {
                 const specialAreasOfConservationLayerData = this.dataProviderUtils.getSpecialAreasOfConservationLayerData();
                 matchedPolygons = matchedPolygons.concat(
                     this.getMatchedPolygonsForLayer(specialAreasOfConservationLayerData, location, 'red', 'Too close to special areas of conservation - < 1km')
@@ -54,7 +54,7 @@ export class AssetAnalysisService {
                 matchedPolygons = matchedPolygons.concat(
                     this.getMatchedPolygonsForLayer(specialAreasOfConservation2KmLayer, location, 'amber', 'Close to special areas of conservation - <= 2km')
                 );
-            } else if (dataLayer.name == 'sites-of-special-scientific-interest') {
+            } else if (dataLayer.id == 'siteOfSpecialScientificInterest') {
                 const sitesOfSpecialScientificInterestLayerData = this.dataProviderUtils.getSitesOfSpecialScientificInterestLayerData();
                 matchedPolygons = matchedPolygons.concat(
                     this.getMatchedPolygonsForLayer(
@@ -74,7 +74,7 @@ export class AssetAnalysisService {
                         'Close to Sites of Special Scientific Interest - <= 2km'
                     )
                 );
-            } else if (dataLayer.name === 'built-up-areas') {
+            } else if (dataLayer.id === 'builtUpAreas') {
                 const builtupAreasLayerData = this.dataProviderUtils.getBuiltupAreasLayerData();
                 matchedPolygons = matchedPolygons.concat(
                     this.getMatchedPolygonsForLayer(builtupAreasLayerData, location, 'red', 'Too close to Built up areas - < 1km')
@@ -84,7 +84,7 @@ export class AssetAnalysisService {
                 matchedPolygons = matchedPolygons.concat(
                     this.getMatchedPolygonsForLayer(builtupAreas2KmLayerData, location, 'amber', 'Close to Built up areas - <= 2km')
                 );
-            } else if (dataLayer.name == 'areas-of-natural-beauty') {
+            } else if (dataLayer.id == 'areasOfOutstandingNaturalBeauty') {
                 const areasOfNaturalBeautyLayerData = this.dataProviderUtils.getAreasOfNaturalBeautyLayerData();
                 matchedPolygons = matchedPolygons.concat(
                     this.getMatchedPolygonsForLayer(areasOfNaturalBeautyLayerData, location, 'red', 'Too close to Areas of Natural Beauty - < 1km')
