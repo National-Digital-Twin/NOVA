@@ -195,6 +195,7 @@ export class MapVisualHelper {
                 paint: {
                     'fill-color': ['match', ['get', 'suitability'], 'red', '#e74c3c', 'amber', '#f39c12', 'green', '#27ae60', '#cccccc'],
                     'fill-opacity': 0.5,
+                    'fill-antialias': false,
                 },
             });
         } else {
@@ -224,6 +225,13 @@ export class MapVisualHelper {
         if (map.getLayer(id)) map.removeLayer(id);
         if (map.getSource(id)) map.removeSource(id);
 
+        MapVisualHelper.removeIssuesPopup();
+    }
+
+    /**
+     * Removes the issue popup if present on a heatmap.
+     */
+    static removeIssuesPopup() {
         if (MapVisualHelper.issuesPopup) {
             MapVisualHelper.issuesPopup.remove();
             MapVisualHelper.issuesPopup = null;
@@ -234,10 +242,11 @@ export class MapVisualHelper {
      * Extracts the "issue" field from a polygon feature.
      *
      * @param feature - A GeoJSON feature to extract issues from
-     * @returns A string of an issue description (can be empty)
+     * @returns A string array for an issue description (can be empty)
      */
-    private static _parseIssueFromFeature(feature: Feature): string | null {
-        return feature.properties?.issue || null;
+    private static _parseIssueFromFeature(feature: Feature): string[] {
+        const issue = feature.properties?.issue;
+        return issue ? [issue] : [];
     }
 
     /**
@@ -265,8 +274,7 @@ export class MapVisualHelper {
             </div>
         `;
 
-        if (MapVisualHelper.issuesPopup) MapVisualHelper.issuesPopup.remove();
-
+        MapVisualHelper.removeIssuesPopup();
         MapVisualHelper.issuesPopup = new Popup({ closeButton: true }).setLngLat(e.lngLat).setHTML(html).addTo(map);
     }
 
@@ -288,7 +296,7 @@ export class MapVisualHelper {
             }
         });
 
-        if (MapVisualHelper.issuesPopup) MapVisualHelper.issuesPopup.remove();
+        MapVisualHelper.removeIssuesPopup();
 
         return toHide;
     }

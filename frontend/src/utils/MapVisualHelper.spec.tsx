@@ -173,9 +173,21 @@ describe('MapVisualHelper', () => {
         expect(map.removeSource).toHaveBeenCalledWith('heatmap-layer');
     });
 
-    it('_parseIssues handles invalid JSON gracefully', () => {
-        const feature = { properties: { issues: 'not-json' } };
-        const result = (MapVisualHelper as any)._parseIssues(feature);
+    it('_parseIssueFromFeature returns issue as array when present', () => {
+        const feature = { properties: { issue: 'Example issue' } };
+        const result = (MapVisualHelper as any)._parseIssueFromFeature(feature);
+        expect(result).toEqual(['Example issue']);
+    });
+    
+    it('_parseIssueFromFeature returns empty array when issue is missing', () => {
+        const feature = { properties: {} };
+        const result = (MapVisualHelper as any)._parseIssueFromFeature(feature);
+        expect(result).toEqual([]);
+    });
+    
+    it('_parseIssueFromFeature returns empty array when properties is missing', () => {
+        const feature = {};
+        const result = (MapVisualHelper as any)._parseIssueFromFeature(feature);
         expect(result).toEqual([]);
     });
 });
