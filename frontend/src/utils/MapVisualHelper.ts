@@ -255,20 +255,21 @@ export class MapVisualHelper {
      */
     private static _handleClick(e: FeatureEvent) {
         const map = e.target as Map;
-        const feature = e.features?.[0];
-        if (!feature) return;
+        const features = e.features ?? [];
+        if (features.length === 0) return;
 
-        const issues = MapVisualHelper._parseIssues(feature);
-        const count = issues.length;
+        // Collect and flatten all issues from every feature, then de-duplicate.
+        const allIssues = features.flatMap((feature) => MapVisualHelper._parseIssues(feature));
+        const uniqueIssues = Array.from(new Set(allIssues));
+        const count = uniqueIssues.length;
 
+        // Build the HTML
         const html = `
-            <div style="
-                max-width: 250px;
-            ">
+            <div style="max-width: 250px;">
                 <div style="font-weight: bold;">
                     ${count === 0 ? 'No issues found' : `${count} issue${count > 1 ? 's' : ''} found`}
                 </div>
-                ${count > 0 ? issues.map((issue) => `<div style="margin-bottom: 4px;">${issue}</div>`).join('') : ''}
+                ${count > 0 ? uniqueIssues.map((issue) => `<div style="margin-bottom: 4px;">${issue}</div>`).join('') : ''}
             </div>
         `;
 

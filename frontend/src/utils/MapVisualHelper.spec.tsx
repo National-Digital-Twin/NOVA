@@ -86,7 +86,7 @@ describe('MapVisualHelper', () => {
         expect(mockRemove).toHaveBeenCalled();
         expect(popupRef.current).toBeNull();
     });
-
+    
     it('flyToLocation calls flyTo', () => {
         const mapRef = { current: { getMap: () => map } };
         MapVisualHelper.flyToLocation(mapRef as any, 10, 20, 5);
