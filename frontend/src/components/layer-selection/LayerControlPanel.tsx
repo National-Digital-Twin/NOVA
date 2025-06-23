@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useId } from 'react';
+import React, { useState, useMemo, useId, useEffect } from 'react';
 import {
     Paper,
     Drawer,
@@ -14,6 +14,7 @@ import {
     IconButton,
     Box,
     CircularProgress,
+    MenuItem,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
@@ -28,90 +29,90 @@ interface LayerControlPanelProps {
     mapRef: React.RefObject<MapRef>;
 }
 
-interface UserParam {
-    label: string;
-    type: 'number';
-    default: number;
+interface Attribute {
+    id: string;
+    description: string;
+    defaultValue: string | number;
+    valueType: 'number' | 'string';
+    options?: string[];
 }
 
 interface LayerItem {
+    id: string;
     name: string;
-    userAdjustableParameters: UserParam[];
+    attributes: Attribute[];
 }
 
-const layers: Record<string, LayerItem[]> = {
-    'Environmental protected sites': [
-        {
-            name: 'Areas of outstanding natural beauty',
-            userAdjustableParameters: [{ label: 'Distance from layer', type: 'number', default: 2 }],
-        },
-        {
-            name: 'Special protection areas',
-            userAdjustableParameters: [{ label: 'Distance from layer', type: 'number', default: 2 }],
-        },
-        {
-            name: 'Sites of special scientific interest',
-            userAdjustableParameters: [{ label: 'Distance from layer', type: 'number', default: 2 }],
-        },
-        {
-            name: 'Special areas of conservation',
-            userAdjustableParameters: [{ label: 'Distance from layer', type: 'number', default: 2 }],
-        },
-    ],
-    Weather: [
-        {
-            name: 'Wind speed',
-            userAdjustableParameters: [
-                { label: 'Set minimum windspeed (MW)', type: 'number', default: 2 },
-                { label: 'Set maximum windspeed (MW)', type: 'number', default: 2 },
-            ],
-        },
-    ],
-    Residential: [
-        {
-            name: 'Built up areas',
-            userAdjustableParameters: [{ label: 'Distance from layer', type: 'number', default: 2 }],
-        },
-    ],
-    'Network infrastructure': [],
-    Consumption: [],
-};
+interface LayerApiResponse {
+    categories: {
+        name: string;
+        items: LayerItem[];
+    }[];
+}
 
 const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
     const idPrefix = useId();
 
+    const [layers, setLayers] = useState<Record<string, LayerItem[]>>({});
     const [searchTerm, setSearchTerm] = useState('');
     const [open, setOpen] = useState(true);
-    const [checkedLayers, setCheckedLayers] = useState<Record<string, boolean>>(() => {
-        const init: Record<string, boolean> = {};
-        Object.values(layers)
-            .flat()
-            .forEach((item) => {
-                init[item.name] = true;
-            });
-        return init;
-    });
-
-    const defaultExpanded = Object.entries(layers).find(([, items]) => items.length > 0)?.[0] || '';
-    const [expandedPanels, setExpandedPanels] = useState<string[]>(defaultExpanded ? [defaultExpanded] : []);
-
-    // Now holds strings, not numbers
-    const [layerSettings, setLayerSettings] = useState<Record<string, Record<string, string>>>(() => {
-        const init: Record<string, Record<string, string>> = {};
-        Object.values(layers)
-            .flat()
-            .forEach((item) => {
-                init[item.name] = {};
-                item.userAdjustableParameters.forEach((p) => {
-                    init[item.name][p.label] = String(p.default);
-                });
-            });
-        return init;
-    });
-
+    const [loading, setLoading] = useState(false);
+    const [checkedLayers, setCheckedLayers] = useState<Record<string, boolean>>({});
+    const [layerSettings, setLayerSettings] = useState<Record<string, Record<string, string>>>({});
+    const [expandedPanels, setExpandedPanels] = useState<string[]>([]);
     const [propOpen, setPropOpen] = useState(false);
     const [currentLayer, setCurrentLayer] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
+    const [layersLoaded, setLayersLoaded] = useState(false);
+    const [loadError, setLoadError] = useState(false);
+
+    const fetchLayers = async () => {
+        try {
+            setLoadError(false);
+            const response = await fetch('/api/ui/layers');
+            if (!response.ok) throw new Error('API error');
+            const data: LayerApiResponse = await response.json();
+
+            const transformed: Record<string, LayerItem[]> = {};
+            const checks: Record<string, boolean> = {};
+            const defaults: Record<string, Record<string, string>> = {};
+
+            data.categories.forEach((category) => {
+                if (!category.items?.length) return;
+
+                transformed[category.name] = category.items.map((item) => {
+                    const attributes = item.attributes;
+
+                    checks[item.name] = true;
+                    defaults[item.name] = {};
+                    attributes.forEach((a) => {
+                        defaults[item.name][a.description] = String(a.defaultValue);
+                    });
+
+                    return {
+                        id: item.id,
+                        name: item.name,
+                        attributes,
+                    };
+                });
+            });
+
+            setLayers(transformed);
+            setCheckedLayers(checks);
+            setLayerSettings(defaults);
+
+            const firstCategory = Object.keys(transformed)[0];
+            if (firstCategory) setExpandedPanels([firstCategory]);
+
+            setLayersLoaded(true);
+        } catch (err) {
+            console.error('Failed to load layers', err);
+            setLoadError(true);
+        }
+    };
+
+    useEffect(() => {
+        fetchLayers();
+    }, []);
 
     const handleCheckboxChange = (name: string) => {
         setCheckedLayers((prev) => ({ ...prev, [name]: !prev[name] }));
@@ -126,7 +127,8 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
         setSearchTerm(v);
 
         if (!v.trim()) {
-            setExpandedPanels(defaultExpanded ? [defaultExpanded] : []);
+            const firstCategory = Object.keys(layers)[0];
+            setExpandedPanels(firstCategory ? [firstCategory] : []);
             return;
         }
 
@@ -140,7 +142,8 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
 
     const clearSearch = () => {
         setSearchTerm('');
-        setExpandedPanels(defaultExpanded ? [defaultExpanded] : []);
+        const firstCategory = Object.keys(layers)[0];
+        setExpandedPanels(firstCategory ? [firstCategory] : []);
     };
 
     const openProps = (name: string) => {
@@ -153,50 +156,42 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
         setCurrentLayer(null);
     };
 
-    // Store raw text on change
-    const handleParamChange = (paramLabel: string, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleParamChange = (label: string, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         if (!currentLayer) return;
         const raw = e.target.value;
         setLayerSettings((prev) => ({
             ...prev,
             [currentLayer]: {
                 ...prev[currentLayer],
-                [paramLabel]: raw,
+                [label]: raw,
             },
         }));
     };
 
-    // Only normalise when they leave the field
-    const handleParamBlur = (paramLabel: string) => {
+    const handleParamBlur = (label: string) => {
         if (!currentLayer) return;
-        const txt = layerSettings[currentLayer][paramLabel];
+        const txt = layerSettings[currentLayer][label];
         const num = Number(txt);
         const final = isNaN(num) ? '' : String(num);
         setLayerSettings((prev) => ({
             ...prev,
             [currentLayer]: {
                 ...prev[currentLayer],
-                [paramLabel]: final,
+                [label]: final,
             },
         }));
     };
 
     const confirmProps = () => {
-        // Here you could convert all layerSettings[currentLayer] values
-        // to numbers and store in another state if needed
         closeProps();
     };
 
     const handleApply = async () => {
         if (!mapRef.current) return;
-
         setLoading(true);
-        await new Promise((r) => setTimeout(r, 10000));
-
         const response = await fetch('/data/sample-polygons.json');
         if (!response.ok) throw new Error('Failed to fetch GeoJSON');
         const geojson = await response.json();
-
         MapVisualHelper.addOrUpdateHeatmapLayer(mapRef, geojson);
         setLoading(false);
     };
@@ -236,9 +231,40 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
                 </Accordion>
             );
         });
-    }, [searchTerm, expandedPanels, checkedLayers, idPrefix]);
+    }, [searchTerm, expandedPanels, checkedLayers, idPrefix, layers]);
 
     const hasSearchResults = filteredLayerEntries.some(Boolean);
+
+    if (!layersLoaded && !loadError) {
+        return null; // Don't render anything until API completes
+    }
+
+    if (loadError) {
+        return (
+            <Box
+                sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    bgcolor: 'rgba(255,255,255,0.6)',
+                    zIndex: 1400,
+                }}
+            >
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                    Failed to load layers. Please try again.
+                </Typography>
+                <Button variant="contained" onClick={fetchLayers}>
+                    Retry
+                </Button>
+            </Box>
+        );
+    }
 
     return (
         <>
@@ -329,17 +355,24 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
                             Object.values(layers)
                                 .flat()
                                 .find((li) => li.name === currentLayer)!
-                                .userAdjustableParameters.map((param) => (
+                                .attributes.map((attr) => (
                                     <TextField
-                                        key={param.label}
-                                        label={param.label}
-                                        type="number"
+                                        key={attr.id}
+                                        label={attr.description}
+                                        type={attr.valueType === 'number' ? 'number' : 'text'}
+                                        select={(attr.options?.length ?? 0) > 0}
                                         fullWidth
-                                        value={layerSettings[currentLayer][param.label]}
-                                        onChange={(e) => handleParamChange(param.label, e)}
-                                        onBlur={() => handleParamBlur(param.label)}
+                                        value={layerSettings[currentLayer][attr.description]}
+                                        onChange={(e) => handleParamChange(attr.description, e)}
+                                        onBlur={() => handleParamBlur(attr.description)}
                                         sx={{ mb: 3 }}
-                                    />
+                                    >
+                                        {attr.options?.map((option) => (
+                                            <MenuItem key={option} value={option}>
+                                                {option}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
                                 ))}
 
                         <Button variant="contained" fullWidth onClick={confirmProps}>

@@ -38,16 +38,6 @@ export class DataProviderUtils {
     public readLayersData(): LayersDTO {
         const fileContent = fs.readFileSync(this.layersDataFilePath, 'utf8');
         const layersData = JSON.parse(fileContent) as LayersDTO;
-
-        // Ensure each item has the active property
-        layersData.categories.forEach((category) => {
-            category.items.forEach((item) => {
-                if (item.active === undefined) {
-                    item.active = false; // Set default value if not present
-                }
-            });
-        });
-
         return layersData;
     }
 

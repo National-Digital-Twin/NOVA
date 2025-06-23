@@ -3,7 +3,6 @@ import { FeatureCollection, Feature, Point, Polygon } from 'geojson';
 import { UIController } from '../src/controllers/ui.controller';
 import { AnalysisRequestDTO } from '../src/models/analysis-request.model';
 import { AssetDTO } from '../src/models/asset.model';
-import { CategoryDTO, ItemDTO } from '../src/models/layers.model';
 import { LocationDTO, LocationsDTO } from '../src/models/location.model';
 import { substationService } from '../src/services/substation.service';
 import { dataProviderUtils } from '../src/utils/data-provider.utils';
@@ -100,14 +99,6 @@ describe('UIController', () => {
 
         // Mock the readLayersData method to process the data like the real implementation
         (dataProviderUtils.readLayersData as jest.Mock).mockImplementation(() => {
-            // Add active property to each item if it doesn't exist
-            mockLayersData.categories.forEach((category: CategoryDTO) => {
-                category.items.forEach((item: ItemDTO) => {
-                    if (item.active === undefined) {
-                        item.active = false; // Set default value if not present
-                    }
-                });
-            });
             return mockLayersData;
         });
 
@@ -357,14 +348,6 @@ describe('UIController', () => {
             // Verify that categories and items exist
             expect(responseData).toHaveProperty('categories');
             expect(responseData.categories[0]).toHaveProperty('items');
-
-            // Verify that each item has the active property
-            responseData.categories.forEach((category: CategoryDTO) => {
-                category.items.forEach((item: ItemDTO) => {
-                    expect(item).toHaveProperty('active');
-                    expect(item.active).toBe(false); // Default value should be false
-                });
-            });
         });
 
         it('should handle errors when retrieving layers data', () => {
@@ -1060,7 +1043,7 @@ describe('UIController', () => {
 
             expect(
                 (JSON.stringify(secondCoords) === JSON.stringify([-0.01, 0.02]) && JSON.stringify(thirdCoords) === JSON.stringify([0.02, -0.01])) ||
-                    (JSON.stringify(secondCoords) === JSON.stringify([0.02, -0.01]) && JSON.stringify(thirdCoords) === JSON.stringify([-0.01, 0.02]))
+                (JSON.stringify(secondCoords) === JSON.stringify([0.02, -0.01]) && JSON.stringify(thirdCoords) === JSON.stringify([-0.01, 0.02]))
             ).toBeTruthy();
         });
 
@@ -1121,7 +1104,7 @@ describe('UIController', () => {
 
             expect(
                 (JSON.stringify(secondCoords) === JSON.stringify([-0.01, 0.02]) && JSON.stringify(thirdCoords) === JSON.stringify([0.02, -0.01])) ||
-                    (JSON.stringify(secondCoords) === JSON.stringify([0.02, -0.01]) && JSON.stringify(thirdCoords) === JSON.stringify([-0.01, 0.02]))
+                (JSON.stringify(secondCoords) === JSON.stringify([0.02, -0.01]) && JSON.stringify(thirdCoords) === JSON.stringify([-0.01, 0.02]))
             ).toBeTruthy();
         });
 
