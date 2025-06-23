@@ -1,17 +1,7 @@
-/**
- * LayerControlPanel
- *
- * A React component that provides an interactive panel for selecting map layers to be used in Heatmap calculations.
- * Users can:
- * - Search for layers
- * - Expand/collapse grouped layer categories
- * - Toggle checkboxes to include/exclude layers
- * - Request a heatmap be calculated based on selected layers
- */
-
 import React, { useState, useMemo, useId } from 'react';
 import {
     Paper,
+    Drawer,
     Accordion,
     AccordionSummary,
     AccordionDetails,
@@ -23,104 +13,198 @@ import {
     InputAdornment,
     IconButton,
     Box,
+    CircularProgress,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import type { MapRef } from 'react-map-gl/maplibre';
+import { MapVisualHelper } from '../../utils/MapVisualHelper';
 
-import '../../App.scss';
+interface LayerControlPanelProps {
+    mapRef: React.RefObject<MapRef>;
+}
 
-// Types used internally by the component
-type LayerItem = { name: string };
-type LayerGroup = { [group: string]: LayerItem[] };
+interface UserParam {
+    label: string;
+    type: 'number';
+    default: number;
+}
 
-// Static layer data grouped by category
-const layers: LayerGroup = {
+interface LayerItem {
+    name: string;
+    userAdjustableParameters: UserParam[];
+}
+
+const layers: Record<string, LayerItem[]> = {
     'Environmental protected sites': [
-        { name: 'Areas of outstanding natural beauty' },
-        { name: 'Special protection areas' },
-        { name: 'Sites of special scientific interest' },
-        { name: 'Special areas of conservation' },
+        {
+            name: 'Areas of outstanding natural beauty',
+            userAdjustableParameters: [{ label: 'Distance from layer', type: 'number', default: 2 }],
+        },
+        {
+            name: 'Special protection areas',
+            userAdjustableParameters: [{ label: 'Distance from layer', type: 'number', default: 2 }],
+        },
+        {
+            name: 'Sites of special scientific interest',
+            userAdjustableParameters: [{ label: 'Distance from layer', type: 'number', default: 2 }],
+        },
+        {
+            name: 'Special areas of conservation',
+            userAdjustableParameters: [{ label: 'Distance from layer', type: 'number', default: 2 }],
+        },
     ],
-    Weather: [{ name: 'Wind speed' }],
-    Residential: [{ name: 'Built up areas' }],
+    Weather: [
+        {
+            name: 'Wind speed',
+            userAdjustableParameters: [
+                { label: 'Set minimum windspeed (MW)', type: 'number', default: 2 },
+                { label: 'Set maximum windspeed (MW)', type: 'number', default: 2 },
+            ],
+        },
+    ],
+    Residential: [
+        {
+            name: 'Built up areas',
+            userAdjustableParameters: [{ label: 'Distance from layer', type: 'number', default: 2 }],
+        },
+    ],
     'Network infrastructure': [],
     Consumption: [],
 };
 
-// Main layer panel component
-const LayerControlPanel = () => {
-    // Determine first non-empty category for initial expansion
-    const defaultExpandedCategory = Object.entries(layers).find(([, items]) => items.length > 0)?.[0] || '';
+const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
+    const idPrefix = useId();
 
-    const idPrefix = useId(); // Unique prefix for form controls
-
-    // State for search text input
     const [searchTerm, setSearchTerm] = useState('');
-
-    // Whether the panel is expanded or collapsed
     const [open, setOpen] = useState(true);
-
-    // Tracks which layers are checked
     const [checkedLayers, setCheckedLayers] = useState<Record<string, boolean>>(() => {
-        const initial: Record<string, boolean> = {};
-        Object.values(layers).forEach((group) => {
-            group.forEach((item) => {
-                initial[item.name] = true; // all checked by default
+        const init: Record<string, boolean> = {};
+        Object.values(layers)
+            .flat()
+            .forEach((item) => {
+                init[item.name] = true;
             });
-        });
-        return initial;
+        return init;
     });
 
-    // Which accordion panels are expanded
-    const [expandedPanels, setExpandedPanels] = useState<string[]>(defaultExpandedCategory ? [defaultExpandedCategory] : []);
+    const defaultExpanded = Object.entries(layers).find(([, items]) => items.length > 0)?.[0] || '';
+    const [expandedPanels, setExpandedPanels] = useState<string[]>(defaultExpanded ? [defaultExpanded] : []);
 
-    // Checkbox toggle handler
-    const handleCheckboxChange = (layerName: string) => {
-        setCheckedLayers((prev) => ({
-            ...prev,
-            [layerName]: !prev[layerName],
-        }));
+    // Now holds strings, not numbers
+    const [layerSettings, setLayerSettings] = useState<Record<string, Record<string, string>>>(() => {
+        const init: Record<string, Record<string, string>> = {};
+        Object.values(layers)
+            .flat()
+            .forEach((item) => {
+                init[item.name] = {};
+                item.userAdjustableParameters.forEach((p) => {
+                    init[item.name][p.label] = String(p.default);
+                });
+            });
+        return init;
+    });
+
+    const [propOpen, setPropOpen] = useState(false);
+    const [currentLayer, setCurrentLayer] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+
+    const handleCheckboxChange = (name: string) => {
+        setCheckedLayers((prev) => ({ ...prev, [name]: !prev[name] }));
     };
 
-    // Accordion toggle handler
     const handleAccordionToggle = (category: string) => {
         setExpandedPanels((prev) => (prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]));
     };
 
-    // Search change handler
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setSearchTerm(value);
+        const v = e.target.value;
+        setSearchTerm(v);
 
-        if (value.trim() === '') return;
+        if (!v.trim()) {
+            setExpandedPanels(defaultExpanded ? [defaultExpanded] : []);
+            return;
+        }
 
-        const lower = value.toLowerCase();
-        const matching = Object.entries(layers)
+        const lower = v.toLowerCase();
+        const matches = Object.entries(layers)
             .filter(([, items]) => items.some((item) => item.name.toLowerCase().includes(lower)))
-            .map(([category]) => category);
+            .map(([cat]) => cat);
 
-        setExpandedPanels(matching);
+        setExpandedPanels(matches);
     };
 
-    // Clear search and reset expanded panel
     const clearSearch = () => {
         setSearchTerm('');
-        setExpandedPanels(defaultExpandedCategory ? [defaultExpandedCategory] : []);
+        setExpandedPanels(defaultExpanded ? [defaultExpanded] : []);
     };
 
-    // Handle Apply button
-    const handleApply = () => {
-        console.log('Apply clicked');
+    const openProps = (name: string) => {
+        setCurrentLayer(name);
+        setPropOpen(true);
     };
 
-    // Memoised list of filtered layer entries
+    const closeProps = () => {
+        setPropOpen(false);
+        setCurrentLayer(null);
+    };
+
+    // Store raw text on change
+    const handleParamChange = (paramLabel: string, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        if (!currentLayer) return;
+        const raw = e.target.value;
+        setLayerSettings((prev) => ({
+            ...prev,
+            [currentLayer]: {
+                ...prev[currentLayer],
+                [paramLabel]: raw,
+            },
+        }));
+    };
+
+    // Only normalise when they leave the field
+    const handleParamBlur = (paramLabel: string) => {
+        if (!currentLayer) return;
+        const txt = layerSettings[currentLayer][paramLabel];
+        const num = Number(txt);
+        const final = isNaN(num) ? '' : String(num);
+        setLayerSettings((prev) => ({
+            ...prev,
+            [currentLayer]: {
+                ...prev[currentLayer],
+                [paramLabel]: final,
+            },
+        }));
+    };
+
+    const confirmProps = () => {
+        // Here you could convert all layerSettings[currentLayer] values
+        // to numbers and store in another state if needed
+        closeProps();
+    };
+
+    const handleApply = async () => {
+        if (!mapRef.current) return;
+
+        setLoading(true);
+        await new Promise((r) => setTimeout(r, 10000));
+
+        const response = await fetch('/data/sample-polygons.json');
+        if (!response.ok) throw new Error('Failed to fetch GeoJSON');
+        const geojson = await response.json();
+
+        MapVisualHelper.addOrUpdateHeatmapLayer(mapRef, geojson);
+        setLoading(false);
+    };
+
     const filteredLayerEntries = useMemo(() => {
         return Object.entries(layers).map(([category, items]) => {
-            const filteredItems = items.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase()));
-            if (filteredItems.length === 0) return null;
+            const visible = items.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase()));
+            if (!visible.length) return null;
 
             return (
                 <Accordion
@@ -134,18 +218,17 @@ const LayerControlPanel = () => {
                         <Typography>{category}</Typography>
                     </AccordionSummary>
                     <AccordionDetails sx={{ pt: 0.5, pb: 0 }}>
-                        {filteredItems.map((item) => {
+                        {visible.map((item) => {
                             const checkboxId = `${idPrefix}-${item.name.replace(/\s+/g, '-')}`;
                             return (
                                 <Box key={item.name} className="layer-item">
                                     <label htmlFor={checkboxId}>
                                         <Typography variant="body2">{item.name}</Typography>
-                                        <Checkbox
-                                            id={checkboxId}
-                                            checked={checkedLayers[item.name] || false}
-                                            onChange={() => handleCheckboxChange(item.name)}
-                                        />
+                                        <Checkbox id={checkboxId} checked={checkedLayers[item.name]} onChange={() => handleCheckboxChange(item.name)} />
                                     </label>
+                                    <IconButton size="small" onClick={() => openProps(item.name)}>
+                                        <MoreVertIcon fontSize="small" />
+                                    </IconButton>
                                 </Box>
                             );
                         })}
@@ -159,14 +242,12 @@ const LayerControlPanel = () => {
 
     return (
         <>
-            {/* Toggle button */}
             <Box className="layer-panel-toggle" sx={{ left: open ? '430px' : '1rem' }}>
-                <IconButton onClick={() => setOpen(!open)}>
+                <IconButton onClick={() => setOpen((o) => !o)}>
                     <ArrowBackIosNewIcon fontSize="small" sx={{ transform: !open ? 'rotate(180deg)' : 'none' }} />
                 </IconButton>
             </Box>
 
-            {/* Panel content */}
             {open && (
                 <Paper className="layer-panel" elevation={4}>
                     <Box className="layer-panel-header">
@@ -222,6 +303,69 @@ const LayerControlPanel = () => {
                         </Button>
                     </Box>
                 </Paper>
+            )}
+
+            <Drawer anchor="left" open={propOpen} onClose={closeProps}>
+                <Box sx={{ width: 280 }}>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            pl: 2,
+                            pr: 1,
+                            pt: 1,
+                            mb: 2,
+                        }}
+                    >
+                        <Typography variant="h6">Properties panel</Typography>
+                        <IconButton onClick={closeProps}>
+                            <HighlightOffIcon />
+                        </IconButton>
+                    </Box>
+
+                    <Box sx={{ px: 2 }}>
+                        {currentLayer &&
+                            Object.values(layers)
+                                .flat()
+                                .find((li) => li.name === currentLayer)!
+                                .userAdjustableParameters.map((param) => (
+                                    <TextField
+                                        key={param.label}
+                                        label={param.label}
+                                        type="number"
+                                        fullWidth
+                                        value={layerSettings[currentLayer][param.label]}
+                                        onChange={(e) => handleParamChange(param.label, e)}
+                                        onBlur={() => handleParamBlur(param.label)}
+                                        sx={{ mb: 3 }}
+                                    />
+                                ))}
+
+                        <Button variant="contained" fullWidth onClick={confirmProps}>
+                            CONFIRM
+                        </Button>
+                    </Box>
+                </Box>
+            </Drawer>
+
+            {loading && (
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        bgcolor: 'rgba(255,255,255,0.6)',
+                        zIndex: 1400,
+                    }}
+                >
+                    <CircularProgress />
+                </Box>
             )}
         </>
     );

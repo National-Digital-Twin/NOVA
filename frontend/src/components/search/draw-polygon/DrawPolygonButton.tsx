@@ -58,6 +58,12 @@ const DrawPolygonButton = ({ onPolygonDrawn, mapRef, drawRef, isVisible, polygon
         const map = mapRef.current;
         const draw = drawRef.current;
 
+        // Prevent double draw
+        const mode = draw.getMode();
+        if (mode.startsWith('draw')) {
+            return;
+        }
+
         const preventEdit = (e: maplibregl.MapMouseEvent & { target: maplibregl.Map }) => {
             const features = map.queryRenderedFeatures([e.point.x, e.point.y], {
                 layers: ['gl-draw-polygon-fill.cold'],
@@ -88,6 +94,12 @@ const DrawPolygonButton = ({ onPolygonDrawn, mapRef, drawRef, isVisible, polygon
 
         const map = mapRef.current;
         const draw = drawRef.current;
+
+        // Prevent double draw
+        const mode = draw.getMode();
+        if (mode.startsWith('draw')) {
+            return;
+        }
 
         setIsActive(true);
         draw.changeMode('draw_polygon');
