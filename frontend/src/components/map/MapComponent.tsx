@@ -29,7 +29,7 @@ const MapComponent = () => {
         if (mapRef.current && userDrawnPolygon && cachedHeatMap) {
             mapRef.current.getMap().once('styledata', () => {
                 MapVisualHelper.addOrUpdateHeatmapLayer(mapRef, cachedHeatMap);
-                MapVisualHelper.applyDimmedMaskAndPanToPolygon(mapRef.current.getMap(), userDrawnPolygon)
+                MapVisualHelper.applyDimmedMaskAndPanToPolygon(mapRef.current.getMap(), userDrawnPolygon);
             });
         }
     };
