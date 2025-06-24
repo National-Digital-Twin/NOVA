@@ -5,6 +5,7 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
+        "start": "npm run dev",
         "build": "tsc -b && vite build --mode prod",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",

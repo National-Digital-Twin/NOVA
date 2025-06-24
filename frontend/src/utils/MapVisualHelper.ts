@@ -195,6 +195,7 @@ export class MapVisualHelper {
                 paint: {
                     'fill-color': ['match', ['get', 'suitability'], 'red', '#e74c3c', 'amber', '#f39c12', 'green', '#27ae60', '#cccccc'],
                     'fill-opacity': 0.5,
+                    'fill-antialias': false,
                 },
             });
         } else {
@@ -224,6 +225,13 @@ export class MapVisualHelper {
         if (map.getLayer(id)) map.removeLayer(id);
         if (map.getSource(id)) map.removeSource(id);
 
+        MapVisualHelper.removeIssuesPopup();
+    }
+
+    /**
+     * Removes the issue popup if present on a heatmap.
+     */
+    static removeIssuesPopup() {
         if (MapVisualHelper.issuesPopup) {
             MapVisualHelper.issuesPopup.remove();
             MapVisualHelper.issuesPopup = null;
@@ -231,21 +239,14 @@ export class MapVisualHelper {
     }
 
     /**
-     * Extracts and normalises the "issues" array from a polygon feature.
-     * Handles both array and stringified JSON input.
+     * Extracts the "issue" field from a polygon feature.
      *
      * @param feature - A GeoJSON feature to extract issues from
-     * @returns A string array of issues (can be empty)
+     * @returns A string array for an issue description (can be empty)
      */
-    private static _parseIssues(feature: Feature): string[] {
-        const raw = feature.properties?.issues;
-        if (Array.isArray(raw)) return raw;
-        try {
-            const parsed = JSON.parse(raw);
-            return Array.isArray(parsed) ? parsed : [];
-        } catch {
-            return [];
-        }
+    private static _parseIssueFromFeature(feature: Feature): string[] {
+        const issue = feature.properties?.issue;
+        return issue ? [issue] : [];
     }
 
     /**
@@ -259,7 +260,7 @@ export class MapVisualHelper {
         if (features.length === 0) return;
 
         // Collect and flatten all issues from every feature, then de-duplicate.
-        const allIssues = features.flatMap((feature) => MapVisualHelper._parseIssues(feature));
+        const allIssues = features.flatMap((feature) => MapVisualHelper._parseIssueFromFeature(feature));
         const uniqueIssues = Array.from(new Set(allIssues));
         const count = uniqueIssues.length;
 
@@ -273,8 +274,7 @@ export class MapVisualHelper {
             </div>
         `;
 
-        if (MapVisualHelper.issuesPopup) MapVisualHelper.issuesPopup.remove();
-
+        MapVisualHelper.removeIssuesPopup();
         MapVisualHelper.issuesPopup = new Popup({ closeButton: true }).setLngLat(e.lngLat).setHTML(html).addTo(map);
     }
 
@@ -296,7 +296,7 @@ export class MapVisualHelper {
             }
         });
 
-        if (MapVisualHelper.issuesPopup) MapVisualHelper.issuesPopup.remove();
+        MapVisualHelper.removeIssuesPopup();
 
         return toHide;
     }

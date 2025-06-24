@@ -3,6 +3,9 @@ import type { FeatureCollection, Geometry } from 'geojson';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMockMapRef } from '../../../test/test-utils';
 import SearchPanel from './SearchPanel';
+import type MapboxDraw from '@mapbox/mapbox-gl-draw';
+
+const mockDrawRef = { current: {} } as unknown as React.RefObject<MapboxDraw>;
 
 vi.mock('./search-input/SearchInput', () => ({
     default: ({ onSearchResultClick }: { onSearchResultClick: (lat: number, lon: number, zoom: number) => void }) => (
@@ -89,7 +92,7 @@ describe('SearchPanel', () => {
     });
 
     it('renders search input and draw button by default', () => {
-        render(<SearchPanel mapRef={mockMapRef} showLayerControl={() => {}} hideLayerControl={() => {}} />);
+        render(<SearchPanel mapRef={mockMapRef} showLayerControl={() => {}} hideLayerControl={() => {}} drawRef={mockDrawRef} />);
         expect(screen.getByTestId('search-input')).toBeInTheDocument();
         expect(screen.getByTestId('draw-polygon-button')).toBeInTheDocument();
     });

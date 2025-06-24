@@ -9,7 +9,7 @@ import { MapVisualHelper } from '../../../utils/MapVisualHelper';
 interface DrawPolygonButtonProps {
     onPolygonDrawn: (geojson: FeatureCollection<Geometry>) => void;
     mapRef: React.RefObject<MapRef>;
-    drawRef: React.RefObject<MapboxDraw>;
+    drawRef: React.RefObject<MapboxDraw | null>;
     isVisible: boolean;
     polygonDrawn: boolean;
 }
@@ -26,6 +26,8 @@ const DrawPolygonButton = ({ onPolygonDrawn, mapRef, drawRef, isVisible, polygon
 
         const map = mapRef.current;
         const draw = drawRef.current;
+
+        if (!draw) return;
 
         const mode = draw.getMode();
         if (mode.startsWith('draw')) {
@@ -53,10 +55,12 @@ const DrawPolygonButton = ({ onPolygonDrawn, mapRef, drawRef, isVisible, polygon
     }, [polygonDrawn, mapRef, drawRef]);
 
     const handleClick = useCallback(() => {
-        if (!mapRef.current || !drawRef.current || polygonDrawn) return;
+        if (!mapRef.current || !drawRef || polygonDrawn) return;
 
         const map = mapRef.current;
         const draw = drawRef.current;
+
+        if (!draw) return;
 
         const mode = draw.getMode();
         if (mode.startsWith('draw')) {

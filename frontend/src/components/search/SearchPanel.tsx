@@ -4,17 +4,16 @@ import type { Feature, FeatureCollection, Point } from 'geojson';
 import maplibregl from 'maplibre-gl';
 import { useCallback, useRef, useState } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
-import useMapboxDraw from '../../hooks/useMapboxDraw';
-import { usePolygonHandlers } from '../../hooks/usePolygonHandlers';
-import { MapVisualHelper } from '../../utils/MapVisualHelper';
-import type { Variation } from './add-asset/AddAsset';
-import AddAssetButton from './add-asset/AddAssetButton';
-import AssetLayer from './asset-layer/AssetLayer';
 import DeletePolygonButton from './delete-polygon/DeletePolygonButton';
 import DrawPolygonButton from './draw-polygon/DrawPolygonButton';
 import EditPolygonButton from './edit-polygon/EditPolygonButton';
 import HideLayersButton from './hide-map-layers/HideLayersButton';
 import SearchInput from './search-input/SearchInput';
+import { MapVisualHelper } from '../../utils/MapVisualHelper';
+import { usePolygonHandlers } from '../../hooks/usePolygonHandlers';
+import type { Variation } from './add-asset/AddAsset';
+import AddAssetButton from './add-asset/AddAssetButton';
+import AssetLayer from './asset-layer/AssetLayer';
 
 const SearchContainer = styled(Box)({
     display: 'flex',
@@ -42,12 +41,12 @@ const StyledDivider = styled(Divider)(({ theme }) => ({
 
 interface SearchPanelProps {
     mapRef: React.RefObject<MapRef>;
+    drawRef: React.RefObject<MapboxDraw | null>;
     showLayerControl: () => void;
     hideLayerControl: () => void;
 }
 
-const SearchPanel = ({ mapRef, showLayerControl, hideLayerControl }: SearchPanelProps) => {
-    const drawRef = useMapboxDraw(mapRef) as React.RefObject<MapboxDraw>;
+const SearchPanel = ({ mapRef, drawRef, showLayerControl, hideLayerControl }: SearchPanelProps) => {
     const popupRef = useRef<maplibregl.Popup | null>(null);
     const [polygonDrawn, setPolygonDrawn] = useState(false);
     const [polygonConfirmed, setPolygonConfirmed] = useState(false);
