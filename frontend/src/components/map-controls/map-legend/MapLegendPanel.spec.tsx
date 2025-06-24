@@ -12,10 +12,10 @@ const createMockMap = () => {
             listeners[event].push(callback);
         }),
         off: vi.fn((event, callback) => {
-            listeners[event] = (listeners[event] || []).filter(fn => fn !== callback);
+            listeners[event] = (listeners[event] || []).filter((fn) => fn !== callback);
         }),
         fire: (event: string) => {
-            (listeners[event] || []).forEach(fn => fn());
+            (listeners[event] || []).forEach((fn) => fn());
         },
     };
 

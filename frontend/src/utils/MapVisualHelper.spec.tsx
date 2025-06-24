@@ -15,28 +15,23 @@ const createMockMap = () => {
         removeSource: vi.fn(),
         setLayoutProperty: vi.fn(),
         getStyle: vi.fn(() => ({
-            layers: [
-                { id: 'background' },
-                { id: 'basemap' },
-                { id: 'heatmap-layer' },
-                { id: 'gl-custom-layer' }
-            ]
+            layers: [{ id: 'background' }, { id: 'basemap' }, { id: 'heatmap-layer' }, { id: 'gl-custom-layer' }],
         })),
         on: vi.fn((event, cb) => {
             listeners[event] = listeners[event] || [];
             listeners[event].push(cb);
         }),
         off: vi.fn((event, cb) => {
-            listeners[event] = (listeners[event] || []).filter(fn => fn !== cb);
+            listeners[event] = (listeners[event] || []).filter((fn) => fn !== cb);
         }),
         fire: (event: string) => {
-            (listeners[event] || []).forEach(fn => fn());
+            (listeners[event] || []).forEach((fn) => fn());
         },
         project: vi.fn(() => ({ x: 100, y: 100 })),
         unproject: vi.fn(() => ({ lng: 3, lat: 6.005 })),
         getCanvas: () => ({ style: { cursor: '' } }),
         flyTo: vi.fn(),
-        setCenter: vi.fn()
+        setCenter: vi.fn(),
     };
 };
 
@@ -50,7 +45,15 @@ describe('MapVisualHelper', () => {
     it('applyDimmedMaskAndPanToPolygon adds mask and pans', () => {
         const polygon: Polygon = {
             type: 'Polygon',
-            coordinates: [[[1, 1], [5, 1], [5, 5], [1, 5], [1, 1]]]
+            coordinates: [
+                [
+                    [1, 1],
+                    [5, 1],
+                    [5, 5],
+                    [1, 5],
+                    [1, 1],
+                ],
+            ],
         };
         map.getSource.mockReturnValue(undefined);
         map.getLayer.mockReturnValue(undefined);
@@ -71,7 +74,14 @@ describe('MapVisualHelper', () => {
     it('getConfirmationPopupCoordinates calculates offset location', () => {
         const polygon: Polygon = {
             type: 'Polygon',
-            coordinates: [[[1, 1], [5, 1], [3, 6], [1, 1]]]
+            coordinates: [
+                [
+                    [1, 1],
+                    [5, 1],
+                    [3, 6],
+                    [1, 1],
+                ],
+            ],
         };
         const result = MapVisualHelper.getConfirmationPopupCoordinates(polygon, map);
         expect(map.project).toHaveBeenCalled();
@@ -86,7 +96,7 @@ describe('MapVisualHelper', () => {
         expect(mockRemove).toHaveBeenCalled();
         expect(popupRef.current).toBeNull();
     });
-    
+
     it('flyToLocation calls flyTo', () => {
         const mapRef = { current: { getMap: () => map } };
         MapVisualHelper.flyToLocation(mapRef as any, 10, 20, 5);
@@ -104,20 +114,30 @@ describe('MapVisualHelper', () => {
     });
 
     it('extractFirstPolygon returns polygon', () => {
-        const geojson: FeatureCollection = { type: 'FeatureCollection', features: [{
-            geometry: { type: 'Polygon', coordinates: [] },
-            type: 'Feature',
-            properties: null
-        }] };
+        const geojson: FeatureCollection = {
+            type: 'FeatureCollection',
+            features: [
+                {
+                    geometry: { type: 'Polygon', coordinates: [] },
+                    type: 'Feature',
+                    properties: null,
+                },
+            ],
+        };
         expect(MapVisualHelper.extractFirstPolygon(geojson)).not.toBeNull();
     });
 
     it('extractFirstPolygon returns null for invalid type', () => {
-        const geojson: FeatureCollection = { type: 'FeatureCollection', features: [{
-            geometry: { type: 'LineString', coordinates: [] },
-            type: 'Feature',
-            properties: null
-        }] };
+        const geojson: FeatureCollection = {
+            type: 'FeatureCollection',
+            features: [
+                {
+                    geometry: { type: 'LineString', coordinates: [] },
+                    type: 'Feature',
+                    properties: null,
+                },
+            ],
+        };
         expect(MapVisualHelper.extractFirstPolygon(geojson)).toBeNull();
     });
 
@@ -162,13 +182,13 @@ describe('MapVisualHelper', () => {
 
     it('removeHeatmapLayer does nothing if no popup', () => {
         (MapVisualHelper as any).issuesPopup = null;
-    
+
         map.getLayer.mockReturnValue(true);
         map.getSource.mockReturnValue(true);
-    
+
         const mapRef = { current: { getMap: () => map } };
         MapVisualHelper.removeHeatmapLayer(mapRef as any);
-    
+
         expect(map.removeLayer).toHaveBeenCalledWith('heatmap-layer');
         expect(map.removeSource).toHaveBeenCalledWith('heatmap-layer');
     });
@@ -178,13 +198,13 @@ describe('MapVisualHelper', () => {
         const result = (MapVisualHelper as any)._parseIssueFromFeature(feature);
         expect(result).toEqual(['Example issue']);
     });
-    
+
     it('_parseIssueFromFeature returns empty array when issue is missing', () => {
         const feature = { properties: {} };
         const result = (MapVisualHelper as any)._parseIssueFromFeature(feature);
         expect(result).toEqual([]);
     });
-    
+
     it('_parseIssueFromFeature returns empty array when properties is missing', () => {
         const feature = {};
         const result = (MapVisualHelper as any)._parseIssueFromFeature(feature);

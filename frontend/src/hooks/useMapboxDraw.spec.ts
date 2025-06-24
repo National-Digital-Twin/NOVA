@@ -39,19 +39,18 @@ describe('useMapboxDraw', () => {
 
     it('should initialise draw control when map is ready', () => {
         const { result } = renderHook(() => useMapboxDraw(mockMapRef, true));
-        expect(MapboxDraw).toHaveBeenCalledWith(expect.objectContaining({
-            displayControlsDefault: false,
-            styles: expect.any(Array),
-        }));
+        expect(MapboxDraw).toHaveBeenCalledWith(
+            expect.objectContaining({
+                displayControlsDefault: false,
+                styles: expect.any(Array),
+            })
+        );
         expect(mockAddControl).toHaveBeenCalled();
         expect(result.current.current).toBeInstanceOf(MapboxDraw);
     });
 
     it('should not re-initialise if drawRef already exists', () => {
-        const { result, rerender } = renderHook(
-            ({ isReady }) => useMapboxDraw(mockMapRef, isReady),
-            { initialProps: { isReady: true } }
-        );
+        const { result, rerender } = renderHook(({ isReady }) => useMapboxDraw(mockMapRef, isReady), { initialProps: { isReady: true } });
         expect(MapboxDraw).toHaveBeenCalledTimes(1);
         rerender({ isReady: true });
         expect(MapboxDraw).toHaveBeenCalledTimes(1); // Still 1 — doesn't re-init

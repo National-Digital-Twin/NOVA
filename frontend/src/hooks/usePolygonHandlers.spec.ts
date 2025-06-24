@@ -74,7 +74,7 @@ describe('usePolygonHandlers', () => {
                 popupRef,
                 setPolygonDrawn,
                 setPolygonConfirmed,
-                showLayerControl
+                showLayerControl,
             })
         );
 
