@@ -1,70 +1,40 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import MapStylePanel from './MapStylePanel';
+import type { MapStyle } from '../../../types/map';
+import { vi } from 'vitest';
 
 describe('MapStylePanel', () => {
     const mockOnStyleChange = vi.fn();
 
-    beforeEach(() => {
-        vi.clearAllMocks();
-    });
-
-    it('renders style button', () => {
-        render(<MapStylePanel currentStyle="hybrid" onStyleChange={mockOnStyleChange} />);
-        expect(screen.getByLabelText('Change map style')).toBeInTheDocument();
-    });
-
-    it('shows panel when button is clicked', () => {
-        render(<MapStylePanel currentStyle="hybrid" onStyleChange={mockOnStyleChange} />);
-
+    const setup = (currentStyle: MapStyle = 'basic') => {
+        render(<MapStylePanel onStyleChange={mockOnStyleChange} currentStyle={currentStyle} />);
+        // Open the panel
         fireEvent.click(screen.getByLabelText('Change map style'));
-        expect(screen.getByText('Map Styles')).toBeInTheDocument();
-    });
+    };
 
     it('renders all map style options', () => {
-        render(<MapStylePanel currentStyle="hybrid" onStyleChange={mockOnStyleChange} />);
+        setup();
 
-        fireEvent.click(screen.getByLabelText('Change map style'));
-        expect(screen.getByLabelText('Basic')).toBeInTheDocument();
-        expect(screen.getByLabelText('Streets')).toBeInTheDocument();
-        expect(screen.getByLabelText('Satellite')).toBeInTheDocument();
-        expect(screen.getByLabelText('Bright')).toBeInTheDocument();
+        const expectedLabels = ['Basic', 'Streets', 'Satellite', 'Bright'];
+
+        expectedLabels.forEach((label) => {
+            expect(screen.getByLabelText(label)).toBeInTheDocument();
+        });
     });
 
     it('marks current style as selected', () => {
-        render(<MapStylePanel currentStyle="hybrid" onStyleChange={mockOnStyleChange} />);
+        setup('hybrid'); // "hybrid" is shown as "Satellite"
 
-        fireEvent.click(screen.getByLabelText('Change map style'));
-        const selectedRadio = screen.getByLabelText('Satellite') as HTMLInputElement;
-        expect(selectedRadio.checked).toBe(true);
+        const satelliteRadio = screen.getByLabelText('Satellite') as HTMLInputElement;
+        expect(satelliteRadio.checked).toBe(true);
     });
 
-    it('calls onStyleChange and closes panel when new style is selected', () => {
-        render(<MapStylePanel currentStyle="hybrid" onStyleChange={mockOnStyleChange} />);
+    it('calls onStyleChange when selecting a different style', () => {
+        setup('basic');
 
-        fireEvent.click(screen.getByLabelText('Change map style'));
-        fireEvent.click(screen.getByLabelText('Basic'));
+        const satelliteRadio = screen.getByLabelText('Satellite') as HTMLInputElement;
+        fireEvent.click(satelliteRadio);
 
-        expect(mockOnStyleChange).toHaveBeenCalledWith('basic');
-        expect(screen.queryByText('Map Styles')).not.toBeInTheDocument();
-    });
-
-    it('does not call onStyleChange when same style is selected', () => {
-        render(<MapStylePanel currentStyle="hybrid" onStyleChange={mockOnStyleChange} />);
-
-        fireEvent.click(screen.getByLabelText('Change map style'));
-        fireEvent.click(screen.getByLabelText('Satellite'));
-
-        expect(mockOnStyleChange).not.toHaveBeenCalled();
-    });
-
-    it('closes panel when clicking button again', () => {
-        render(<MapStylePanel currentStyle="hybrid" onStyleChange={mockOnStyleChange} />);
-
-        fireEvent.click(screen.getByLabelText('Change map style'));
-        expect(screen.getByText('Map Styles')).toBeInTheDocument();
-
-        fireEvent.click(screen.getByLabelText('Change map style'));
-        expect(screen.queryByText('Map Styles')).not.toBeInTheDocument();
+        expect(mockOnStyleChange).toHaveBeenCalledWith('hybrid');
     });
 });

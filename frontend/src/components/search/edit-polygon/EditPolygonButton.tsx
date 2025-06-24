@@ -39,7 +39,6 @@ const EditPolygonButton = ({ onPolygonEdited, hideLayerControl, mapRef, drawRef,
         const polygonFeatureId = MapVisualHelper.getFeatureCollection(draw).features[0]?.id;
 
         if (!polygon || !polygonFeatureId) {
-            console.warn('No valid polygon to edit');
             return;
         }
 
