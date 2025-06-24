@@ -19,6 +19,7 @@ export class MapVisualHelper {
     private static readonly maskLayerId = 'mask-layer';
     private static readonly heatmapLayerId = 'heatmap-layer';
     private static issuesPopup: Popup | null = null;
+    private static cachedHeatmapGeojson: FeatureCollection | null = null;
 
     /**
      * Applies a dimmed mask over the entire map except inside the given polygon and centers the map on that polygon.
@@ -187,6 +188,7 @@ export class MapVisualHelper {
 
         if (!map.getSource(id)) {
             map.addSource(id, { type: 'geojson', data: geojson });
+            MapVisualHelper.cachedHeatmapGeojson = geojson;
 
             map.addLayer({
                 id,
@@ -239,43 +241,19 @@ export class MapVisualHelper {
     }
 
     /**
-     * Extracts the "issue" field from a polygon feature.
-     *
-     * @param feature - A GeoJSON feature to extract issues from
-     * @returns A string array for an issue description (can be empty)
+     * Setter for cached heatmap geojson data.
+     * @param geojson geojson of the polygons for cached heatmap contents.
      */
-    private static _parseIssueFromFeature(feature: Feature): string[] {
-        const issue = feature.properties?.issue;
-        return issue ? [issue] : [];
+    static setCachedHeatmapGeojson(geojson: FeatureCollection) {
+        this.cachedHeatmapGeojson = geojson;
     }
 
     /**
-     * Shows a popup when a polygon is clicked, listing all issues.
-     *
-     * @param e - Click event with feature context
+     * Getter for cached heatmap geojson data.
+     * @returns geojson of the polygons for cached heatmap contents.
      */
-    private static _handleClick(e: FeatureEvent) {
-        const map = e.target as Map;
-        const features = e.features ?? [];
-        if (features.length === 0) return;
-
-        // Collect and flatten all issues from every feature, then de-duplicate.
-        const allIssues = features.flatMap((feature) => MapVisualHelper._parseIssueFromFeature(feature));
-        const uniqueIssues = Array.from(new Set(allIssues));
-        const count = uniqueIssues.length;
-
-        // Build the HTML
-        const html = `
-            <div style="max-width: 250px;">
-                <div style="font-weight: bold;">
-                    ${count === 0 ? 'No issues found' : `${count} issue${count > 1 ? 's' : ''} found`}
-                </div>
-                ${count > 0 ? uniqueIssues.map((issue) => `<div style="margin-bottom: 4px;">${issue}</div>`).join('') : ''}
-            </div>
-        `;
-
-        MapVisualHelper.removeIssuesPopup();
-        MapVisualHelper.issuesPopup = new Popup({ closeButton: true }).setLngLat(e.lngLat).setHTML(html).addTo(map);
+    static getCachedHeatmapGeojson(): FeatureCollection | null {
+        return this.cachedHeatmapGeojson;
     }
 
     /**
@@ -313,5 +291,45 @@ export class MapVisualHelper {
                 map.setLayoutProperty(id, 'visibility', 'visible');
             }
         });
+    }
+
+    /**
+     * Extracts the "issue" field from a polygon feature.
+     *
+     * @param feature - A GeoJSON feature to extract issues from
+     * @returns A string array for an issue description (can be empty)
+     */
+    private static _parseIssueFromFeature(feature: Feature): string[] {
+        const issue = feature.properties?.issue;
+        return issue ? [issue] : [];
+    }
+
+    /**
+     * Shows a popup when a polygon is clicked, listing all issues.
+     *
+     * @param e - Click event with feature context
+     */
+    private static _handleClick(e: FeatureEvent) {
+        const map = e.target as Map;
+        const features = e.features ?? [];
+        if (features.length === 0) return;
+
+        // Collect and flatten all issues from every feature, then de-duplicate.
+        const allIssues = features.flatMap((feature) => MapVisualHelper._parseIssueFromFeature(feature));
+        const uniqueIssues = Array.from(new Set(allIssues));
+        const count = uniqueIssues.length;
+
+        // Build the HTML
+        const html = `
+            <div style="max-width: 250px;">
+                <div style="font-weight: bold;">
+                    ${count === 0 ? 'No issues found' : `${count} issue${count > 1 ? 's' : ''} found`}
+                </div>
+                ${count > 0 ? uniqueIssues.map((issue) => `<div style="margin-bottom: 4px;">${issue}</div>`).join('') : ''}
+            </div>
+        `;
+
+        MapVisualHelper.removeIssuesPopup();
+        MapVisualHelper.issuesPopup = new Popup({ closeButton: true }).setLngLat(e.lngLat).setHTML(html).addTo(map);
     }
 }
