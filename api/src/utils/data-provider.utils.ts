@@ -135,49 +135,49 @@ export class DataProviderUtils {
     }
 
     public getSpecialAreasOfConservationLayerData(): FeatureCollection<MultiPolygon> {
-        const fileContent = fs.readFileSync(this.specialAreasOfConservationLayerDataFilePath, 'utf-8');
+        const fileContent = fs.readFileSync(this.specialAreasOfConservationLayerDataFilePath, 'utf8');
 
         return JSON.parse(fileContent) as FeatureCollection<MultiPolygon>;
     }
 
     public getSpecialAreasOfConservation2KmLayerData(): FeatureCollection<MultiPolygon> {
-        const fileContent = fs.readFileSync(this.specialAreasOfConservation2KmLayerDataFilePath, 'utf-8');
+        const fileContent = fs.readFileSync(this.specialAreasOfConservation2KmLayerDataFilePath, 'utf8');
 
         return JSON.parse(fileContent) as FeatureCollection<MultiPolygon>;
     }
 
     public getSitesOfSpecialScientificInterestLayerData(): FeatureCollection<MultiPolygon> {
-        const fileContent = fs.readFileSync(this.sitesOfSpecialScientificInterestLayerDataFilePath, 'utf-8');
+        const fileContent = fs.readFileSync(this.sitesOfSpecialScientificInterestLayerDataFilePath, 'utf8');
 
         return JSON.parse(fileContent) as FeatureCollection<MultiPolygon>;
     }
 
     public getSitesOfSpecialScientificInterest2KmLayerData(): FeatureCollection<MultiPolygon> {
-        const fileContent = fs.readFileSync(this.sitesOfSpecialScientificInterest2KmLayerDataFilePath, 'utf-8');
+        const fileContent = fs.readFileSync(this.sitesOfSpecialScientificInterest2KmLayerDataFilePath, 'utf8');
 
         return JSON.parse(fileContent) as FeatureCollection<MultiPolygon>;
     }
 
     public getBuiltupAreasLayerData(): FeatureCollection<MultiPolygon> {
-        const fileContent = fs.readFileSync(this.builtupAreasLayerDataFilePath, 'utf-8');
+        const fileContent = fs.readFileSync(this.builtupAreasLayerDataFilePath, 'utf8');
 
         return JSON.parse(fileContent) as FeatureCollection<MultiPolygon>;
     }
 
     public getBuiltupAreas2KmLayerData(): FeatureCollection<MultiPolygon> {
-        const fileContent = fs.readFileSync(this.builtupAreas2KmLayerDataFilePath, 'utf-8');
+        const fileContent = fs.readFileSync(this.builtupAreas2KmLayerDataFilePath, 'utf8');
 
         return JSON.parse(fileContent) as FeatureCollection<MultiPolygon>;
     }
 
     public getAreasOfNaturalBeautyLayerData(): FeatureCollection<MultiPolygon> {
-        const fileContent = fs.readFileSync(this.areasOfNaturalBeautyLayerDataFilePath, 'utf-8');
+        const fileContent = fs.readFileSync(this.areasOfNaturalBeautyLayerDataFilePath, 'utf8');
 
         return JSON.parse(fileContent) as FeatureCollection<MultiPolygon>;
     }
 
     public getAreasOfNaturalBeauty2KmLayerData(): FeatureCollection<MultiPolygon> {
-        const fileContent = fs.readFileSync(this.areasOfNaturalBeauty2KmLayerDataFilePath, 'utf-8');
+        const fileContent = fs.readFileSync(this.areasOfNaturalBeauty2KmLayerDataFilePath, 'utf8');
 
         return JSON.parse(fileContent) as FeatureCollection<MultiPolygon>;
     }
