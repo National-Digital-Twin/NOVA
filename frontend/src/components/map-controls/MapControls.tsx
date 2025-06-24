@@ -44,7 +44,7 @@ const MapControls = ({ mapRef, onStyleChange, currentStyle }: MapControlsProps) 
             <ControlGroup role="group" aria-label="View controls">
                 <CompassButton mapRef={mapRef} />
                 <ControlDivider />
-                <ViewToggleButton mapRef={mapRef} />
+                <ViewToggleButton mapRef={mapRef} onStyleChange={onStyleChange} />
             </ControlGroup>
 
             <ControlGroup role="group" aria-label="Zoom controls">
