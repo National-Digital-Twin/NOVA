@@ -14,12 +14,17 @@ interface AssetMarkerProps {
   onBoltClick?: () => void;
   isSelected?: boolean;
   onDragEnd?: (longitude: number, latitude: number) => void;
+  setMarkerPosition?: React.Dispatch<React.SetStateAction<{
+    longitude?: number;
+    latitude?: number;
+} | null>>;
+  setPlacing?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 /**
  * A reusable component for displaying a wind turbine marker on the map
  */
-const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onClick, onBoltClick, isSelected = false, onDragEnd }) => {
+const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onClick, onBoltClick, isSelected = false, onDragEnd, setMarkerPosition, setPlacing }) => {
   const markerRef = useRef<HTMLDivElement>(null);
   const [showControls, setShowControls] = useState(false);
   const [showSubstationsList, setShowSubstationsList] = useState(false);
@@ -73,9 +78,12 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onClick,
               setShowSubstationsList(prev => !prev);
               if (onBoltClick) onBoltClick();
             }}
-            onDeleteClick={() => console.log('Delete clicked')}
+            onDeleteClick={() => {
+              if (setMarkerPosition) setMarkerPosition(null);
+            }}
             onMoveClick={() => {
-              console.log('Move clicked');
+              if (setMarkerPosition) setMarkerPosition(null);
+              if (setPlacing) setPlacing(true);
             }}
           />
         )}

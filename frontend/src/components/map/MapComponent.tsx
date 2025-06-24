@@ -1,12 +1,13 @@
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { useRef, useState, useCallback } from 'react';
-import type { MapRef } from 'react-map-gl/maplibre';
+import { useRef, useState, useCallback, useEffect } from 'react';
+import type { MapLayerMouseEvent, MapRef } from 'react-map-gl/maplibre';
 import { Map } from 'react-map-gl/maplibre';
 import { MAP_STYLES, type MapStyle } from '../../types/map';
 import MapControls from '../map-controls/MapControls';
 import SearchPanel from '../search/SearchPanel';
 import LayerControlPanel from '../layer-selection/LayerControlPanel';
 import AssetMarker from '../asset-marker/AssetMarker';
+import windTurbineIcon from '../../assets/Windturbine_white.svg';
 
 const MapComponent = () => {
     const mapRef = useRef<MapRef>(null!);
@@ -18,6 +19,8 @@ const MapComponent = () => {
         longitude?: number;
         latitude?: number;
     } | null>(null);
+    const [placing, setPlacing] = useState(false);
+    const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
 
     const handleStyleChange = (newStyle: MapStyle) => {
         setMapStyle(newStyle);
@@ -28,15 +31,13 @@ const MapComponent = () => {
     };
 
     // Handle map click to update marker position
-    const handleMapClick = useCallback((e: any) => {
-        if (!mapRef.current) return;
+    const handleMapClick = useCallback((e: MapLayerMouseEvent) => {
+        if (!placing) return;
 
-        // Create or update marker position
-        setMarkerPosition({
-            longitude: e.lngLat.lng,
-            latitude: e.lngLat.lat
-        });
-    }, []);
+        const { lngLat } = e;
+        setMarkerPosition({longitude: lngLat.lng, latitude: lngLat.lat});
+        setPlacing(false);
+    }, [placing]);
 
 
     // Handle marker drag end to update marker position
@@ -44,6 +45,22 @@ const MapComponent = () => {
         console.log('Marker position updated:', { longitude, latitude });
         setMarkerPosition({ longitude, latitude });
     }, []);
+
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            setMousePos({ x: e.clientX, y: e.clientY });
+        };
+
+        if (placing) {
+            window.addEventListener('mousemove', handleMouseMove);
+        } else {
+            setMousePos(null);
+        }
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+        };
+    }, [placing]);
 
     return (
         <div style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -58,14 +75,34 @@ const MapComponent = () => {
             >
                 {isMapInitialized && (
                     <>
-                        <SearchPanel mapRef={mapRef} hideLayerControl={() => setShowLayerControl(false)} showLayerControl={() => setShowLayerControl(true)} />
+                        <SearchPanel mapRef={mapRef} hideLayerControl={() => setShowLayerControl(false)} showLayerControl={() => setShowLayerControl(true)} setPlacing={setPlacing} />
                         <MapControls mapRef={mapRef} onStyleChange={handleStyleChange} currentStyle={mapStyle} />
+                        {placing && mousePos && (
+                            <div
+                                style={{
+                                position: 'fixed',
+                                left: mousePos.x,
+                                top: mousePos.y,
+                                transform: 'translate(-50%, -100%)',
+                                pointerEvents: 'none',
+                                zIndex: 1000,
+                                }}
+                            >
+                                <img 
+                                    src={windTurbineIcon} 
+                                    alt="Wind Turbine pending" 
+                                    style={{ width: '60px', height: '60px', cursor: 'pointer' }}
+                                />
+                            </div>
+                            )}
                         {markerPosition && (
                             <AssetMarker
                                 longitude={markerPosition.longitude}
                                 latitude={markerPosition.latitude}
                                 mapRef={mapRef}
                                 onDragEnd={handleMarkerDragEnd}
+                                setMarkerPosition={setMarkerPosition}
+                                setPlacing={setPlacing}
                             />
                         )}
                         {showLayerControl && <LayerControlPanel />}

@@ -1,4 +1,4 @@
-import { Box, Divider, styled } from '@mui/material';
+import { Box, Divider, styled, Typography } from '@mui/material';
 import type { FeatureCollection, Geometry } from 'geojson';
 import { useCallback, useRef, useState } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
@@ -12,6 +12,8 @@ import EditPolygonButton from './edit-polygon/EditPolygonButton';
 import { usePolygonHandlers } from '../../hooks/usePolygonHandlers';
 import maplibregl from 'maplibre-gl';
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
+import ControlButton from '../../shared/control-button/ControlButton';
+import AddAssetButton from './add-asset/AddAssetButton';
 
 const SearchContainer = styled(Box)({
     position: 'absolute',
@@ -40,16 +42,17 @@ interface SearchPanelProps {
     mapRef: React.RefObject<MapRef>;
     showLayerControl: () => void;
     hideLayerControl: () => void;
+    setPlacing: (placing: boolean) => void;
 }
 
-const SearchPanel = ({ mapRef, showLayerControl, hideLayerControl }: SearchPanelProps) => {
+const SearchPanel = ({ mapRef, showLayerControl, hideLayerControl, setPlacing }: SearchPanelProps) => {
     const drawRef = useMapboxDraw(mapRef) as React.RefObject<MapboxDraw>;
     const popupRef = useRef<maplibregl.Popup | null>(null);
 
     const [layerData, setLayerData] = useState<FeatureCollection<Geometry> | null>(null);
     const [polygonDrawn, setPolygonDrawn] = useState(false);
     const [polygonConfirmed, setPolygonConfirmed] = useState(false);
-
+    
     const { handlePolygonDrawn, handlePolygonEdited, handlePolygonDeleted } = usePolygonHandlers({
         mapRef,
         popupRef,
@@ -95,6 +98,9 @@ const SearchPanel = ({ mapRef, showLayerControl, hideLayerControl }: SearchPanel
                     onPolygonDrawn={handlePolygonDrawn}
                     polygonDrawn={polygonDrawn}
                 />
+            </SearchGroup>
+            <SearchGroup role="group" aria-label="Search controls" sx={{ minWidth: 50 }}>
+                <AddAssetButton setPlacing={setPlacing} />
             </SearchGroup>
 
             {layerData && <PolygonLayer data={layerData} />}

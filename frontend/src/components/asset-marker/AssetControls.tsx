@@ -1,6 +1,7 @@
 import { Box, styled } from '@mui/material';
 import BoltIcon from '@mui/icons-material/Bolt';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import EditIcon from '@mui/icons-material/Edit';
 import OpenWithIcon from '@mui/icons-material/OpenWith';
 import ControlButton from '../../shared/control-button/ControlButton';
 
@@ -20,6 +21,7 @@ const ControlsContainer = styled(Box)(({ theme }) => ({
 interface AssetControlsProps {
   onBoltClick?: () => void;
   onDeleteClick?: () => void;
+  onEditClick?: () => void;
   onMoveClick?: () => void;
 }
 
@@ -29,6 +31,7 @@ interface AssetControlsProps {
 const AssetControls: React.FC<AssetControlsProps> = ({
   onBoltClick,
   onDeleteClick,
+  onEditClick,
   onMoveClick,
 }) => {
   // Wrapper function to handle button clicks
@@ -42,6 +45,13 @@ const AssetControls: React.FC<AssetControlsProps> = ({
 
   return (
     <ControlsContainer onClick={(e) => e.stopPropagation()}>
+      <ControlButton
+        onClick={() => (onEditClick || (() => console.log('Edit clicked')))}
+        aria-label="Edit"
+        showTooltip
+      >
+        <EditIcon />
+      </ControlButton>
       <ControlButton
         onClick={handleButtonClick(onBoltClick || (() => console.log('Bolt clicked')))}
         aria-label="Connect to grid"
