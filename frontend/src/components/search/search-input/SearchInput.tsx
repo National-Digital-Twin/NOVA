@@ -100,12 +100,11 @@ const SearchInput: React.FC<SearchInputProps> = ({ onSearchResultClick }) => {
                                     <SearchIcon />
                                 </InputAdornment>
                             ),
-                            endAdornment: (
-                                <>
-                                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                                    {params.InputProps.endAdornment}
-                                </>
-                            ),
+                            endAdornment: loading ? (
+                                <InputAdornment position="end">
+                                    <CircularProgress size={20} color="inherit" />
+                                </InputAdornment>
+                            ) : null,
                         },
                     }}
                 />
