@@ -1,12 +1,11 @@
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import type { FeatureCollection, Geometry, GeoJsonProperties } from 'geojson';
+import type { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import DrawPolygonButton from './DrawPolygonButton';
 
-// Mock ControlButton component to simplify rendering
-vi.mock('../../../shared/control-button/ControlButton', () => ({
+vi.mock('../../../shared/control-icon/ControlIcon', () => ({
     default: ({ children, onClick, isActive, 'aria-label': ariaLabel, 'aria-pressed': ariaPressed }: any) => (
         <button
             onClick={onClick}
@@ -33,6 +32,9 @@ describe('DrawPolygonButton', () => {
         }),
         off: vi.fn(),
         queryRenderedFeatures: vi.fn().mockReturnValue([]),
+        getCanvas: vi.fn(() => ({
+            style: { cursor: '' },
+        })),
     };
 
     const mockMapRef = {
@@ -42,13 +44,15 @@ describe('DrawPolygonButton', () => {
     const mockDrawRef = {
         current: {
             changeMode: vi.fn(),
-            getAll: vi.fn(), // important: mock with vi.fn()
+            getAll: vi.fn(),
+            getMode: vi.fn().mockReturnValue('simple_select'),
         },
     } as unknown as React.RefObject<MapboxDraw>;
 
     beforeEach(() => {
         vi.clearAllMocks();
         modeChangeCallback = null;
+        mockDrawRef.current.getMode = vi.fn().mockReturnValue('simple_select');
     });
 
     it('does not render if isVisible is false', () => {
@@ -64,8 +68,9 @@ describe('DrawPolygonButton', () => {
 
         await act(() => fireEvent.click(button));
 
+        expect(mockDrawRef.current.getMode).toHaveBeenCalled();
         expect(mockDrawRef.current.changeMode).toHaveBeenCalledWith('draw_polygon');
-        expect(mockMapRef.current.on).toHaveBeenCalledWith('draw.modechange', expect.any(Function));
+        expect(mockMapInstance.on).toHaveBeenCalledWith('draw.modechange', expect.any(Function));
     });
 
     it('does not activate if polygonDrawn is true', async () => {
@@ -76,6 +81,18 @@ describe('DrawPolygonButton', () => {
         await act(() => fireEvent.click(button));
 
         expect(mockDrawRef.current.changeMode).not.toHaveBeenCalled();
+    });
+
+    it('does not activate if already in a draw mode', async () => {
+        mockDrawRef.current.getMode = vi.fn().mockReturnValue('draw_polygon');
+
+        render(<DrawPolygonButton mapRef={mockMapRef} drawRef={mockDrawRef} onPolygonDrawn={mockOnPolygonDrawn} isVisible={true} polygonDrawn={false} />);
+
+        const button = screen.getByLabelText('Draw Polygon');
+
+        await act(() => fireEvent.click(button));
+
+        expect(mockDrawRef.current.changeMode).not.toHaveBeenCalledWith('draw_polygon');
     });
 
     it('does not break if drawRef is null', async () => {
@@ -124,16 +141,14 @@ describe('DrawPolygonButton', () => {
             ],
         };
 
-        const getAllMock = vi.fn();
+        const getAllMock = vi.fn().mockReturnValue(mockPolygon);
         mockDrawRef.current.getAll = getAllMock;
-        getAllMock.mockReturnValue(mockPolygon);
 
         render(<DrawPolygonButton mapRef={mockMapRef} drawRef={mockDrawRef} onPolygonDrawn={mockOnPolygonDrawn} isVisible={true} polygonDrawn={false} />);
 
         const button = screen.getByLabelText('Draw Polygon');
 
         await act(() => fireEvent.click(button));
-
         expect(mockDrawRef.current.changeMode).toHaveBeenCalledWith('draw_polygon');
 
         await act(() => {
@@ -146,7 +161,8 @@ describe('DrawPolygonButton', () => {
 
     it('prevents editing existing polygon on map click', () => {
         const mockChangeMode = vi.fn();
-        const mockQueryRenderedFeatures = vi.fn().mockReturnValue([{}]); // pretend a polygon is clicked
+        const mockQueryRenderedFeatures = vi.fn().mockReturnValue([{}]);
+        const mockMode = vi.fn().mockReturnValue('simple_select');
 
         const map = {
             on: vi.fn(),
@@ -157,6 +173,7 @@ describe('DrawPolygonButton', () => {
         const draw = {
             changeMode: mockChangeMode,
             getAll: vi.fn(),
+            getMode: mockMode,
         };
 
         const mapRef = { current: map } as unknown as React.RefObject<MapRef>;
@@ -166,7 +183,6 @@ describe('DrawPolygonButton', () => {
             <DrawPolygonButton mapRef={mapRef} drawRef={drawRef} onPolygonDrawn={mockOnPolygonDrawn} isVisible={true} polygonDrawn={true} />
         );
 
-        // simulate the callback added to map.on
         const clickHandler = map.on.mock.calls.find((call) => call[0] === 'click')?.[1];
         expect(clickHandler).toBeDefined();
 
@@ -175,14 +191,12 @@ describe('DrawPolygonButton', () => {
             preventDefault: vi.fn(),
         };
 
-        // Call the preventEdit logic manually
-        clickHandler(fakeEvent);
+        clickHandler(fakeEvent as any);
 
         expect(mockQueryRenderedFeatures).toHaveBeenCalled();
         expect(mockChangeMode).toHaveBeenCalledWith('simple_select', { featureIds: [] });
         expect(fakeEvent.preventDefault).toHaveBeenCalled();
 
-        // cleanup
         unmount();
         expect(map.off).toHaveBeenCalledWith('click', expect.any(Function));
         expect(map.off).toHaveBeenCalledWith('contextmenu', expect.any(Function));

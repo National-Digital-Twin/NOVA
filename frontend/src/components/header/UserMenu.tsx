@@ -18,8 +18,8 @@ const StyledMenu = styled(Menu)(({ theme }) => ({
 
 const StyledDivider = styled(Divider)(({ theme }) => ({
     backgroundColor: theme.palette.divider,
-    opacity: 0.3,
     margin: theme.spacing(1) + ' 0',
+    opacity: 0.3,
 }));
 
 const UsernameTypography = styled(Typography)(({ theme }) => ({

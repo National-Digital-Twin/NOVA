@@ -1,62 +1,39 @@
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
-import ControlButton from '../../../shared/control-button/ControlButton';
 import type { FeatureCollection, Geometry } from 'geojson';
-import { MapVisualHelper } from '../../../utils/MapVisualHelper';
-import type { MapRef } from 'react-map-gl/maplibre';
 import maplibregl from 'maplibre-gl';
-import ConfirmPolygonButton from '../../map-controls/confirm-polygon/ConfirmPolygonButton';
+import { useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import type { MapRef } from 'react-map-gl/maplibre';
+import ControlIcon from '../../../shared/control-icon/ControlIcon';
+import { MapVisualHelper } from '../../../utils/MapVisualHelper';
+import ConfirmPolygonButton from '../../map-controls/confirm-polygon/ConfirmPolygonButton';
 
 interface EditPolygonButtonProps {
-    /**
-     * Callback triggered after a polygon has been edited and confirmed by the user.
-     */
     onPolygonEdited: (geojson: FeatureCollection<Geometry>) => void;
-
-    /**
-     * Function to hide the map's layer control while editing is active.
-     */
     hideLayerControl: () => void;
-
-    /**
-     * Reference to the MapLibre map instance.
-     */
     mapRef: React.RefObject<MapRef>;
-
-    /**
-     * Reference to the Mapbox Draw instance.
-     */
     drawRef: React.RefObject<MapboxDraw | null>;
-
-    /**
-     * Ref to hold and manage the popup instance for confirmation.
-     */
     polygonConfirmationPopUpRef: React.RefObject<maplibregl.Popup | null>;
-
-    /**
-     * Controls visibility of the edit button.
-     */
     isVisible: boolean;
 }
 
-/**
- * EditPolygonButton renders a control button for initiating polygon editing
- * using Mapbox Draw on a MapLibre map. It enables direct selection of the polygon,
- * displays a confirmation popup after dragging, and updates the polygon's geometry.
- */
 const EditPolygonButton = ({ onPolygonEdited, hideLayerControl, mapRef, drawRef, polygonConfirmationPopUpRef, isVisible }: EditPolygonButtonProps) => {
-    /**
-     * Handles the edit button click. It activates direct_select mode,
-     * sets up a one-time drag completion listener, and displays a confirmation popup.
-     */
+    const [isActive, setIsActive] = useState(false);
+
     const handleClick = () => {
+        if (isActive) return;
+
         const draw = drawRef.current;
         const map = mapRef.current?.getMap();
         if (!map || !draw) return;
 
+        setIsActive(true);
         hideLayerControl();
         MapVisualHelper.removeDimmedMask(map);
         MapVisualHelper.removeExistingPopup(polygonConfirmationPopUpRef);
+        MapVisualHelper.removeHeatmapLayer(mapRef);
+
+        map.getCanvas().style.cursor = 'grab';
 
         const polygon = MapVisualHelper.getFirstPolygon(draw);
         const polygonFeatureId = MapVisualHelper.getFeatureCollection(draw).features[0]?.id;
@@ -68,10 +45,6 @@ const EditPolygonButton = ({ onPolygonEdited, hideLayerControl, mapRef, drawRef,
 
         draw.changeMode('direct_select', { featureId: polygonFeatureId });
 
-        /**
-         * Called once after user finishes dragging the polygon.
-         * Displays a confirmation popup, updates the geometry, and handles future edits.
-         */
         const handleUserFinishDragging = () => {
             const latestPolygon = MapVisualHelper.getFirstPolygon(draw);
             if (!latestPolygon) return;
@@ -82,7 +55,7 @@ const EditPolygonButton = ({ onPolygonEdited, hideLayerControl, mapRef, drawRef,
                 closeOnClick: false,
                 offset: [0, 10],
             })
-                .setLngLat(MapVisualHelper.getConfirmationPopupCoordinates(latestPolygon))
+                .setLngLat(MapVisualHelper.getConfirmationPopupCoordinates(latestPolygon, mapRef.current))
                 .setDOMContent(popupNode)
                 .addTo(map);
 
@@ -93,18 +66,16 @@ const EditPolygonButton = ({ onPolygonEdited, hideLayerControl, mapRef, drawRef,
                     onConfirm={() => {
                         draw.changeMode('simple_select', { featureIds: [] });
                         MapVisualHelper.removeExistingPopup(polygonConfirmationPopUpRef);
+                        setIsActive(false);
                         onPolygonEdited(MapVisualHelper.getFeatureCollection(draw));
                     }}
                 />
             );
 
-            /**
-             * Keeps the confirmation popup anchored to the polygon's new position after edits.
-             */
             const updatePopupPosition = () => {
                 const updatedPolygon = MapVisualHelper.getFirstPolygon(draw);
                 if (updatedPolygon) {
-                    popup.setLngLat(MapVisualHelper.getConfirmationPopupCoordinates(updatedPolygon));
+                    popup.setLngLat(MapVisualHelper.getConfirmationPopupCoordinates(updatedPolygon, mapRef.current));
                 }
             };
 
@@ -123,9 +94,9 @@ const EditPolygonButton = ({ onPolygonEdited, hideLayerControl, mapRef, drawRef,
     if (!isVisible) return null;
 
     return (
-        <ControlButton onClick={handleClick} aria-label="Edit polygon" showTooltip={true}>
-            <img src="/icons/edit-polygon.svg" alt="Edit polygon icon" width={24} height={24} />
-        </ControlButton>
+        <ControlIcon onClick={handleClick} aria-label="Edit Polygon">
+            <img src={'/icons/edit-polygon.svg'} alt="Edit polygon icon" width={24} height={24} />
+        </ControlIcon>
     );
 };
 

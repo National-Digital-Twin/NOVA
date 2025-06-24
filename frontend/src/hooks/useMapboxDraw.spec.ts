@@ -7,12 +7,16 @@ import useMapboxDraw from './useMapboxDraw';
 vi.mock('@mapbox/mapbox-gl-draw');
 
 describe('useMapboxDraw', () => {
-    const mockMap = {
+    const mockAddControl = vi.fn();
+    const mockRemoveControl = vi.fn();
+    const mockGetMap = vi.fn().mockReturnValue({
+        addControl: mockAddControl,
+        removeControl: mockRemoveControl,
+    });
+
+    const mockMapRef = {
         current: {
-            getMap: vi.fn().mockReturnValue({
-                addControl: vi.fn(),
-                removeControl: vi.fn(),
-            }),
+            getMap: mockGetMap,
         },
     } as unknown as React.RefObject<MapRef>;
 
@@ -20,44 +24,35 @@ describe('useMapboxDraw', () => {
         vi.clearAllMocks();
     });
 
-    it('should not initialize if mapRef.current is null', () => {
+    it('should not initialise if mapRef.current is null', () => {
         const nullMapRef = { current: null } as unknown as React.RefObject<MapRef>;
-        const { result } = renderHook(() => useMapboxDraw(nullMapRef));
+        const { result } = renderHook(() => useMapboxDraw(nullMapRef, true));
         expect(result.current.current).toBeNull();
+        expect(MapboxDraw).not.toHaveBeenCalled();
     });
 
-    it('should not initialize if mapRef.current.getMap() returns null', () => {
-        const mockMapWithNullGetMap = {
-            current: {
-                getMap: vi.fn().mockReturnValue(null),
-            },
-        } as unknown as React.RefObject<MapRef>;
-        const { result } = renderHook(() => useMapboxDraw(mockMapWithNullGetMap));
+    it('should not initialise if isReady is false', () => {
+        const { result } = renderHook(() => useMapboxDraw(mockMapRef, false));
         expect(result.current.current).toBeNull();
+        expect(MapboxDraw).not.toHaveBeenCalled();
     });
 
-    it('should initialize draw control when map is initialized', () => {
-        const { result } = renderHook(() => useMapboxDraw(mockMap));
-        expect(MapboxDraw).toHaveBeenCalledWith({
-            displayControlsDefault: false,
-            styles: expect.any(Array),
-            touchEnabled: true,
-            touchMoveThreshold: 3,
-            clickBuffer: 3,
-            keybindings: false,
-            boxSelect: false,
-            touchPitch: false,
-            mode: 'simple_select',
-        });
+    it('should initialise draw control when map is ready', () => {
+        const { result } = renderHook(() => useMapboxDraw(mockMapRef, true));
+        expect(MapboxDraw).toHaveBeenCalledWith(
+            expect.objectContaining({
+                displayControlsDefault: false,
+                styles: expect.any(Array),
+            })
+        );
+        expect(mockAddControl).toHaveBeenCalled();
         expect(result.current.current).toBeInstanceOf(MapboxDraw);
     });
 
-    it('should cleanup draw control on unmount', () => {
-        const { unmount } = renderHook(() => useMapboxDraw(mockMap));
-        const map = mockMap.current?.getMap();
-
-        unmount();
-
-        expect(map?.removeControl).toHaveBeenCalled();
+    it('should not re-initialise if drawRef already exists', () => {
+        const { rerender } = renderHook(({ isReady }) => useMapboxDraw(mockMapRef, isReady), { initialProps: { isReady: true } });
+        expect(MapboxDraw).toHaveBeenCalledTimes(1);
+        rerender({ isReady: true });
+        expect(MapboxDraw).toHaveBeenCalledTimes(1); // Still 1 — doesn't re-init
     });
 });

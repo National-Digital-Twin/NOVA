@@ -84,10 +84,6 @@ export interface AttributeDTO {
  *           items:
  *             $ref: '#/components/schemas/AttributeDTO'
  *           description: List of configurable attributes for this item
- *         active:
- *           type: boolean
- *           description: Indicates whether the item is active
- *           default: false
  *       required:
  *         - id
  *         - name
@@ -111,12 +107,6 @@ export interface ItemDTO {
      * List of configurable attributes for this item
      */
     attributes: AttributeDTO[];
-
-    /**
-     * Indicates whether the item is active
-     * @default false
-     */
-    active?: boolean;
 }
 
 /**

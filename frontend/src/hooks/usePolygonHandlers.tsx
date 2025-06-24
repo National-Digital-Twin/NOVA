@@ -12,29 +12,9 @@ interface UsePolygonHandlersProps {
     setPolygonDrawn: (val: boolean) => void;
     setPolygonConfirmed: (val: boolean) => void;
     showLayerControl: () => void;
-    clearLayerData: () => void;
 }
 
-/**
- * Custom React hook that manages polygon interaction logic on a MapLibre map
- * using MapboxDraw. It handles drawing, confirming, editing, and deleting polygons,
- * and updates visual effects such as masking and popup rendering.
- *
- * @param {Object} params - Parameters for configuring the polygon handlers.
- * @param {React.RefObject<MapRef>} params.mapRef - Reference to the MapLibre map instance.
- * @param {React.RefObject<maplibregl.Popup | null>} params.popupRef - Reference for managing the confirmation popup.
- * @param {(val: boolean) => void} params.setPolygonDrawn - State setter for whether a polygon has been drawn.
- * @param {(val: boolean) => void} params.setPolygonConfirmed - State setter for whether the polygon is confirmed.
- * @param {() => void} params.showLayerControl - Function to show the layer control UI.
- * @param {() => void} params.clearLayerData - Function to clear any associated polygon or layer data.
- *
- * @returns {Object} Polygon handlers.
- * @returns {(geojson: FeatureCollection<Geometry>) => void} handlePolygonDrawn - Called after the user draws a polygon. Triggers popup and confirmation.
- * @returns {(geojson: FeatureCollection<Geometry>) => void} handlePolygonConfirmed - Called when the user confirms the polygon. Applies mask and pans map.
- * @returns {(geojson: FeatureCollection<Geometry>) => void} handlePolygonEdited - Called after polygon is edited. Reapplies mask and shows control.
- * @returns {() => void} handlePolygonDeleted - Removes polygon and any visual effects or popup.
- */
-export function usePolygonHandlers({ mapRef, popupRef, setPolygonDrawn, setPolygonConfirmed, showLayerControl, clearLayerData }: UsePolygonHandlersProps) {
+export function usePolygonHandlers({ mapRef, popupRef, setPolygonDrawn, setPolygonConfirmed, showLayerControl }: UsePolygonHandlersProps) {
     const showConfirmationPopup = useCallback(
         (polygon: Polygon, onConfirm: () => void) => {
             const popupNode = document.createElement('div');
@@ -43,9 +23,8 @@ export function usePolygonHandlers({ mapRef, popupRef, setPolygonDrawn, setPolyg
             const popup = new maplibregl.Popup({
                 closeButton: false,
                 closeOnClick: false,
-                offset: [100, 0],
             })
-                .setLngLat(MapVisualHelper.getConfirmationPopupCoordinates(polygon))
+                .setLngLat(MapVisualHelper.getConfirmationPopupCoordinates(polygon, mapRef.current))
                 .setDOMContent(popupNode)
                 .addTo(mapRef.current!.getMap());
 
@@ -100,15 +79,14 @@ export function usePolygonHandlers({ mapRef, popupRef, setPolygonDrawn, setPolyg
     const handlePolygonDeleted = useCallback(() => {
         setPolygonDrawn(false);
         setPolygonConfirmed(false);
-        clearLayerData();
 
         const map = mapRef.current?.getMap();
         if (map) {
             MapVisualHelper.removeDimmedMask(map);
+            MapVisualHelper.removeExistingPopup(popupRef);
+            MapVisualHelper.removeHeatmapLayer(mapRef);
         }
-
-        MapVisualHelper.removeExistingPopup(popupRef);
-    }, [mapRef, popupRef, setPolygonDrawn, setPolygonConfirmed, clearLayerData]);
+    }, [mapRef, popupRef, setPolygonDrawn, setPolygonConfirmed]);
 
     return {
         handlePolygonDrawn,

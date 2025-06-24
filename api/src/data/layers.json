@@ -1,29 +1,27 @@
 {
   "categories": [
     {
-      "name": "Environmental Protected Sites",
+      "name": "Environmentally Protected Sites",
       "items": [
         {
-          "active": true,
           "id": "areasOfOutstandingNaturalBeauty",
-          "name": "Areas of outstanding natural beauty",
+          "name": "Areas of Outstanding Natural Beauty",
           "attributes": [
             {
               "id": "minDistance",
-              "description": "Minimum Distance in km",
+              "description": "Set distance from AONB (km)",
               "defaultValue": 10,
               "valueType": "number"
             }
           ]
         },
         {
-          "active": true,
-          "id": "siteOfSpecialScientificInterest",
+          "id": "sitesOfSpecialScientificInterest",
           "name": "Sites of Special Scientific Interest",
           "attributes": [
             {
               "id": "minDistance",
-              "description": "Minimum Distance in km",
+              "description": "Set distance from SSSI (km)",
               "defaultValue": 20,
               "valueType": "number"
             }
@@ -36,7 +34,7 @@
           "attributes": [
             {
               "id": "minDistance",
-              "description": "Minimum Distance in km",
+              "description": "Set distance from SAC (km)",
               "defaultValue": 20,
               "valueType": "number"
             }
@@ -45,15 +43,15 @@
       ]
     },
     {
-      "name": "Residential Areas",
+      "name": "Urban Constraints",
       "items": [
         {
-          "id": "buildUpAreas",
-          "name": "Built up areas",
+          "id": "builtUpAreas",
+          "name": "Built-up areas",
           "attributes": [
             {
               "id": "minDistance",
-              "description": "Minimum Distance in km",
+              "description": "Set distance from BUA (km)",
               "defaultValue": 10,
               "valueType": "number"
             }
@@ -62,44 +60,22 @@
       ]
     },
     {
-      "name": "Grid Service points",
+      "name": "Weather",
       "items": [
         {
-          "active": true,
-          "id": "substationLocations",
-          "name": "Substation locations",
+          "id": "windSpeed",
+          "name": "Wind speed",
           "attributes": [
             {
-              "id": "minDistance",
-              "description": "Minimum Distance in km",
-              "defaultValue": 3,
+              "id": "minSpeed",
+              "description": "Set minimum wind speed (MW)",
+              "defaultValue": 4,
               "valueType": "number"
             },
             {
-              "id": "connectionType",
-              "description": "Connection Type ",
-              "options": [
-                "overhead",
-                "underground"
-              ],
-              "defaultValue": "underground",
-              "valueType": "string"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "topology",
-      "name": "Topology",
-      "items": [
-        {
-          "name": "Elevation",
-          "attributes": [
-            {
-              "id": "minHight",
-              "description": "Minimum Hight in Meters",
-              "defaultValue": 200,
+              "id": "maxSpeed",
+              "description": "Set maximum wind speed (MW)",
+              "defaultValue": 7.5,
               "valueType": "number"
             }
           ]

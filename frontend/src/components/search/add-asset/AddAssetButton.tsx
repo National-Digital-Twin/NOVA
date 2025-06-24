@@ -1,30 +1,41 @@
+import { Box, styled } from '@mui/material';
+import { useState } from 'react';
 import ControlButton from '../../../shared/control-button/ControlButton';
-import { Typography } from '@mui/material';
+import type { Variation } from './AddAsset';
+import AddAssetPanel from './AddAssetPanel';
 
-/**
- * Props for the AddAssetButton component.
- */
+const StyledContainer = styled(Box)({
+    position: 'relative',
+});
+
 interface AddAssetButtonProps {
-
-    /**
-     * Function to set a boolean indicating whether an asset is currently being placed.
-     * @param placing  boolean indicating whether an asset is currently being placed.
-     */
-    setPlacing: (placing: boolean) => void;
+    onAssetSelect: (variant: Variation) => void;
 }
 
-/**
- * A control button adding an asset to the map.
- * 
- * @param {AddAssetButtonProps} props - Component props.
- * @returns {JSX.Element | null} The rendered add button or null if hidden.
- */
-const AddAssetButton = ({ setPlacing }: AddAssetButtonProps) => {
+const AddAssetButton = ({ onAssetSelect }: AddAssetButtonProps) => {
+    const [isPanelOpen, setIsPanelOpen] = useState(false);
+
+    const handleTogglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
+    };
+
+    const handleClosePanel = () => {
+        setIsPanelOpen(false);
+    };
+
+    const handleAssetSelect = (variant: Variation) => {
+        onAssetSelect(variant);
+        setIsPanelOpen(false);
+    };
 
     return (
-        <ControlButton onClick={() => setPlacing(true)} aria-label="Add asset">
-            <Typography fontSize={15}>{'Add Asset'}</Typography>
-        </ControlButton>
+        <StyledContainer>
+            <ControlButton onClick={handleTogglePanel} aria-label="Add asset">
+                <span style={{ marginRight: '8px' }}>Add asset</span>
+                <img src="/icons/add.svg" alt="Add asset" width={18} height={18} />
+            </ControlButton>
+            {isPanelOpen && <AddAssetPanel onClose={handleClosePanel} onSelect={handleAssetSelect} />}
+        </StyledContainer>
     );
 };
 

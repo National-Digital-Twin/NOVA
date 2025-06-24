@@ -1,10 +1,12 @@
-import { Request, Response } from "express";
-import { isValidGeoJSON } from "../utils/geojson.utils";
-import { dataProviderUtils } from "../utils/data-provider.utils";
-import { AnalysisRequestDTO } from "../models/analysis-request.model";
-import { SuitabilityResponseDTO } from "../models/suitability-response.model";
-import { substationService } from "../services/substation.service";
-import { GeoJSON } from "geojson";
+import { Request, Response } from 'express';
+import { isValidGeoJSON } from '../utils/geojson.utils';
+import { DataProviderUtils, dataProviderUtils } from '../utils/data-provider.utils';
+import { AnalysisRequestDTO } from '../models/analysis-request.model';
+import { SuitabilityResponseDTO } from '../models/suitability-response.model';
+import { substationService } from '../services/substation.service';
+import { GeoJSON } from 'geojson';
+import { AssetLocationRequestDto } from '../models/asset-location-request.model';
+import { AssetAnalysisService } from '../services/asset-analysis.service';
 
 /**
  * Controller for UI-related endpoints
@@ -13,7 +15,7 @@ export class UIController {
     /**
      * Constructor for UIController
      */
-    constructor() {}
+    constructor(private readonly assetAnalysisService: AssetAnalysisService) {}
 
     /**
      * @swagger
@@ -57,19 +59,12 @@ export class UIController {
 
     /**
      * @swagger
-     * /api/ui/layers/{assetType}:
+     * /api/ui/layers:
      *   get:
-     *     summary: Get layers information by asset type such as wind turbine
-     *     description: Returns layer information for a specific asset type.
+     *     summary: Get layers information for presentation in the layer selection panel.
+     *     description: Returns layer information.
      *     tags:
      *       - UI
-     *     parameters:
-     *       - in: path
-     *         name: assetType
-     *         schema:
-     *           type: string
-     *         required: true
-     *         description: Type of asset to get layers for
      *     responses:
      *       200:
      *         description: Layers information retrieved successfully.
@@ -97,10 +92,9 @@ export class UIController {
             res.status(200).json(layersData);
         } catch (error) {
             console.error(`Error retrieving layers data: ${error}`);
-            res.status(500).json({ error: "Failed to retrieve layers data" });
+            res.status(500).json({ error: 'Failed to retrieve layers data' });
         }
     }
-
 
     /**
      * @swagger
@@ -166,10 +160,9 @@ export class UIController {
             res.status(200).json(assetsData);
         } catch (error) {
             console.error(`Error retrieving assets data: ${error}`);
-            res.status(500).json({ error: "Failed to retrieve assets data" });
+            res.status(500).json({ error: 'Failed to retrieve assets data' });
         }
     }
-
 
     /**
      * @swagger
@@ -215,32 +208,25 @@ export class UIController {
 
             // Validate that the data is a valid GeoJSON object
             if (!isValidGeoJSON(req.body)) {
-                res.status(400).json({ error: "Invalid GeoJSON data" });
+                res.status(400).json({ error: 'Invalid GeoJSON data' });
                 return;
             }
 
             res.status(200).json(geoJsonData);
         } catch (error) {
             console.error(`Error processing GeoJSON data: ${error}`);
-            res.status(500).json({ error: "Failed to process GeoJSON data" });
+            res.status(500).json({ error: 'Failed to process GeoJSON data' });
         }
     }
 
     /**
      * @swagger
-     * /api/ui/location/analyse/{assetType}:
+     * /api/ui/location/analyse:
      *   post:
      *     summary: Analyse location data for a specific asset type
      *     description: Accepts GeoJSON of the selected area, layers configuration, and asset to analyze, returns an array of GeoJSON objects.
      *     tags:
      *       - UI
-     *     parameters:
-     *       - in: path
-     *         name: assetType
-     *         schema:
-     *           type: string
-     *         required: true
-     *         description: Type of asset to analyse
      *     requestBody:
      *       required: true
      *       content:
@@ -262,28 +248,22 @@ export class UIController {
      *         description: Internal server error.
      */
     public analyseLocation(req: Request, res: Response): void {
-        const assetType = req.params.assetType;
-
-        console.debug(`Analysing location for asset type: ${assetType}`);
-
         try {
-            const analysisRequest = req.body as AnalysisRequestDTO;
+            const analysisRequest = req.body as AssetLocationRequestDto;
 
             // Validate that the geoJson is a valid GeoJSON object
             if (!isValidGeoJSON(analysisRequest.location)) {
-                res.status(400).json({ error: "Invalid GeoJSON data" });
+                res.status(400).json({ error: 'Invalid GeoJSON data' });
                 return;
             }
 
-            // In a real application, we would perform analysis based on the GeoJSON and layers
-            // For now, we'll just return a sample GeoJSON as an array
-            const geoJsonData = dataProviderUtils.readSampleGeoJsonData();
+            const geoJsonData = this.assetAnalysisService.analyzeLocation(analysisRequest);
 
             // Return an array with the sample GeoJSON
-            res.status(200).json([geoJsonData]);
+            res.status(200).json(geoJsonData);
         } catch (error) {
             console.error(`Error analysing location data: ${error}`);
-            res.status(500).json({ error: "Failed to analyse location data" });
+            res.status(500).json({ error: 'Failed to analyse location data' });
         }
     }
 
@@ -314,14 +294,14 @@ export class UIController {
      *         description: Internal server error.
      */
     public analyseAsset(req: Request, res: Response): void {
-        console.debug("Analysing asset suitability for location");
+        console.debug('Analysing asset suitability for location');
 
         try {
             const analysisRequest = req.body as AnalysisRequestDTO;
 
             // Validate that the geoJson is a valid GeoJSON object
             if (!isValidGeoJSON(analysisRequest.location)) {
-                res.status(400).json({ error: "Invalid GeoJSON data" });
+                res.status(400).json({ error: 'Invalid GeoJSON data' });
                 return;
             }
 
@@ -329,13 +309,13 @@ export class UIController {
             // For now, we'll just return a sample suitability response
             const suitabilityResponse: SuitabilityResponseDTO = {
                 suitabilityPercentage: 85.5,
-                suitabilityDescription: "This location is highly suitable for the asset based on the provided layers configuration."
+                suitabilityDescription: 'This location is highly suitable for the asset based on the provided layers configuration.',
             };
 
             res.status(200).json(suitabilityResponse);
         } catch (error) {
             console.error(`Error analysing asset suitability: ${error}`);
-            res.status(500).json({ error: "Failed to analyse asset suitability" });
+            res.status(500).json({ error: 'Failed to analyse asset suitability' });
         }
     }
 
@@ -368,7 +348,7 @@ export class UIController {
      *         description: Internal server error.
      */
     public getSubstations(req: Request, res: Response): void {
-        console.debug("Getting substations near location");
+        console.debug('Getting substations near location');
 
         try {
             let geoJson: GeoJSON;
@@ -377,33 +357,32 @@ export class UIController {
             if (req.body.latitude !== undefined && req.body.longitude !== undefined) {
                 // Convert PositionDTO to GeoJSON Point
                 geoJson = {
-                    type: "Point",
-                    coordinates: [req.body.longitude, req.body.latitude]
+                    type: 'Point',
+                    coordinates: [req.body.longitude, req.body.latitude],
                 };
             } else {
                 // Validate that the request body is a valid GeoJSON object
                 if (!isValidGeoJSON(req.body)) {
-                    res.status(400).json({ error: "Invalid data. Must be a valid GeoJSON object or a position with latitude and longitude." });
+                    res.status(400).json({ error: 'Invalid data. Must be a valid GeoJSON object or a position with latitude and longitude.' });
                     return;
                 }
                 geoJson = req.body;
             }
 
             // Get the nearest substations using the substation service
-            const substations = substationService.getNearestSubstations(geoJson,5);
+            const substations = substationService.getNearestSubstations(geoJson, 5);
 
             if (!substations || substations.length === 0) {
-                res.status(400).json({ error: "Request must contain a valid point geometry" });
+                res.status(400).json({ error: 'Request must contain a valid point geometry' });
                 return;
             }
 
             res.status(200).json(substations);
         } catch (error) {
             console.error(`Error retrieving substations: ${error}`);
-            res.status(500).json({ error: "Failed to retrieve substations" });
+            res.status(500).json({ error: 'Failed to retrieve substations' });
         }
     }
-
 }
 
-export const uiController = new UIController();
+export const uiController = new UIController(new AssetAnalysisService(new DataProviderUtils()));

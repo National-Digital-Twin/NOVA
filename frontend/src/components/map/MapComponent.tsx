@@ -8,10 +8,16 @@ import SearchPanel from '../search/SearchPanel';
 import LayerControlPanel from '../layer-selection/LayerControlPanel';
 import AssetMarker from '../asset-marker/AssetMarker';
 import windTurbineIcon from '../../assets/Windturbine_white.svg';
+import useMapboxDraw from '../../hooks/useMapboxDraw';
+
+const MAP_VIEW_BOUNDS: [[number, number], [number, number]] = [
+    [-25.0, 42.0],
+    [15.0, 67.0],
+];
 
 const MapComponent = () => {
     const mapRef = useRef<MapRef>(null!);
-    const [viewState, setViewState] = useState({ longitude: -1.33, latitude: 50.65, zoom: 10, pitch: 60, bearing: 0 });
+    const [viewState, setViewState] = useState({ longitude: -1.611, latitude: 54.5, pitch: 0, bearing: 0 });
     const [mapStyle, setMapStyle] = useState<MapStyle>('hybrid');
     const [isMapInitialized, setIsMapInitialized] = useState(false);
     const [showLayerControl, setShowLayerControl] = useState(false);
@@ -21,6 +27,7 @@ const MapComponent = () => {
     } | null>(null);
     const [placing, setPlacing] = useState(false);
     const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
+    const drawRef = useMapboxDraw(mapRef, isMapInitialized);
 
     const handleStyleChange = (newStyle: MapStyle) => {
         setMapStyle(newStyle);
@@ -66,6 +73,7 @@ const MapComponent = () => {
         <div style={{ position: 'relative', width: '100%', height: '100%' }}>
             <Map
                 ref={mapRef}
+                maxBounds={MAP_VIEW_BOUNDS}
                 {...viewState}
                 onMove={(evt) => setViewState(evt.viewState)}
                 onLoad={handleMapLoad}
@@ -75,7 +83,12 @@ const MapComponent = () => {
             >
                 {isMapInitialized && (
                     <>
-                        <SearchPanel mapRef={mapRef} hideLayerControl={() => setShowLayerControl(false)} showLayerControl={() => setShowLayerControl(true)} setPlacing={setPlacing} />
+                        <SearchPanel 
+                            mapRef={mapRef} 
+                            drawRef={drawRef}
+                            hideLayerControl={() => setShowLayerControl(false)} 
+                            showLayerControl={() => setShowLayerControl(true)} 
+                            setPlacing={setPlacing} />
                         <MapControls mapRef={mapRef} onStyleChange={handleStyleChange} currentStyle={mapStyle} />
                         {placing && mousePos && (
                             <div
@@ -105,7 +118,7 @@ const MapComponent = () => {
                                 setPlacing={setPlacing}
                             />
                         )}
-                        {showLayerControl && <LayerControlPanel />}
+                        {showLayerControl && <LayerControlPanel mapRef={mapRef} drawRef={drawRef} />}
                     </>
                 )}
             </Map>
