@@ -1,13 +1,13 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import ControlButton from './ControlButton';
+import ControlIcon from './ControlIcon';
 
-describe('ControlButton', () => {
+describe('ControlIcon', () => {
     it('renders with correct aria label', () => {
         render(
-            <ControlButton onClick={() => {}} aria-label="Test Button">
+            <ControlIcon onClick={() => {}} aria-label="Test Button">
                 <span>Test</span>
-            </ControlButton>
+            </ControlIcon>
         );
 
         const button = screen.getByLabelText('Test Button');
@@ -17,9 +17,9 @@ describe('ControlButton', () => {
     it('calls onClick when clicked', () => {
         const handleClick = vi.fn();
         render(
-            <ControlButton onClick={handleClick} aria-label="Test Button">
+            <ControlIcon onClick={handleClick} aria-label="Test Button">
                 <span>Test</span>
-            </ControlButton>
+            </ControlIcon>
         );
 
         const button = screen.getByLabelText('Test Button');
@@ -29,9 +29,9 @@ describe('ControlButton', () => {
 
     it('renders children correctly', () => {
         render(
-            <ControlButton onClick={() => {}} aria-label="Test Button">
+            <ControlIcon onClick={() => {}} aria-label="Test Button">
                 <span>Test Content</span>
-            </ControlButton>
+            </ControlIcon>
         );
 
         const content = screen.getByText('Test Content');
@@ -40,15 +40,16 @@ describe('ControlButton', () => {
 
     it('applies correct styling', () => {
         render(
-            <ControlButton onClick={() => {}} aria-label="Test Button">
+            <ControlIcon onClick={() => {}} aria-label="Test Button">
                 <span>Test</span>
-            </ControlButton>
+            </ControlIcon>
         );
 
         const button = screen.getByLabelText('Test Button');
         expect(button).toHaveStyle({
-            width: '100%',
-            padding: '0.5rem 1rem',
+            width: '3rem',
+            height: '3rem',
+            padding: '0',
         });
     });
 });

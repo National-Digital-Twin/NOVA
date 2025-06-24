@@ -1,22 +1,7 @@
-/**
- * Props for the ConfirmPolygonButton component.
- */
 export interface ConfirmPolygonButtonProps {
-    /**
-     * Callback function triggered when the user clicks the "Set" button to confirm the polygon.
-     */
     onConfirm: () => void;
 }
 
-/**
- * A simple confirmation button that allows users to confirm a polygon action
- * (e.g. after drawing or editing). It displays an icon and the label "Set".
- *
- * This component is currently used inside a MapLibre popup.
- *
- * @param {ConfirmPolygonButtonProps} props - Component props.
- * @returns {JSX.Element} The rendered confirmation button.
- */
 const ConfirmPolygonButton = ({ onConfirm }: ConfirmPolygonButtonProps) => {
     const handleClick = () => {
         onConfirm();

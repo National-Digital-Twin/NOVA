@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import type { FeatureCollection, Geometry } from 'geojson';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import SearchPanel from './SearchPanel';
 import { createMockMapRef } from '../../../test/test-utils';
+import SearchPanel from './SearchPanel';
 
 vi.mock('./search-input/SearchInput', () => ({
     default: ({ onSearchResultClick }: { onSearchResultClick: (lat: number, lon: number, zoom: number) => void }) => (

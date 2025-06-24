@@ -1,64 +1,32 @@
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import type { FeatureCollection, Geometry } from 'geojson';
+import maplibregl from 'maplibre-gl';
 import { useCallback, useEffect, useState } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
-import ControlButton from '../../../shared/control-button/ControlButton';
-import maplibregl from 'maplibre-gl';
+import ControlIcon from '../../../shared/control-icon/ControlIcon';
 import { MapVisualHelper } from '../../../utils/MapVisualHelper';
 
 interface DrawPolygonButtonProps {
-    /**
-     * Callback triggered when a polygon has been successfully drawn and detected.
-     */
     onPolygonDrawn: (geojson: FeatureCollection<Geometry>) => void;
-
-    /**
-     * Reference to the MapLibre map instance.
-     */
     mapRef: React.RefObject<MapRef>;
-
-    /**
-     * Reference to the Mapbox Draw instance.
-     */
     drawRef: React.RefObject<MapboxDraw>;
-
-    /**
-     * Controls whether the button should be visible.
-     */
     isVisible: boolean;
-
-    /**
-     * Tracks whether a polygon has already been drawn (to avoid duplicate drawing).
-     */
     polygonDrawn: boolean;
 }
 
-/**
- * DrawPolygonButton renders a map control button that allows users to draw a single polygon on a MapLibre map
- * using Mapbox Draw. Once a polygon is drawn, it triggers a confirmation popup, disables further editing,
- * and prevents users from drawing multiple polygons unless the existing one is removed.
- */
 const DrawPolygonButton = ({ onPolygonDrawn, mapRef, drawRef, isVisible, polygonDrawn }: DrawPolygonButtonProps) => {
     const [isActive, setIsActive] = useState(false);
 
-    /**
-     * Updates local active state based on whether a polygon is drawn.
-     */
     useEffect(() => {
         setIsActive(polygonDrawn);
     }, [polygonDrawn]);
 
-    /**
-     * Prevents users from re-entering edit mode by clicking on the polygon.
-     * This avoids the default Mapbox Draw behaviour of enabling polygon editing on selection.
-     */
     useEffect(() => {
         if (!polygonDrawn || !mapRef.current || !drawRef.current) return;
 
         const map = mapRef.current;
         const draw = drawRef.current;
 
-        // Prevent double draw
         const mode = draw.getMode();
         if (mode.startsWith('draw')) {
             return;
@@ -84,18 +52,12 @@ const DrawPolygonButton = ({ onPolygonDrawn, mapRef, drawRef, isVisible, polygon
         };
     }, [polygonDrawn, mapRef, drawRef]);
 
-    /**
-     * Starts the polygon drawing mode and listens for the mode change event,
-     * indicating a polygon has been completed. Once complete, the polygon is saved
-     * and further editing is disabled.
-     */
     const handleClick = useCallback(() => {
         if (!mapRef.current || !drawRef.current || polygonDrawn) return;
 
         const map = mapRef.current;
         const draw = drawRef.current;
 
-        // Prevent double draw
         const mode = draw.getMode();
         if (mode.startsWith('draw')) {
             return;
@@ -121,9 +83,9 @@ const DrawPolygonButton = ({ onPolygonDrawn, mapRef, drawRef, isVisible, polygon
     if (!isVisible) return null;
 
     return (
-        <ControlButton onClick={handleClick} isActive={isActive} aria-label="Draw Polygon" aria-pressed={isActive} showTooltip={true}>
+        <ControlIcon onClick={handleClick} isActive={isActive} aria-label="Draw Polygon" aria-pressed={isActive}>
             <img src={isActive ? '/icons/polygon-white.svg' : '/icons/polygon.svg'} alt="Draw polygon icon" width={24} height={24} />
-        </ControlButton>
+        </ControlIcon>
     );
 };
 

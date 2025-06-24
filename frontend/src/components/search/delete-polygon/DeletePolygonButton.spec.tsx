@@ -29,7 +29,7 @@ describe('DeletePolygonButton', () => {
     it('renders the button when isVisible is true', () => {
         render(<DeletePolygonButton drawRef={mockDrawRef} isVisible={true} onPolygonDeleted={onPolygonDeletedMock} hideLayerControl={hideLayerControlMock} />);
 
-        expect(screen.getByLabelText('Delete polygon')).toBeInTheDocument();
+        expect(screen.getByLabelText('Delete Polygon')).toBeInTheDocument();
     });
 
     it('handles null drawRef.current gracefully', () => {
@@ -37,7 +37,7 @@ describe('DeletePolygonButton', () => {
 
         render(<DeletePolygonButton drawRef={nullDrawRef} isVisible={true} onPolygonDeleted={onPolygonDeletedMock} hideLayerControl={hideLayerControlMock} />);
 
-        const button = screen.getByLabelText('Delete polygon button');
+        const button = screen.getByLabelText('Delete Polygon');
         fireEvent.click(button);
 
         expect(onPolygonDeletedMock).not.toHaveBeenCalled();

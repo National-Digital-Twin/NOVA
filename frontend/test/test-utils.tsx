@@ -7,12 +7,6 @@ export function render(ui: ReactElement, { ...renderOptions } = {}) {
     return rtlRender(ui, { ...renderOptions });
 }
 
-/**
- * Creates a mock MapRef object for use in testing components
- * that rely on MapLibre's map instance and methods.
- *
- * @returns A mocked React ref object with a `getMap` method.
- */
 export function createMockMapRef(): React.RefObject<MapRef> {
     const mockMap = {
         flyTo: vi.fn(),
