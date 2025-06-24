@@ -228,6 +228,7 @@ export class MapVisualHelper {
         if (map.getSource(id)) map.removeSource(id);
 
         MapVisualHelper.removeIssuesPopup();
+        this.cachedHeatmapGeojson = null;
     }
 
     /**

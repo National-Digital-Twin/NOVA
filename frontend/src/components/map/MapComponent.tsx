@@ -7,6 +7,7 @@ import MapControls from '../map-controls/MapControls';
 import SearchPanel from '../search/SearchPanel';
 import LayerControlPanel from '../layer-selection/LayerControlPanel';
 import useMapboxDraw from '../../hooks/useMapboxDraw';
+import { MapVisualHelper } from '../../utils/MapVisualHelper';
 
 const MAP_VIEW_BOUNDS: [[number, number], [number, number]] = [
     [-25.0, 42.0],
@@ -23,6 +24,14 @@ const MapComponent = () => {
 
     const handleStyleChange = (newStyle: MapStyle) => {
         setMapStyle(newStyle);
+        const cachedHeatMap = MapVisualHelper.getCachedHeatmapGeojson();
+        const userDrawnPolygon = drawRef.current ? MapVisualHelper.getFirstPolygon(drawRef.current) : null;
+        if (mapRef.current && userDrawnPolygon && cachedHeatMap) {
+            mapRef.current.getMap().once('styledata', () => {
+                MapVisualHelper.addOrUpdateHeatmapLayer(mapRef, cachedHeatMap);
+                MapVisualHelper.applyDimmedMaskAndPanToPolygon(mapRef.current.getMap(), userDrawnPolygon);
+            });
+        }
     };
 
     const handleMapLoad = () => {
