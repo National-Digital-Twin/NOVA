@@ -1,17 +1,17 @@
 import { FormControl, FormControlLabel, Radio, RadioGroup, styled, Typography } from '@mui/material';
 import { useState } from 'react';
 import type { MapStyle } from '../../../types/map';
-import ControlButton from '../../../shared/control-button/ControlButton';
+import ControlIcon from '../../../shared/control-icon/ControlIcon';
 
 const StyledPanel = styled('div')(({ theme }) => ({
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    minWidth: '220px',
     backgroundColor: theme.palette.background.paper,
-    padding: theme.spacing(2),
     borderRadius: theme.shape.borderRadius,
     boxShadow: theme.shadows[3],
+    minWidth: '220px',
+    padding: theme.spacing(2),
+    position: 'absolute',
+    right: 0,
+    top: 0,
     zIndex: 1,
 }));
 
@@ -37,9 +37,9 @@ const MapStylePanel = ({ currentStyle, onStyleChange }: MapStylePanelProps) => {
 
     return (
         <div style={{ position: 'relative' }}>
-            <ControlButton onClick={() => setShowPanel(!showPanel)} aria-label="Change map style" aria-expanded={showPanel} aria-controls="map-style-panel">
+            <ControlIcon onClick={() => setShowPanel(!showPanel)} aria-label="Change map style" aria-expanded={showPanel} aria-controls="map-style-panel">
                 <img src="/icons/layers.svg" alt="Layers" width={24} height={24} />
-            </ControlButton>
+            </ControlIcon>
 
             {showPanel && (
                 <StyledPanel id="map-style-panel" role="dialog" aria-label="Map style options" style={{ right: 'calc(100% + 1rem)' }}>

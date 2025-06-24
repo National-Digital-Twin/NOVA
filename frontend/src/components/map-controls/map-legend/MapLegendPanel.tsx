@@ -1,17 +1,17 @@
 import { Box, styled, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import ControlButton from '../../../shared/control-button/ControlButton';
 import type { MapRef } from 'react-map-gl/maplibre';
+import ControlIcon from '../../../shared/control-icon/ControlIcon';
 
 const StyledPanel = styled('div')(({ theme }) => ({
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    minWidth: '220px',
     backgroundColor: theme.palette.background.paper,
-    padding: theme.spacing(2),
     borderRadius: theme.shape.borderRadius,
     boxShadow: theme.shadows[3],
+    minWidth: '220px',
+    padding: theme.spacing(2),
+    position: 'absolute',
+    right: 0,
+    top: 0,
     zIndex: 1,
 }));
 
@@ -20,29 +20,26 @@ const LegendTitle = styled(Typography)(({ theme }) => ({
 }));
 
 const LegendSubtitle = styled(Typography)(({ theme }) => ({
-    marginBottom: theme.spacing(1),
     color: theme.palette.text.secondary,
+    marginBottom: theme.spacing(1),
 }));
 
 const LegendItem = styled(Box)(({ theme }) => ({
-    marginBottom: theme.spacing(1),
-    display: 'flex',
     alignItems: 'center',
+    display: 'flex',
+    marginBottom: theme.spacing(1),
 }));
 
 const ColorLine = styled(Box, {
     shouldForwardProp: (prop) => prop !== 'color',
 })<{ color: string }>(({ color, theme }) => ({
-    width: '2rem',
-    height: '4px',
     backgroundColor: color,
+    height: '4px',
     marginRight: theme.spacing(1),
+    width: '2rem',
 }));
 
 interface MapLegendPanelProps {
-    /**
-     * Reference to the MapLibre map instance.
-     */
     mapRef: React.RefObject<MapRef>;
 }
 
@@ -71,9 +68,9 @@ const MapLegendPanel = ({ mapRef }: MapLegendPanelProps) => {
 
     return (
         <div style={{ position: 'relative' }}>
-            <ControlButton onClick={() => setShowPanel(!showPanel)} aria-label="Show map legend" aria-expanded={showPanel} aria-controls="map-legend-panel">
+            <ControlIcon onClick={() => setShowPanel(!showPanel)} aria-label="Show map legend" aria-expanded={showPanel} aria-controls="map-legend-panel">
                 <img src="/icons/legend.svg" alt="Legend" width={24} height={24} />
-            </ControlButton>
+            </ControlIcon>
 
             {showPanel && (
                 <StyledPanel id="map-legend-panel" role="dialog" aria-label="Map legend" style={{ right: 'calc(100% + 1rem)' }}>

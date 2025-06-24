@@ -50,7 +50,7 @@ describe('useMapboxDraw', () => {
     });
 
     it('should not re-initialise if drawRef already exists', () => {
-        const { result, rerender } = renderHook(({ isReady }) => useMapboxDraw(mockMapRef, isReady), { initialProps: { isReady: true } });
+        const { rerender } = renderHook(({ isReady }) => useMapboxDraw(mockMapRef, isReady), { initialProps: { isReady: true } });
         expect(MapboxDraw).toHaveBeenCalledTimes(1);
         rerender({ isReady: true });
         expect(MapboxDraw).toHaveBeenCalledTimes(1); // Still 1 — doesn't re-init

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
-import ControlButton from '../../../shared/control-button/ControlButton';
+import ControlIcon from '../../../shared/control-icon/ControlIcon';
 
 interface CompassButtonProps {
     mapRef: React.RefObject<MapRef>;
@@ -36,9 +36,9 @@ const CompassButton = ({ mapRef }: CompassButtonProps) => {
     }, [mapRef]);
 
     return (
-        <ControlButton onClick={handleClick} aria-label="Reset View">
+        <ControlIcon onClick={handleClick} aria-label="Reset View">
             <img src="/icons/compass.svg" alt="Reset view" style={{ transform: `rotate(${-bearing}deg)` }} />
-        </ControlButton>
+        </ControlIcon>
     );
 };
 

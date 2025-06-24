@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach, type MockInstance } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import LayerControlPanel from './LayerControlPanel';
-import { MapVisualHelper } from '../../utils/MapVisualHelper';
 import type { MapRef } from 'react-map-gl/maplibre';
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
+import { MapVisualHelper } from '../../utils/MapVisualHelper';
+import LayerControlPanel from './LayerControlPanel';
 
 const mockMapRef = { current: {} } as unknown as React.RefObject<MapRef>;
 const mockDrawRef = { current: {} } as unknown as React.RefObject<MapboxDraw>;

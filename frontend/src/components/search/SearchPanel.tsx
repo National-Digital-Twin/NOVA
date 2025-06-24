@@ -1,33 +1,38 @@
+import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { Box, Divider, styled } from '@mui/material';
+import type { Feature, FeatureCollection, Point } from 'geojson';
+import maplibregl from 'maplibre-gl';
 import { useCallback, useRef, useState } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
 import DeletePolygonButton from './delete-polygon/DeletePolygonButton';
 import DrawPolygonButton from './draw-polygon/DrawPolygonButton';
+import EditPolygonButton from './edit-polygon/EditPolygonButton';
+import HideLayersButton from './hide-map-layers/HideLayersButton';
 import SearchInput from './search-input/SearchInput';
 import { MapVisualHelper } from '../../utils/MapVisualHelper';
-import EditPolygonButton from './edit-polygon/EditPolygonButton';
 import { usePolygonHandlers } from '../../hooks/usePolygonHandlers';
-import maplibregl from 'maplibre-gl';
-import type MapboxDraw from '@mapbox/mapbox-gl-draw';
-import HideLayersButton from './hide-map-layers/HideLayersButton';
+import type { Variation } from './add-asset/AddAsset';
+import AddAssetButton from './add-asset/AddAssetButton';
+import AssetLayer from './asset-layer/AssetLayer';
 
 const SearchContainer = styled(Box)({
-    position: 'absolute',
-    top: '1rem',
-    left: '1rem',
     display: 'flex',
     flexDirection: 'row',
     gap: '1rem',
+    left: '1rem',
+    position: 'absolute',
+    top: '1rem',
     zIndex: 1,
 });
 
 const SearchGroup = styled(Box)(({ theme }) => ({
-    display: 'flex',
-    flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: theme.palette.background.paper,
     borderRadius: theme.shape.borderRadius,
     boxShadow: theme.shadows[2],
+    display: 'flex',
+    flexDirection: 'row',
+    position: 'relative',
 }));
 
 const StyledDivider = styled(Divider)(({ theme }) => ({
@@ -45,6 +50,7 @@ const SearchPanel = ({ mapRef, drawRef, showLayerControl, hideLayerControl }: Se
     const popupRef = useRef<maplibregl.Popup | null>(null);
     const [polygonDrawn, setPolygonDrawn] = useState(false);
     const [polygonConfirmed, setPolygonConfirmed] = useState(false);
+    const [assetFeatures, setAssetFeatures] = useState<FeatureCollection<Point>>({ type: 'FeatureCollection', features: [] });
 
     const { handlePolygonDrawn, handlePolygonEdited, handlePolygonDeleted } = usePolygonHandlers({
         mapRef,
@@ -57,6 +63,32 @@ const SearchPanel = ({ mapRef, drawRef, showLayerControl, hideLayerControl }: Se
     const handleLocationSelect = useCallback(
         (lat: number, long: number, zoom: number) => {
             MapVisualHelper.flyToLocation(mapRef, lat, long, zoom);
+        },
+        [mapRef]
+    );
+
+    const handleAssetSelect = useCallback(
+        (variant: Variation) => {
+            if (!mapRef.current) return;
+
+            const map = mapRef.current.getMap();
+            const center = map.getCenter();
+
+            const newFeature: Feature<Point> = {
+                type: 'Feature',
+                geometry: {
+                    type: 'Point',
+                    coordinates: [center.lng, center.lat],
+                },
+                properties: {
+                    icon: variant.icon,
+                },
+            };
+
+            setAssetFeatures((prevFeatures) => ({
+                ...prevFeatures,
+                features: [...prevFeatures.features, newFeature],
+            }));
         },
         [mapRef]
     );
@@ -93,6 +125,12 @@ const SearchPanel = ({ mapRef, drawRef, showLayerControl, hideLayerControl }: Se
                 <StyledDivider orientation="vertical" flexItem />
                 <HideLayersButton mapRef={mapRef} />
             </SearchGroup>
+
+            <SearchGroup>
+                <AddAssetButton onAssetSelect={handleAssetSelect} />
+            </SearchGroup>
+
+            {assetFeatures.features.length > 0 && <AssetLayer data={assetFeatures} />}
         </SearchContainer>
     );
 };

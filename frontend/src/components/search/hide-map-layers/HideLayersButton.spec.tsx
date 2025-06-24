@@ -1,15 +1,15 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { vi } from 'vitest';
-import HideLayersButton from './HideLayersButton';
-import { MapVisualHelper } from '../../../utils/MapVisualHelper';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { MapRef } from 'react-map-gl/maplibre';
+import { vi } from 'vitest';
+import { MapVisualHelper } from '../../../utils/MapVisualHelper';
+import HideLayersButton from './HideLayersButton';
 
 describe('HideLayersButton', () => {
     const getMockMap = (hasHeatmap: boolean) => {
         return {
             getLayer: vi.fn((id: string) => (id === 'heatmap-layer' && hasHeatmap ? {} : undefined)),
             on: vi.fn((event, callback) => {
-                if (event === 'styledata') callback(); // simulate styledata event immediately
+                if (event === 'styledata') callback();
             }),
             off: vi.fn(),
             getStyle: vi.fn(() => ({
@@ -51,11 +51,9 @@ describe('HideLayersButton', () => {
         render(<HideLayersButton mapRef={mockMapRef(true)} />);
         const button = await screen.findByRole('button');
 
-        // First click hides layers
         fireEvent.click(button);
         expect(hideMock).toHaveBeenCalled();
 
-        // Second click shows layers
         fireEvent.click(button);
         expect(showMock).toHaveBeenCalledWith(expect.anything(), ['custom-layer-1']);
     });
