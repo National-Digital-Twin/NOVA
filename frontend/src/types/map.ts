@@ -7,5 +7,5 @@ export const MAP_STYLES: Record<MapStyle, string> = {
     osm: `https://api.maptiler.com/maps/openstreetmap/style.json?key=${MAPTILER_TOKEN}`,
     hybrid: `https://api.maptiler.com/maps/hybrid/style.json?key=${MAPTILER_TOKEN}`,
     bright: `https://api.maptiler.com/maps/bright-v2/style.json?key=${MAPTILER_TOKEN}`,
-    satellite: `https://api.maptiler.com/maps/satellite/style.json?key=${MAPTILER_TOKEN}`,
+    satellite: `https://api.maptiler.com/maps/satellite/style.json?key=${MAPTILER_TOKEN}`, // Note this is required for 3d map rendering
 };

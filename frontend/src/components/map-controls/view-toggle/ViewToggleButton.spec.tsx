@@ -1,63 +1,81 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import type { MapRef } from 'react-map-gl/maplibre';
-import { describe, expect, it, vi } from 'vitest';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import ViewToggleButton from './ViewToggleButton';
+import type { MapStyle } from '../../../types/map';
 
 describe('ViewToggleButton', () => {
-    const mockMap = {
-        easeTo: vi.fn(),
-        getPitch: () => 0,
-    };
+    let mockMap: any;
+    let mockMapRef: React.RefObject<MapRef>;
 
-    const mockMapRef = {
-        current: {
-            getMap: () => mockMap,
-        },
-    } as unknown as React.RefObject<MapRef>;
-
-    it('renders with 2D text initially', () => {
-        render(<ViewToggleButton mapRef={mockMapRef} />);
-        expect(screen.getByText('2D')).toBeInTheDocument();
+    beforeEach(() => {
+        // Minimal stub of MapLibre API needed by our component
+        mockMap = {
+            easeTo: vi.fn(),
+            isMoving: () => false,
+            isStyleLoaded: () => true,
+            once: (_evt: string, cb: () => void) => {
+                cb();
+            },
+            getSource: () => null,
+            addSource: vi.fn(),
+            setTerrain: vi.fn(),
+        };
+        mockMapRef = {
+            current: {
+                getMap: () => mockMap,
+            },
+        } as unknown as React.RefObject<MapRef>;
     });
 
-    it('renders with correct aria label initially', () => {
-        render(<ViewToggleButton mapRef={mockMapRef} />);
+    function setup(initial3D: boolean, initialStyle: MapStyle) {
+        const onStyleChange = vi.fn();
+        const setIs3D = vi.fn();
+        render(<ViewToggleButton mapRef={mockMapRef} onStyleChange={onStyleChange} is3D={initial3D} setIs3D={setIs3D} currentStyle={initialStyle} />);
+        const button = screen.getByRole('button');
+        return { button, onStyleChange, setIs3D };
+    }
+
+    it('renders "3D" when is3D is false', () => {
+        setup(false, 'basic');
+        expect(screen.getByText('3D')).toBeInTheDocument();
+        expect(screen.getByLabelText('Switch to 3D')).toBeInTheDocument();
+    });
+
+    it('renders "2D" when is3D is true', () => {
+        setup(true, 'hybrid');
+        expect(screen.getByText('2D')).toBeInTheDocument();
         expect(screen.getByLabelText('Switch to 2D')).toBeInTheDocument();
     });
 
-    it('toggles between 2D and 3D text when clicked', () => {
-        render(<ViewToggleButton mapRef={mockMapRef} />);
-        const button = screen.getByRole('button');
+    it('toggles into 3D: calls onStyleChange("satellite"), setIs3D(true), and easeTo({ pitch: 60, duration: 400 })', () => {
+        const { button, onStyleChange, setIs3D } = setup(false, 'hybrid');
 
-        expect(screen.getByText('2D')).toBeInTheDocument();
-
-        fireEvent.click(button);
-        expect(screen.getByText('3D')).toBeInTheDocument();
-
-        fireEvent.click(button);
-        expect(screen.getByText('2D')).toBeInTheDocument();
-    });
-
-    it('calls easeTo with correct parameters when toggling to 2D', () => {
-        render(<ViewToggleButton mapRef={mockMapRef} />);
-        const button = screen.getByRole('button');
+        // click to go into 3D
         fireEvent.click(button);
 
+        expect(onStyleChange).toHaveBeenCalledWith('satellite');
+        expect(setIs3D).toHaveBeenCalledWith(true);
         expect(mockMap.easeTo).toHaveBeenCalledWith({
-            pitch: 0,
-            duration: 300,
+            pitch: 60,
+            duration: 400,
         });
     });
 
-    it('calls easeTo with correct parameters when toggling to 3D', () => {
-        render(<ViewToggleButton mapRef={mockMapRef} />);
-        const button = screen.getByRole('button');
-        fireEvent.click(button);
+    it('toggles back to 2D: calls onStyleChange(previousStyle), setIs3D(false), and easeTo({ pitch: 0, duration: 400 })', () => {
+        // Simulate initial 3D and previous style "hybrid"
+        const { button, onStyleChange, setIs3D } = setup(true, 'hybrid');
+
+        // click to go back to 2D
         fireEvent.click(button);
 
+        // should restore to the saved style ('hybrid')
+        expect(onStyleChange).toHaveBeenCalledWith('hybrid');
+        expect(setIs3D).toHaveBeenCalledWith(false);
         expect(mockMap.easeTo).toHaveBeenCalledWith({
-            pitch: 60,
-            duration: 300,
+            pitch: 0,
+            duration: 400,
         });
     });
 });
