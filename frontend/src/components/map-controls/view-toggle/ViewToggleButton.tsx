@@ -1,7 +1,7 @@
 import { Typography } from '@mui/material';
 import { useState } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
-import ControlButton from '../../../shared/control-button/ControlButton';
+import ControlIcon from '../../../shared/control-icon/ControlIcon';
 
 interface ViewToggleButtonProps {
     mapRef: React.RefObject<MapRef>;
@@ -22,9 +22,9 @@ const ViewToggleButton = ({ mapRef }: ViewToggleButtonProps) => {
     };
 
     return (
-        <ControlButton onClick={handleClick} aria-label={is3D ? 'Switch to 2D' : 'Switch to 3D'}>
+        <ControlIcon onClick={handleClick} aria-label={is3D ? 'Switch to 2D' : 'Switch to 3D'}>
             <Typography fontSize={20}>{is3D ? '2D' : '3D'}</Typography>
-        </ControlButton>
+        </ControlIcon>
     );
 };
 

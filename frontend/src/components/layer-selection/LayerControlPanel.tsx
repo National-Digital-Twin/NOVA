@@ -1,27 +1,28 @@
-import React, { useState, useMemo, useId, useEffect } from 'react';
 import {
-    Paper,
-    Drawer,
     Accordion,
-    AccordionSummary,
     AccordionDetails,
-    Checkbox,
-    TextField,
-    Button,
-    Typography,
-    Divider,
-    InputAdornment,
-    IconButton,
+    AccordionSummary,
     Box,
+    Button,
+    Checkbox,
     CircularProgress,
+    Divider,
+    Drawer,
+    IconButton,
+    InputAdornment,
     MenuItem,
+    Paper,
+    TextField,
+    Typography,
 } from '@mui/material';
+import React, { useEffect, useId, useMemo, useState } from 'react';
+
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined';
-import SearchIcon from '@mui/icons-material/Search';
-import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import SearchIcon from '@mui/icons-material/Search';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { MapVisualHelper } from '../../utils/MapVisualHelper';
 
@@ -236,7 +237,7 @@ const LayerControlPanel = ({ mapRef }: LayerControlPanelProps) => {
     const hasSearchResults = filteredLayerEntries.some(Boolean);
 
     if (!layersLoaded && !loadError) {
-        return null; // Don't render anything until API completes
+        return null;
     }
 
     if (loadError) {

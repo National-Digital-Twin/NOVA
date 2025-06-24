@@ -5,13 +5,13 @@ import type { SearchResponse } from '../../../types/searchResponse';
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
     '& .MuiOutlinedInput-root': {
-        minHeight: 48,
         height: 48,
+        minHeight: 48,
         padding: '0 16px',
         '& fieldset': {
-            top: 0,
-            margin: 0,
             border: 'none',
+            margin: 0,
+            top: 0,
         },
         '&:hover fieldset': {
             outline: '4px solid',

@@ -1,5 +1,5 @@
 import type { MapRef } from 'react-map-gl/maplibre';
-import ControlButton from '../../../shared/control-button/ControlButton';
+import ControlIcon from '../../../shared/control-icon/ControlIcon';
 
 interface ZoomInButtonProps {
     mapRef: React.RefObject<MapRef>;
@@ -14,9 +14,9 @@ const ZoomInButton = ({ mapRef }: ZoomInButtonProps) => {
     };
 
     return (
-        <ControlButton onClick={handleClick} aria-label="Zoom In">
+        <ControlIcon onClick={handleClick} aria-label="Zoom In">
             <img src="/icons/add.svg" alt="Zoom in" width={24} height={24} />
-        </ControlButton>
+        </ControlIcon>
     );
 };
 
