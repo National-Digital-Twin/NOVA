@@ -18,7 +18,7 @@ describe('AddAssetButton', () => {
 
     const TestAddAssetWrapper = () => {
         const [isPanelOpen, setIsPanelOpen] = useState(false);
-        return <AddAssetButton onAssetSelect={mockOnAssetSelect} setIsPanelOpen={setIsPanelOpen} isPanelOpen={isPanelOpen} />
+        return <AddAssetButton onAssetSelect={mockOnAssetSelect} setIsPanelOpen={setIsPanelOpen} isPanelOpen={isPanelOpen} />;
     };
 
     it('renders the add asset button', () => {

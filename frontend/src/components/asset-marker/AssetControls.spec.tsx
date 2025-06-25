@@ -14,6 +14,5 @@ describe('AssetControls', () => {
         expect(screen.getByLabelText('Connect to grid')).toBeInTheDocument();
         expect(screen.getByLabelText('Delete Asset')).toBeInTheDocument();
         expect(screen.getByLabelText('Move')).toBeInTheDocument();
-
     });
 });

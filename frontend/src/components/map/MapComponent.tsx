@@ -30,6 +30,7 @@ const MapComponent = () => {
     const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const drawRef = useMapboxDraw(mapRef, isMapInitialized);
+    const [is3D, setIs3D] = useState(false);
 
     const handleStyleChange = (newStyle: MapStyle) => {
         setMapStyle(newStyle);
@@ -54,6 +55,7 @@ const MapComponent = () => {
 
             const { lngLat } = e;
             setMarkerPosition({ longitude: lngLat.lng, latitude: lngLat.lat });
+            MapVisualHelper.setMarkerPosition({ longitude: lngLat.lng, latitude: lngLat.lat });
             setPlacing(false);
         },
         [placing]
@@ -104,7 +106,7 @@ const MapComponent = () => {
                             setPlacing={setPlacing}
                             showLayerControl={() => setShowLayerControl(true)}
                         />
-                        <MapControls mapRef={mapRef} onStyleChange={handleStyleChange} currentStyle={mapStyle} />
+                        <MapControls mapRef={mapRef} onStyleChange={handleStyleChange} currentStyle={mapStyle} is3D={is3D} setIs3D={setIs3D} />
                         {placing && mousePos && (
                             <div
                                 style={{
@@ -119,7 +121,7 @@ const MapComponent = () => {
                                 <img src={windTurbineIcon} alt="Wind Turbine pending" style={{ width: '60px', height: '60px', cursor: 'pointer' }} />
                             </div>
                         )}
-                        {markerPosition && (
+                        {markerPosition && !is3D && (
                             <AssetMarker
                                 longitude={markerPosition.longitude}
                                 latitude={markerPosition.latitude}

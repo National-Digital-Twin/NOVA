@@ -1,9 +1,8 @@
 import { LngLat, MapMouseEvent, type Map, Popup, MercatorCoordinate } from 'maplibre-gl';
 import type { Feature, FeatureCollection, Geometry, Polygon } from 'geojson';
-import type { GeoJSONSource, LngLatLike } from 'maplibre-gl';
+import type { GeoJSONSource } from 'maplibre-gl';
 import type { MapRef } from 'react-map-gl/maplibre';
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
-import type { Asset } from '../components/search/add-asset/AddAsset';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/Addons.js';
 
@@ -30,8 +29,21 @@ export class MapVisualHelper {
     private static readonly maskLayerSourceId = 'mask';
     private static readonly maskLayerId = 'mask-layer';
     private static readonly heatmapLayerId = 'heatmap-layer';
+    private static readonly threeDimensionalAssetsLayer = '3d-assets-layer';
     private static issuesPopup: Popup | null = null;
     private static cachedHeatmapGeojson: FeatureCollection | null = null;
+    private static markerPosition: {
+        longitude?: number;
+        latitude?: number;
+    } | null;
+
+    static setMarkerPosition(markerPosition: { longitude?: number; latitude?: number }) {
+        this.markerPosition = markerPosition;
+    }
+
+    static removeMarkerPosition() {
+        this.markerPosition = null;
+    }
 
     /**
      * Applies a dimmed mask over the entire map except inside the given polygon and centers the map on that polygon.
@@ -301,107 +313,40 @@ export class MapVisualHelper {
     /**
      * Helper method to visualise assets placed on the map in 3d.
      * @param map  - The MapLibre map instance.
-     * @param assets  - Array of assets to show.
      */
-    static async visualiseAssetsIn3d(map: Map, assets: Asset[]) {
-        const id = 'threejs-turbine';
-        if (map.getLayer(id)) map.removeLayer(id);
-      
-        // Load the turbine GLB
-        const { scene: model } = await new GLTFLoader()
-          .loadAsync('https://maplibre.org/maplibre-gl-js/docs/assets/34M_17/34M_17.gltf');
+    static async visualiseAssetsIn3d(map: Map) {
+        MapVisualHelper.remove3DAssets(map);
+
+        const { scene: model } = await new GLTFLoader().loadAsync('models/turbine-b.glb');
         model.scale.set(1, 1, 1);
-      
-        const layer = {
-          id,
-          type: 'custom' as const,
-          renderingMode: '3d' as const,
-      
-          onAdd(_: Map, gl: WebGLRenderingContext) {
-            const scene  = new THREE.Scene();
-            const camera = new THREE.Camera();
-      
-            // Align axes (Y ↑, Z north)
-            scene.rotateX(Math.PI / 2);
-            scene.scale.set(1, 1, -1);
-      
-            // Simple light + model
-            const light = new THREE.DirectionalLight(0xffffff, 1);
-            light.position.set(100, 200, 100);
-            scene.add(light);
-            scene.add(model);
-      
-            // Share the map’s WebGL context
-            const renderer = new THREE.WebGLRenderer({
-              canvas: map.getCanvas(),
-              context: gl,
-              antialias: true,
-            });
-            renderer.autoClear = false;
-      
-            Object.assign(this, { scene, camera, renderer });
-          },
-      
-          render(_: WebGLRenderingContext,
-                 { defaultProjectionData: { mainMatrix } }: any) {
-            // Anchor at current centre & terrain height
-            const centre = map.getCenter();
-            const elev   = map.queryTerrainElevation(centre) || 0;
-            const origin = MercatorCoordinate.fromLngLat(centre, elev);
-            const scale  = origin.meterInMercatorCoordinateUnits();
-      
-            // Build final projection matrix
-            const proj  = new THREE.Matrix4().fromArray(mainMatrix);
-            const modelM = new THREE.Matrix4()
-              .makeTranslation(origin.x, origin.y, origin.z)
-              .scale(new THREE.Vector3(scale, -scale, scale));
-      
-            this.camera.projectionMatrix = proj.multiply(modelM);
-      
-            // Draw once per map frame (no custom animation loop)
-            this.renderer.resetState();
-            this.renderer.render(this.scene, this.camera);
-          },
-        } as ThreeJsCustomLayer;
-      
-        map.addLayer(layer);
-      
-        // Optional: move the camera so the user sees it
-        map.easeTo({
-          center: map.getCenter(),
-          zoom: 17,
-          pitch: 60,
-          bearing: 0,
-          duration: 1000,
-        });
-      }      
-      
-    /**
-     * Debug helper for working with three js to render a red cube (to test WebGL rendering).
-     * @param map - The MapLibre map instance
-     */
-    static renderRedCube(map: Map) {
-        const id = 'threejs-red-cube';
-        if (map.getLayer(id)) map.removeLayer(id);
+
+        // Use the stored marker position if available, else don't render
+        const { longitude, latitude } = this.markerPosition || {};
+        if (longitude === undefined || latitude === undefined) {
+            console.warn('No marker position set. Skipping visualisation.');
+            return;
+        }
+
+        const position = new LngLat(longitude, latitude);
+        const elevation = map.queryTerrainElevation(position) || 0;
+        const origin = MercatorCoordinate.fromLngLat(position, elevation);
+        const scale = origin.meterInMercatorCoordinateUnits();
 
         const layer = {
-            id,
+            id: MapVisualHelper.threeDimensionalAssetsLayer,
             type: 'custom' as const,
             renderingMode: '3d' as const,
 
             onAdd(_: Map, gl: WebGLRenderingContext) {
                 const scene = new THREE.Scene();
                 const camera = new THREE.Camera();
+
                 scene.rotateX(Math.PI / 2);
                 scene.scale.set(1, 1, -1);
 
-                // red 2 m cube
-                scene.add(
-                    new THREE.Mesh(
-                        new THREE.BoxGeometry(15, 15, 15),
-                        new THREE.MeshBasicMaterial({ color: 0xff0000 })
-                    )
-                );
+                const light = new THREE.DirectionalLight(0xffffff, 1);
+                light.position.set(100, 200, 100);
+                scene.add(light, model);
 
                 const renderer = new THREE.WebGLRenderer({
                     canvas: map.getCanvas(),
@@ -413,26 +358,33 @@ export class MapVisualHelper {
                 Object.assign(this, { scene, camera, renderer });
             },
 
-            render(_: WebGLRenderingContext, { defaultProjectionData: { mainMatrix } }: any) {
-                const centre = map.getCenter();
-                const elev = map.queryTerrainElevation(centre) || 0;
-                const origin = MercatorCoordinate.fromLngLat(centre, elev);
-                const scale = origin.meterInMercatorCoordinateUnits();
-
-                // compose projection * modelTransform
+            render(_: WebGLRenderingContext, { defaultProjectionData: { mainMatrix } }: { defaultProjectionData: { mainMatrix: number[] } }) {
                 const proj = new THREE.Matrix4().fromArray(mainMatrix);
-                const model = new THREE.Matrix4()
-                    .makeTranslation(origin.x, origin.y, origin.z)
-                    .scale(new THREE.Vector3(scale, -scale, scale));
+                const modelMatrix = new THREE.Matrix4().makeTranslation(origin.x, origin.y, origin.z).scale(new THREE.Vector3(scale, -scale, scale));
 
-                this.camera.projectionMatrix = proj.multiply(model);
+                this.camera.projectionMatrix = proj.multiply(modelMatrix);
                 this.renderer.resetState();
                 this.renderer.render(this.scene, this.camera);
             },
         } as ThreeJsCustomLayer;
 
         map.addLayer(layer);
-        map.easeTo({ center: map.getCenter(), zoom: 17, pitch: 60, bearing: 0, duration: 1000 });
+
+        map.easeTo({
+            center: [longitude, latitude],
+            zoom: 16.5,
+            pitch: 60,
+            bearing: 0,
+            duration: 1000,
+            offset: [0, 100], // shift map centre 100px down (so asset appears higher)
+        });
+    }
+
+    /**
+     * Removes all 3d assets from the map.
+     */
+    static remove3DAssets(map: Map) {
+        if (map.getLayer(MapVisualHelper.threeDimensionalAssetsLayer)) map.removeLayer(MapVisualHelper.threeDimensionalAssetsLayer);
     }
 
     /**

@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import MapComponent from '../../components/map/MapComponent';
 
 vi.mock('../../components/search/SearchPanel', () => ({
-    default: ({ setPlacing, showLayerControl }: { setPlacing: () => void, showLayerControl: () => void}) => (
+    default: ({ setPlacing, showLayerControl }: { setPlacing: () => void; showLayerControl: () => void }) => (
         <div data-testid="search-panel">
             <button onClick={showLayerControl}>Show Layer Panel</button>
             <button onClick={setPlacing}>Add Asset</button>
@@ -13,7 +13,17 @@ vi.mock('../../components/search/SearchPanel', () => ({
 }));
 
 vi.mock('react-map-gl/maplibre', () => ({
-    Map: ({ children, onMove, onLoad, onClick }: { children: React.ReactNode; onMove?: (evt: { viewState: ViewState }) => void; onLoad?: () => void; onClick?: (e: any) => void; }) => (
+    Map: ({
+        children,
+        onMove,
+        onLoad,
+        onClick,
+    }: {
+        children: React.ReactNode;
+        onMove?: (evt: { viewState: ViewState }) => void;
+        onLoad?: () => void;
+        onClick?: (e: any) => void;
+    }) => (
         <div
             data-testid="map"
             onClick={() => {
@@ -30,15 +40,11 @@ vi.mock('react-map-gl/maplibre', () => ({
     ),
     Source: ({ children }: { children: React.ReactNode }) => <>{children}</>,
     Layer: () => null,
-    Marker: ({ longitude, latitude, children }: { longitude: number, latitude: number, children: React.ReactNode }) => (
-        <div
-            data-testid="mock-marker"
-            data-lng={longitude}
-            data-lat={latitude}
-        >
+    Marker: ({ longitude, latitude, children }: { longitude: number; latitude: number; children: React.ReactNode }) => (
+        <div data-testid="mock-marker" data-lng={longitude} data-lat={latitude}>
             {children}
         </div>
-        ),
+    ),
 }));
 
 vi.mock('../../components/map-controls/MapControls', () => ({
@@ -79,7 +85,7 @@ describe('MapComponent', () => {
         await act(async () => render(<MapComponent />));
         fireEvent.click(screen.getByTestId('map'));
         fireEvent.click(screen.getByText('Add Asset')); // Trigger setPlacing(true)
-        
+
         const event = new MouseEvent('mousemove', {
             bubbles: true,
             cancelable: true,
