@@ -42,16 +42,16 @@ const AssetControls: React.FC<AssetControlsProps> = ({ onBoltClick, onDeleteClic
 
     return (
         <ControlsContainer onClick={(e) => e.stopPropagation()}>
-            <ControlIcon onClick={handleButtonClick(onEditClick || (() => console.log('Edit clicked')))} aria-label="Edit">
+            <ControlIcon onClick={handleButtonClick(onEditClick || (() => console.log('Edit clicked')))} aria-label="Edit" showTooltip>
                 <EditIcon />
             </ControlIcon>
-            <ControlIcon onClick={handleButtonClick(onBoltClick || (() => console.log('Bolt clicked')))} aria-label="Connect to grid">
+            <ControlIcon onClick={handleButtonClick(onBoltClick || (() => console.log('Bolt clicked')))} aria-label="Connect to grid" showTooltip>
                 <BoltIcon />
             </ControlIcon>
-            <ControlIcon onClick={handleButtonClick(onDeleteClick || (() => console.log('Delete clicked')))} aria-label="Delete Asset">
+            <ControlIcon onClick={handleButtonClick(onDeleteClick || (() => console.log('Delete clicked')))} aria-label="Delete Asset" showTooltip>
                 <DeleteForeverIcon />
             </ControlIcon>
-            <ControlIcon onClick={handleButtonClick(onMoveClick || (() => console.log('Move clicked')))} aria-label="Move">
+            <ControlIcon onClick={handleButtonClick(onMoveClick || (() => console.log('Move clicked')))} aria-label="Move" showTooltip>
                 <OpenWithIcon />
             </ControlIcon>
         </ControlsContainer>

@@ -1,6 +1,7 @@
 import { Box, styled } from '@mui/material';
 import ControlButton from '../../../shared/control-button/ControlButton';
 import AddAssetPanel from './AddAssetPanel';
+import { useMapStore } from '../../../stores/useMapStore';
 
 const StyledContainer = styled(Box)({
     position: 'relative',
@@ -8,11 +9,12 @@ const StyledContainer = styled(Box)({
 
 interface AddAssetButtonProps {
     isPanelOpen: boolean;
-    onAssetSelect: (placing: boolean) => void;
     setIsPanelOpen: (isPanelOpen: boolean) => void;
 }
 
-const AddAssetButton = ({ isPanelOpen, onAssetSelect, setIsPanelOpen }: AddAssetButtonProps) => {
+const AddAssetButton = ({ isPanelOpen, setIsPanelOpen }: AddAssetButtonProps) => {
+    const setPlacing = useMapStore((s) => s.setPlacing);
+
     const handleTogglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
     };
@@ -22,7 +24,7 @@ const AddAssetButton = ({ isPanelOpen, onAssetSelect, setIsPanelOpen }: AddAsset
     };
 
     const handleAssetSelect = () => {
-        onAssetSelect(true);
+        setPlacing(true);
         setIsPanelOpen(false);
     };
 

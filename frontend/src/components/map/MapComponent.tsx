@@ -1,6 +1,6 @@
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useRef, useState, useCallback, useEffect } from 'react';
-import type { MapLayerMouseEvent, MapRef } from 'react-map-gl/maplibre';
+import type { MapRef } from 'react-map-gl/maplibre';
 import { Map } from 'react-map-gl/maplibre';
 import { MAP_STYLES, type MapStyle } from '../../types/map';
 import MapControls from '../map-controls/MapControls';
@@ -10,6 +10,7 @@ import AssetMarker from '../asset-marker/AssetMarker';
 import windTurbineIcon from '../../assets/Windturbine_white.svg';
 import useMapboxDraw from '../../hooks/useMapboxDraw';
 import { MapVisualHelper } from '../../utils/MapVisualHelper';
+import { useMapStore } from '../../stores/useMapStore';
 
 const MAP_VIEW_BOUNDS: [[number, number], [number, number]] = [
     [-25.0, 42.0],
@@ -18,18 +19,19 @@ const MAP_VIEW_BOUNDS: [[number, number], [number, number]] = [
 
 const MapComponent = () => {
     const mapRef = useRef<MapRef>(null!);
+    const setMapRef = useMapStore((s) => s.setMapRef);
     const [viewState, setViewState] = useState({ longitude: -1.611, latitude: 54.5, pitch: 0, bearing: 0 });
     const [mapStyle, setMapStyle] = useState<MapStyle>('hybrid');
     const [isMapInitialized, setIsMapInitialized] = useState(false);
     const [showLayerControl, setShowLayerControl] = useState(false);
-    const [markerPosition, setMarkerPosition] = useState<{
-        longitude?: number;
-        latitude?: number;
-    } | null>(null);
-    const [placing, setPlacing] = useState(false);
+    const markerPosition = useMapStore((s) => s.markerPosition);
+    const setMarkerPosition = useMapStore((s) => s.setMarkerPosition);
+    const placing = useMapStore((s) => s.placing);
+
     const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const drawRef = useMapboxDraw(mapRef, isMapInitialized);
+    const setDrawRef = useMapStore((s) => s.setDrawRef);
     const [is3D, setIs3D] = useState(false);
 
     const handleStyleChange = (newStyle: MapStyle) => {
@@ -48,24 +50,23 @@ const MapComponent = () => {
         setIsMapInitialized(true);
     };
 
-    // Handle map click to update marker position
-    const handleMapClick = useCallback(
-        (e: MapLayerMouseEvent) => {
-            if (!placing) return;
-
-            const { lngLat } = e;
-            setMarkerPosition({ longitude: lngLat.lng, latitude: lngLat.lat });
-            MapVisualHelper.setMarkerPosition({ longitude: lngLat.lng, latitude: lngLat.lat });
-            setPlacing(false);
-        },
-        [placing]
-    );
-
     // Handle marker drag end to update marker position
     const handleMarkerDragEnd = useCallback((longitude: number, latitude: number) => {
         console.log('Marker position updated:', { longitude, latitude });
         setMarkerPosition({ longitude, latitude });
     }, []);
+
+    useEffect(() => {
+        if (mapRef.current) {
+            setMapRef(mapRef.current);
+        }
+    }, [mapRef.current]);
+
+    useEffect(() => {
+        if (drawRef.current) {
+            setDrawRef(drawRef.current);
+        }
+    }, [drawRef.current]);
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
@@ -91,7 +92,7 @@ const MapComponent = () => {
                 {...viewState}
                 onMove={(evt) => setViewState(evt.viewState)}
                 onLoad={handleMapLoad}
-                onClick={handleMapClick}
+                onClick={useMapStore((s) => s.handleMapClick)}
                 mapStyle={MAP_STYLES[mapStyle]}
                 style={{ width: '100%', height: '100%' }}
             >
@@ -103,7 +104,6 @@ const MapComponent = () => {
                             isPanelOpen={isPanelOpen}
                             mapRef={mapRef}
                             setIsPanelOpen={setIsPanelOpen}
-                            setPlacing={setPlacing}
                             showLayerControl={() => setShowLayerControl(true)}
                         />
                         <MapControls mapRef={mapRef} onStyleChange={handleStyleChange} currentStyle={mapStyle} is3D={is3D} setIs3D={setIs3D} />
@@ -127,9 +127,7 @@ const MapComponent = () => {
                                 latitude={markerPosition.latitude}
                                 mapRef={mapRef}
                                 onDragEnd={handleMarkerDragEnd}
-                                setMarkerPosition={setMarkerPosition}
                                 setIsPanelOpen={setIsPanelOpen}
-                                setPlacing={setPlacing}
                             />
                         )}
                         {showLayerControl && <LayerControlPanel mapRef={mapRef} drawRef={drawRef} />}

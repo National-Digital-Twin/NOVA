@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
 import ControlIcon from '../../../shared/control-icon/ControlIcon';
 import { MapVisualHelper } from '../../../utils/MapVisualHelper';
+import { useMapStore } from '../../../stores/useMapStore';
 
 interface DrawPolygonButtonProps {
     onPolygonDrawn: (geojson: FeatureCollection<Geometry>) => void;
@@ -16,6 +17,7 @@ interface DrawPolygonButtonProps {
 
 const DrawPolygonButton = ({ onPolygonDrawn, mapRef, drawRef, isVisible, polygonDrawn }: DrawPolygonButtonProps) => {
     const [isActive, setIsActive] = useState(false);
+    const preventPolygonEdit = useMapStore((s) => s.preventPolygonEdit);
 
     useEffect(() => {
         setIsActive(polygonDrawn);
