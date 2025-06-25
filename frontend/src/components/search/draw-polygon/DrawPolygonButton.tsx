@@ -24,35 +24,16 @@ const DrawPolygonButton = ({ onPolygonDrawn, mapRef, drawRef, isVisible, polygon
     }, [polygonDrawn]);
 
     useEffect(() => {
-        if (!polygonDrawn || !mapRef.current || !drawRef.current) return;
+        if (!polygonDrawn ) return;
 
         const map = mapRef.current;
-        const draw = drawRef.current;
 
-        if (!draw) return;
-
-        const mode = draw.getMode();
-        if (mode.startsWith('draw')) {
-            return;
-        }
-
-        const preventEdit = (e: maplibregl.MapMouseEvent & { target: maplibregl.Map }) => {
-            const features = map.queryRenderedFeatures([e.point.x, e.point.y], {
-                layers: ['gl-draw-polygon-fill.cold'],
-            });
-
-            if (features.length > 0) {
-                draw.changeMode('simple_select', { featureIds: [] });
-                e.preventDefault();
-            }
-        };
-
-        map.on('click', preventEdit);
-        map.on('contextmenu', preventEdit);
+        map.on('click', preventPolygonEdit);
+        map.on('contextmenu', preventPolygonEdit);
 
         return () => {
-            map.off('click', preventEdit);
-            map.off('contextmenu', preventEdit);
+            map.off('click', preventPolygonEdit);
+            map.off('contextmenu', preventPolygonEdit);
         };
     }, [polygonDrawn, mapRef, drawRef]);
 

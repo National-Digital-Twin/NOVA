@@ -1,5 +1,6 @@
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
-import type { MapLayerMouseEvent, MapMouseEvent } from 'maplibre-gl';
+import Point from '@mapbox/point-geometry';
+import type { MapLayerMouseEvent } from 'maplibre-gl';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { create } from 'zustand';
 
@@ -34,16 +35,28 @@ export const useMapStore = create<MapState>((set, get) => ({
   setMarkerPosition: (position) => set({markerPosition: position}),
 
   preventPolygonEdit: (e: MouseEvent) => {
+    let x: number;
+    let y: number;
+
+    if ('point' in e && e.point && typeof e.point.x === 'number') {
+        // It's a MapMouseEvent
+        x = e.point.x;
+        y = e.point.y;
+    } else {
+        // It's a DOM MouseEvent
+        x = e.clientX;
+        y = e.clientY;
+    }
+
     const map = get().mapRef;
     const draw = get().drawRef;
-    // ensures 
     if (map && draw) {
         const mode = draw.getMode();
         if (mode.startsWith('draw')) {
             return;
         }
 
-        const features = map.queryRenderedFeatures([e.clientX, e.clientY], {
+        const features = map.queryRenderedFeatures([x, y], {
             layers: ['gl-draw-polygon-fill.cold'],
         });
 
@@ -55,7 +68,6 @@ export const useMapStore = create<MapState>((set, get) => ({
   },
 
   handleMapClick: (e: MapLayerMouseEvent) => {
-    // get().preventPolygonEdit(e);
     // handle state when asset is being placed
     if (get().placing) {
         const { lngLat } = e;
