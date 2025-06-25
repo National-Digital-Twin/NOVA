@@ -45,7 +45,7 @@ const UserMenu = () => {
         const fetchUserData = async () => {
             try {
                 const userData = await userService.getUserData();
-                setUsername(userData.displayName);
+                setUsername(userData.email);
             } catch (err) {
                 console.error('Failed to fetch user data:', err);
             }
