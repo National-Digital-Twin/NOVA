@@ -39,14 +39,16 @@ const MapComponent = () => {
     };
 
     // Handle map click to update marker position
-    const handleMapClick = useCallback((e: MapLayerMouseEvent) => {
-        if (!placing) return;
+    const handleMapClick = useCallback(
+        (e: MapLayerMouseEvent) => {
+            if (!placing) return;
 
-        const { lngLat } = e;
-        setMarkerPosition({longitude: lngLat.lng, latitude: lngLat.lat});
-        setPlacing(false);
-    }, [placing]);
-
+            const { lngLat } = e;
+            setMarkerPosition({ longitude: lngLat.lng, latitude: lngLat.lat });
+            setPlacing(false);
+        },
+        [placing]
+    );
 
     // Handle marker drag end to update marker position
     const handleMarkerDragEnd = useCallback((longitude: number, latitude: number) => {
@@ -84,33 +86,30 @@ const MapComponent = () => {
             >
                 {isMapInitialized && (
                     <>
-                        <SearchPanel 
+                        <SearchPanel
                             drawRef={drawRef}
-                            hideLayerControl={() => setShowLayerControl(false)} 
+                            hideLayerControl={() => setShowLayerControl(false)}
                             isPanelOpen={isPanelOpen}
-                            mapRef={mapRef} 
+                            mapRef={mapRef}
                             setIsPanelOpen={setIsPanelOpen}
                             setPlacing={setPlacing}
-                            showLayerControl={() => setShowLayerControl(true)}  />
+                            showLayerControl={() => setShowLayerControl(true)}
+                        />
                         <MapControls mapRef={mapRef} onStyleChange={handleStyleChange} currentStyle={mapStyle} />
                         {placing && mousePos && (
                             <div
                                 style={{
-                                position: 'fixed',
-                                left: mousePos.x,
-                                top: mousePos.y,
-                                transform: 'translate(-50%, -100%)',
-                                pointerEvents: 'none',
-                                zIndex: 1000,
+                                    position: 'fixed',
+                                    left: mousePos.x,
+                                    top: mousePos.y,
+                                    transform: 'translate(-50%, -100%)',
+                                    pointerEvents: 'none',
+                                    zIndex: 1000,
                                 }}
                             >
-                                <img 
-                                    src={windTurbineIcon} 
-                                    alt="Wind Turbine pending" 
-                                    style={{ width: '60px', height: '60px', cursor: 'pointer' }}
-                                />
+                                <img src={windTurbineIcon} alt="Wind Turbine pending" style={{ width: '60px', height: '60px', cursor: 'pointer' }} />
                             </div>
-                            )}
+                        )}
                         {markerPosition && (
                             <AssetMarker
                                 longitude={markerPosition.longitude}

@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {Box, List, ListItem, ListItemButton, ListItemText, ListItemIcon, Button, Paper, Typography, Divider} from '@mui/material';
+import React, { useState } from 'react';
+import { Box, List, ListItem, ListItemButton, ListItemText, ListItemIcon, Button, Paper, Typography, Divider } from '@mui/material';
 import BoltIcon from '@mui/icons-material/Bolt';
 
 export interface ListItem {
@@ -15,10 +15,7 @@ interface SubstationsListProps {
 /**
  * A component that displays a list of substations with a confirmation button.
  */
-const SubstationsList: React.FC<SubstationsListProps> = ({
-                                                             items = [],
-                                                             onConfirm = () => console.log('Confirmed'),
-                                                         }) => {
+const SubstationsList: React.FC<SubstationsListProps> = ({ items = [], onConfirm = () => console.log('Confirmed') }) => {
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
     const handleItemClick = (index: number) => {
@@ -31,60 +28,46 @@ const SubstationsList: React.FC<SubstationsListProps> = ({
         }
     };
 
-    return (<Paper
-            elevation={5}
-            sx={{ maxWidth: 600, borderRadius: 1, overflow: 'hidden' }}
-        >
+    return (
+        <Paper elevation={5} sx={{ maxWidth: 600, borderRadius: 1, overflow: 'hidden' }}>
             <Box sx={{ display: 'flex', alignItems: 'left', p: 0.5 }}>
-                <ListItemIcon sx={{  minWidth: 'auto', mr: 0.5 }}>
+                <ListItemIcon sx={{ minWidth: 'auto', mr: 0.5 }}>
                     <BoltIcon />
                 </ListItemIcon>
-                <Typography
-                    variant="subtitle1"
-                    fontWeight="bold"
-                >
+                <Typography variant="subtitle1" fontWeight="bold">
                     Choose Substation
                 </Typography>
             </Box>
 
-            <List sx={{height: '200', overflow: 'auto'}}>
+            <List sx={{ height: '200', overflow: 'auto' }}>
                 {items.map((item, index) => (
                     <React.Fragment key={index}>
                         <ListItem disablePadding>
-                            <ListItemButton
-                                selected={selectedIndex === index}
-                                onClick={() => handleItemClick(index)}
-                                sx={{ py: 0.5, px: 1 }}
-                            >
+                            <ListItemButton selected={selectedIndex === index} onClick={() => handleItemClick(index)} sx={{ py: 0.5, px: 1 }}>
                                 <ListItemText
                                     primary={item.text}
                                     secondary={`distance: ${item.distance}`}
                                     sx={{
                                         my: 0,
                                         ml: 0,
-                                        '& .MuiListItemText-primary': {fontSize: 'smaller'},
-                                        '& .MuiListItemText-secondary': {fontSize: 'smaller'}
+                                        '& .MuiListItemText-primary': { fontSize: 'smaller' },
+                                        '& .MuiListItemText-secondary': { fontSize: 'smaller' },
                                     }}
                                 />
                             </ListItemButton>
                         </ListItem>
-                        {index < items.length - 1 && <Divider sx={{my: 0}}/>}
+                        {index < items.length - 1 && <Divider sx={{ my: 0 }} />}
                     </React.Fragment>
                 ))}
             </List>
 
-        <Box sx={{p: 1, textAlign: 'center'}}>
-            <Button
-                variant="contained"
-                    color="primary"
-                    onClick={handleConfirm}
-                    disabled={selectedIndex === null}
-                    size="medium"
-                >
+            <Box sx={{ p: 1, textAlign: 'center' }}>
+                <Button variant="contained" color="primary" onClick={handleConfirm} disabled={selectedIndex === null} size="medium">
                     Confirm
                 </Button>
             </Box>
-        </Paper>);
+        </Paper>
+    );
 };
 
 export default SubstationsList;

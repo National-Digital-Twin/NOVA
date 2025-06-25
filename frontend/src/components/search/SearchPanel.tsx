@@ -102,7 +102,6 @@ const SearchPanel = ({ drawRef, hideLayerControl, mapRef, isPanelOpen, setIsPane
             <SearchGroup>
                 <AddAssetButton onAssetSelect={setPlacing} isPanelOpen={isPanelOpen} setIsPanelOpen={setIsPanelOpen} />
             </SearchGroup>
-
         </SearchContainer>
     );
 };

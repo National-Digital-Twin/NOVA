@@ -7,119 +7,123 @@ import AssetControls from './AssetControls';
 import { SubstationsListContainer } from '../map-substations-list';
 
 interface AssetMarkerProps {
-  longitude?: number;
-  latitude?: number;
-  mapRef?: React.RefObject<MapRef>;
-  onClick?: () => void;
-  onBoltClick?: () => void;
-  isSelected?: boolean;
-  onDragEnd?: (longitude: number, latitude: number) => void;
-  setIsPanelOpen?: (isPanelOpen: boolean) => void;
-  setMarkerPosition?: React.Dispatch<React.SetStateAction<{
     longitude?: number;
     latitude?: number;
-} | null>>;
-  setPlacing?: React.Dispatch<React.SetStateAction<boolean>>;
+    mapRef?: React.RefObject<MapRef>;
+    onClick?: () => void;
+    onBoltClick?: () => void;
+    isSelected?: boolean;
+    onDragEnd?: (longitude: number, latitude: number) => void;
+    setIsPanelOpen?: (isPanelOpen: boolean) => void;
+    setMarkerPosition?: React.Dispatch<
+        React.SetStateAction<{
+            longitude?: number;
+            latitude?: number;
+        } | null>
+    >;
+    setPlacing?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 /**
  * A reusable component for displaying a wind turbine marker on the map
  */
-const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onClick, onBoltClick, isSelected = false, onDragEnd, setMarkerPosition, setIsPanelOpen, setPlacing }) => {
-  const markerRef = useRef<HTMLDivElement>(null);
-  const [showControls, setShowControls] = useState(false);
-  const [showSubstationsList, setShowSubstationsList] = useState(false);
+const AssetMarker: React.FC<AssetMarkerProps> = ({
+    longitude,
+    latitude,
+    onClick,
+    onBoltClick,
+    isSelected = false,
+    onDragEnd,
+    setMarkerPosition,
+    setIsPanelOpen,
+    setPlacing,
+}) => {
+    const markerRef = useRef<HTMLDivElement>(null);
+    const [showControls, setShowControls] = useState(false);
+    const [showSubstationsList, setShowSubstationsList] = useState(false);
 
-  const handleMarkerClick = (e: React.MouseEvent) => {
-    // Prevent event from bubbling up to the map
-    e.stopPropagation();
+    const handleMarkerClick = (e: React.MouseEvent) => {
+        // Prevent event from bubbling up to the map
+        e.stopPropagation();
 
-    // Log marker click
-    console.log('Marker clicked');
+        // Log marker click
+        console.log('Marker clicked');
 
-    // Toggle controls visibility
-    setShowControls(prev => !prev);
+        // Toggle controls visibility
+        setShowControls((prev) => !prev);
 
-    // Call the onClick prop if provided
-    if (onClick) {
-      onClick();
+        // Call the onClick prop if provided
+        if (onClick) {
+            onClick();
+        }
+    };
+
+    const handleDragEnd = (event: MarkerDragEvent) => {
+        console.log('Marker dragged to:', event.lngLat);
+
+        // Call the onDragEnd prop if provided
+        if (onDragEnd) {
+            onDragEnd(event.lngLat.lng, event.lngLat.lat);
+        }
+    };
+
+    // Only render the marker if both longitude and latitude are provided
+    if (longitude === undefined || latitude === undefined) {
+        return null;
     }
-  };
 
-  const handleDragEnd = (event: MarkerDragEvent) => {
-    console.log('Marker dragged to:', event.lngLat);
-
-    // Call the onDragEnd prop if provided
-    if (onDragEnd) {
-      onDragEnd(event.lngLat.lng, event.lngLat.lat);
-    }
-  };
-
-  // Only render the marker if both longitude and latitude are provided
-  if (longitude === undefined || latitude === undefined) {
-    return null;
-  }
-
-  return (
-    <Marker
-      longitude={longitude}
-      latitude={latitude}
-      anchor="bottom"
-      draggable={true}
-      onDragEnd={handleDragEnd}
-    >
-      <div 
-        ref={markerRef}
-        style={{ position: 'relative' }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {showControls && (
-          <AssetControls 
-            onBoltClick={() => {
-              setShowSubstationsList(prev => !prev);
-              if (onBoltClick) onBoltClick();
-            }}
-            onDeleteClick={() => {
-              if (setMarkerPosition) setMarkerPosition(null);
-            }}
-            onEditClick={() => {
-              if (setMarkerPosition) setMarkerPosition(null);
-              if (setIsPanelOpen) setIsPanelOpen(true);
-            }}
-            onMoveClick={() => {
-              if (setMarkerPosition) setMarkerPosition(null);
-              if (setPlacing) setPlacing(true);
-            }}
-          />
-        )}
-        {showSubstationsList && (
-          <div style={{
-            position: 'absolute',
-            bottom: '-320px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 1000,
-            width: '250px'
-          }}>
-            <SubstationsListContainer
-              longitude={longitude}
-              latitude={latitude}
-              onConfirm={(selected) => {
-                console.log(`Selected substation: ${selected.text}`);
-                setShowSubstationsList(false);
-              }}
-            />
-          </div>
-        )}
-        <img 
-          src={isSelected ? windTurbineSelectedIcon : windTurbineIcon} 
-          alt="Wind Turbine" 
-          style={{ width: '60px', height: '60px', cursor: 'pointer' }}
-          onClick={handleMarkerClick}
-        />
-      </div>
-    </Marker>
-  );
+    return (
+        <Marker longitude={longitude} latitude={latitude} anchor="bottom" draggable={true} onDragEnd={handleDragEnd}>
+            <div ref={markerRef} style={{ position: 'relative' }} onClick={(e) => e.stopPropagation()}>
+                {showControls && (
+                    <AssetControls
+                        onBoltClick={() => {
+                            setShowSubstationsList((prev) => !prev);
+                            if (onBoltClick) onBoltClick();
+                        }}
+                        onDeleteClick={() => {
+                            if (setMarkerPosition) setMarkerPosition(null);
+                        }}
+                        onEditClick={() => {
+                            if (setMarkerPosition) setMarkerPosition(null);
+                            if (setIsPanelOpen) setIsPanelOpen(true);
+                        }}
+                        onMoveClick={() => {
+                            if (setMarkerPosition) setMarkerPosition(null);
+                            if (setPlacing) setPlacing(true);
+                        }}
+                    />
+                )}
+                {showSubstationsList && (
+                    <div
+                        style={{
+                            position: 'absolute',
+                            bottom: '-320px',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            zIndex: 1000,
+                            width: '250px',
+                        }}
+                    >
+                        <SubstationsListContainer
+                            longitude={longitude}
+                            latitude={latitude}
+                            onConfirm={(selected) => {
+                                console.log(`Selected substation: ${selected.text}`);
+                                setShowSubstationsList(false);
+                            }}
+                        />
+                    </div>
+                )}
+                <img
+                    src={isSelected ? windTurbineSelectedIcon : windTurbineIcon}
+                    alt="Wind Turbine"
+                    style={{ width: '60px', height: '60px', cursor: 'pointer' }}
+                    onClick={handleMarkerClick}
+                />
+            </div>
+        </Marker>
+    );
 };
 
 export default AssetMarker;
