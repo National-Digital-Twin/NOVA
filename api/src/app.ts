@@ -1,9 +1,10 @@
-import express, { Application, Request, Response, Router } from 'express';
-import { SwaggerConfig } from './config/swagger';
-import { errorMiddleware } from './middleware/error.middleware';
-import { authRoutes } from './routes/auth.routes';
-import { healthRoutes } from './routes/health.routes';
-import { uiRoutes } from './routes/ui.routes';
+import express, { Application, Router, Request, Response, NextFunction } from "express";
+import cors from "cors";
+import { SwaggerConfig } from "./config/swagger";
+import { healthRoutes } from "./routes/health.routes";
+import { uiRoutes } from "./routes/ui.routes";
+import { errorMiddleware } from "./middleware/error.middleware";
+import {authRoutes} from "./routes/auth.routes";
 
 /**
  * Application class
@@ -25,12 +26,20 @@ export class App {
         this.initializeErrorHandling();
     }
 
-    /**
-     * Initialize middlewares
-     */
-    private initializeMiddlewares(): void {
-        this.app.use(express.json());
-    }
+
+  /**
+   * Initialize middlewares
+   */
+  private initializeMiddlewares(): void {
+    // Enable CORS for frontend requests
+    this.app.use(cors({
+      origin: 'http://localhost:5173', // Frontend origin
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+      credentials: true
+    }));
+    this.app.use(express.json());
+  }
 
     /**
      * Initialize routes
