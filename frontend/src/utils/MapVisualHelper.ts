@@ -317,6 +317,7 @@ export class MapVisualHelper {
     static async visualiseAssetsIn3d(map: Map) {
         MapVisualHelper.remove3DAssets(map);
 
+        // Note this needs to be adjusted to turbine-a depending on asset type
         const { scene: model } = await new GLTFLoader().loadAsync('models/turbine-b.glb');
         model.scale.set(1, 1, 1);
 
