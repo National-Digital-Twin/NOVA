@@ -14,24 +14,19 @@ describe('AssetMarker', () => {
         const actual = await vi.importActual('react-map-gl/maplibre');
         return {
             ...actual,
-            Marker: ({ longitude, latitude, children }: { longitude: number, latitude: number, children: React.ReactNode }) => (
-            <div
-                data-testid="mock-marker"
-                data-lng={longitude}
-                data-lat={latitude}
-            >
-                {children}
-            </div>
+            Marker: ({ longitude, latitude, children }: { longitude: number; latitude: number; children: React.ReactNode }) => (
+                <div data-testid="mock-marker" data-lng={longitude} data-lat={latitude}>
+                    {children}
+                </div>
             ),
         };
     });
 
     vi.mock('../map-substations-list/substationsApi', () => ({
-        fetchSubstations: vi.fn(() => [{text: 'Test', distance: 1}]),
+        fetchSubstations: vi.fn(() => [{ text: 'Test', distance: 1 }]),
     }));
 
     it('renders a marker at the correct location', () => {
-
         render(<AssetMarker longitude={lng} latitude={lat} />);
 
         const marker = screen.getByTestId('mock-marker');
@@ -51,7 +46,7 @@ describe('AssetMarker', () => {
     });
 
     it('shows controls on marker click', () => {
-        render(<AssetMarker longitude={lng} latitude={lat}/>);
+        render(<AssetMarker longitude={lng} latitude={lat} />);
 
         const marker = screen.getByAltText('Wind Turbine');
         fireEvent.click(marker);
@@ -64,7 +59,7 @@ describe('AssetMarker', () => {
 
     it('calls onBoltClick and shows substations on marker connect control click', async () => {
         const boltFn = vi.fn();
-        await act(async () => render(<AssetMarker onBoltClick={boltFn} longitude={lng} latitude={lat}/>));
+        await act(async () => render(<AssetMarker onBoltClick={boltFn} longitude={lng} latitude={lat} />));
 
         const marker = screen.getByAltText('Wind Turbine');
         fireEvent.click(marker);
@@ -76,12 +71,12 @@ describe('AssetMarker', () => {
             expect(screen.getByText('Loading substations...')).toBeInTheDocument();
         });
 
-        expect(boltFn).toHaveBeenCalledOnce()
+        expect(boltFn).toHaveBeenCalledOnce();
     });
 
     it('calls set marker position on marker delete control click', async () => {
         const setMarkerMock = vi.fn();
-        render(<AssetMarker setMarkerPosition={setMarkerMock} longitude={lng} latitude={lat}/>);
+        render(<AssetMarker setMarkerPosition={setMarkerMock} longitude={lng} latitude={lat} />);
 
         const marker = screen.getByAltText('Wind Turbine');
         fireEvent.click(marker);
@@ -96,7 +91,7 @@ describe('AssetMarker', () => {
     it('calls set marker position and sets placing on marker move control click', async () => {
         const setMarkerMock = vi.fn();
         const setPlacingMock = vi.fn();
-        render(<AssetMarker setMarkerPosition={setMarkerMock} setPlacing={setPlacingMock} longitude={lng} latitude={lat}/>);
+        render(<AssetMarker setMarkerPosition={setMarkerMock} setPlacing={setPlacingMock} longitude={lng} latitude={lat} />);
 
         const marker = screen.getByAltText('Wind Turbine');
         fireEvent.click(marker);

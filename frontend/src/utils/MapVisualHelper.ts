@@ -1,14 +1,25 @@
-import { LngLat, MapMouseEvent, type Map, Popup } from 'maplibre-gl';
+import { LngLat, MapMouseEvent, type Map, Popup, MercatorCoordinate } from 'maplibre-gl';
 import type { Feature, FeatureCollection, Geometry, Polygon } from 'geojson';
 import type { GeoJSONSource } from 'maplibre-gl';
 import type { MapRef } from 'react-map-gl/maplibre';
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 // Used to ensure mouse events include feature information. any type is used as property could be of any object.
 type FeatureEvent = MapMouseEvent & {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     features?: Feature<Geometry, { [key: string]: any }>[];
 };
+
+/**
+ * Interface for a custom Three.js layer for MapLibre.
+ */
+interface ThreeJsCustomLayer extends maplibregl.CustomLayerInterface {
+    scene: THREE.Scene;
+    camera: THREE.Camera;
+    renderer: THREE.WebGLRenderer;
+}
 
 /**
  * Helper class for applying map visualisations when using MapLibre GL.
@@ -18,8 +29,21 @@ export class MapVisualHelper {
     private static readonly maskLayerSourceId = 'mask';
     private static readonly maskLayerId = 'mask-layer';
     private static readonly heatmapLayerId = 'heatmap-layer';
+    private static readonly threeDimensionalAssetsLayer = '3d-assets-layer';
     private static issuesPopup: Popup | null = null;
     private static cachedHeatmapGeojson: FeatureCollection | null = null;
+    private static markerPosition: {
+        longitude?: number;
+        latitude?: number;
+    } | null;
+
+    static setMarkerPosition(markerPosition: { longitude?: number; latitude?: number }) {
+        this.markerPosition = markerPosition;
+    }
+
+    static removeMarkerPosition() {
+        this.markerPosition = null;
+    }
 
     /**
      * Applies a dimmed mask over the entire map except inside the given polygon and centers the map on that polygon.
@@ -242,14 +266,6 @@ export class MapVisualHelper {
     }
 
     /**
-     * Setter for cached heatmap geojson data.
-     * @param geojson geojson of the polygons for cached heatmap contents.
-     */
-    static setCachedHeatmapGeojson(geojson: FeatureCollection) {
-        this.cachedHeatmapGeojson = geojson;
-    }
-
-    /**
      * Getter for cached heatmap geojson data.
      * @returns geojson of the polygons for cached heatmap contents.
      */
@@ -292,6 +308,84 @@ export class MapVisualHelper {
                 map.setLayoutProperty(id, 'visibility', 'visible');
             }
         });
+    }
+
+    /**
+     * Helper method to visualise assets placed on the map in 3d.
+     * @param map  - The MapLibre map instance.
+     */
+    static async visualiseAssetsIn3d(map: Map) {
+        MapVisualHelper.remove3DAssets(map);
+
+        // Note this needs to be adjusted to turbine-a depending on asset type
+        const { scene: model } = await new GLTFLoader().loadAsync('models/turbine-b.glb');
+        model.scale.set(1, 1, 1);
+
+        // Use the stored marker position if available, else don't render
+        const { longitude, latitude } = this.markerPosition || {};
+        if (longitude === undefined || latitude === undefined) {
+            console.warn('No marker position set. Skipping visualisation.');
+            return;
+        }
+
+        const position = new LngLat(longitude, latitude);
+        const elevation = map.queryTerrainElevation(position) || 0;
+        const origin = MercatorCoordinate.fromLngLat(position, elevation);
+        const scale = origin.meterInMercatorCoordinateUnits();
+
+        const layer = {
+            id: MapVisualHelper.threeDimensionalAssetsLayer,
+            type: 'custom' as const,
+            renderingMode: '3d' as const,
+
+            onAdd(_: Map, gl: WebGLRenderingContext) {
+                const scene = new THREE.Scene();
+                const camera = new THREE.Camera();
+
+                scene.rotateX(Math.PI / 2);
+                scene.scale.set(1, 1, -1);
+
+                const light = new THREE.DirectionalLight(0xffffff, 1);
+                light.position.set(100, 200, 100);
+                scene.add(light, model);
+
+                const renderer = new THREE.WebGLRenderer({
+                    canvas: map.getCanvas(),
+                    context: gl,
+                    antialias: true,
+                });
+                renderer.autoClear = false;
+
+                Object.assign(this, { scene, camera, renderer });
+            },
+
+            render(_: WebGLRenderingContext, { defaultProjectionData: { mainMatrix } }: { defaultProjectionData: { mainMatrix: number[] } }) {
+                const proj = new THREE.Matrix4().fromArray(mainMatrix);
+                const modelMatrix = new THREE.Matrix4().makeTranslation(origin.x, origin.y, origin.z).scale(new THREE.Vector3(scale, -scale, scale));
+
+                this.camera.projectionMatrix = proj.multiply(modelMatrix);
+                this.renderer.resetState();
+                this.renderer.render(this.scene, this.camera);
+            },
+        } as ThreeJsCustomLayer;
+
+        map.addLayer(layer);
+
+        map.easeTo({
+            center: [longitude, latitude],
+            zoom: 16.5,
+            pitch: 60,
+            bearing: 0,
+            duration: 1000,
+            offset: [0, 100], // shift map centre 100px down (so asset appears higher)
+        });
+    }
+
+    /**
+     * Removes all 3d assets from the map.
+     */
+    static remove3DAssets(map: Map) {
+        if (map.getLayer(MapVisualHelper.threeDimensionalAssetsLayer)) map.removeLayer(MapVisualHelper.threeDimensionalAssetsLayer);
     }
 
     /**

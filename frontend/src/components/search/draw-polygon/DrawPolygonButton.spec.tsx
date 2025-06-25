@@ -58,13 +58,13 @@ describe('DrawPolygonButton', () => {
     it('does not render if isVisible is false', () => {
         render(<DrawPolygonButton mapRef={mockMapRef} drawRef={mockDrawRef} onPolygonDrawn={mockOnPolygonDrawn} isVisible={false} polygonDrawn={false} />);
 
-        expect(screen.queryByLabelText('Draw Polygon')).not.toBeInTheDocument();
+        expect(screen.queryByLabelText('Draw polygon')).not.toBeInTheDocument();
     });
 
     it('renders and activates when clicked, triggering draw_polygon mode', async () => {
         render(<DrawPolygonButton mapRef={mockMapRef} drawRef={mockDrawRef} onPolygonDrawn={mockOnPolygonDrawn} isVisible={true} polygonDrawn={false} />);
 
-        const button = screen.getByLabelText('Draw Polygon');
+        const button = screen.getByLabelText('Draw polygon');
 
         await act(() => fireEvent.click(button));
 
@@ -76,7 +76,7 @@ describe('DrawPolygonButton', () => {
     it('does not activate if polygonDrawn is true', async () => {
         render(<DrawPolygonButton mapRef={mockMapRef} drawRef={mockDrawRef} onPolygonDrawn={mockOnPolygonDrawn} isVisible={true} polygonDrawn={true} />);
 
-        const button = screen.getByLabelText('Draw Polygon');
+        const button = screen.getByLabelText('Draw polygon');
 
         await act(() => fireEvent.click(button));
 
@@ -88,7 +88,7 @@ describe('DrawPolygonButton', () => {
 
         render(<DrawPolygonButton mapRef={mockMapRef} drawRef={mockDrawRef} onPolygonDrawn={mockOnPolygonDrawn} isVisible={true} polygonDrawn={false} />);
 
-        const button = screen.getByLabelText('Draw Polygon');
+        const button = screen.getByLabelText('Draw polygon');
 
         await act(() => fireEvent.click(button));
 
@@ -100,7 +100,7 @@ describe('DrawPolygonButton', () => {
 
         render(<DrawPolygonButton mapRef={mockMapRef} drawRef={nullDrawRef} onPolygonDrawn={mockOnPolygonDrawn} isVisible={true} polygonDrawn={false} />);
 
-        const button = screen.getByLabelText('Draw Polygon');
+        const button = screen.getByLabelText('Draw polygon');
 
         await act(() => fireEvent.click(button));
 
@@ -112,7 +112,7 @@ describe('DrawPolygonButton', () => {
 
         render(<DrawPolygonButton mapRef={nullMapRef} drawRef={mockDrawRef} onPolygonDrawn={mockOnPolygonDrawn} isVisible={true} polygonDrawn={false} />);
 
-        const button = screen.getByLabelText('Draw Polygon');
+        const button = screen.getByLabelText('Draw polygon');
 
         await act(() => fireEvent.click(button));
 
@@ -146,7 +146,7 @@ describe('DrawPolygonButton', () => {
 
         render(<DrawPolygonButton mapRef={mockMapRef} drawRef={mockDrawRef} onPolygonDrawn={mockOnPolygonDrawn} isVisible={true} polygonDrawn={false} />);
 
-        const button = screen.getByLabelText('Draw Polygon');
+        const button = screen.getByLabelText('Draw polygon');
 
         await act(() => fireEvent.click(button));
         expect(mockDrawRef.current.changeMode).toHaveBeenCalledWith('draw_polygon');

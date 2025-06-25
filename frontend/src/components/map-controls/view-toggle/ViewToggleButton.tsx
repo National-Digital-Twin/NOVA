@@ -39,14 +39,15 @@ const ViewToggleButton = ({ mapRef, onStyleChange, is3D, setIs3D, currentStyle }
             onStyleChange('satellite');
         } else {
             onStyleChange(savedStyleRef.current);
-            map.setTerrain(null);
         }
 
         map.once('styledata', () => {
             if (!changingTo3d) {
+                map.setTerrain(null); // Now effective
+                MapVisualHelper.remove3DAssets(map);
                 reapplyHeatmap();
             } else {
-                MapVisualHelper.removeHeatmapLayer(mapRef);
+                reapplyHeatmap();
             }
 
             map.easeTo({
@@ -55,20 +56,26 @@ const ViewToggleButton = ({ mapRef, onStyleChange, is3D, setIs3D, currentStyle }
             });
 
             map.once('moveend', () => {
-                if (!map.getSource(TERRAIN_SOURCE_ID)) {
-                    map.addSource(TERRAIN_SOURCE_ID, {
-                        type: 'raster-dem',
-                        url: MAPTILER_TERRAIN_SOURCE_URL,
-                        tileSize: 256,
-                        maxzoom: 10,
-                    });
-                    map.setTerrain({ source: TERRAIN_SOURCE_ID });
-                } else if (!map.getTerrain()) {
+                if (changingTo3d) {
+                    if (!map.getSource(TERRAIN_SOURCE_ID)) {
+                        map.addSource(TERRAIN_SOURCE_ID, {
+                            type: 'raster-dem',
+                            url: MAPTILER_TERRAIN_SOURCE_URL,
+                            tileSize: 256,
+                            maxzoom: 10,
+                        });
+                    }
                     map.setTerrain({ source: TERRAIN_SOURCE_ID });
                 }
 
                 isTransitioning.current = false;
             });
+
+            if (changingTo3d) {
+                map.once('idle', () => {
+                    MapVisualHelper.visualiseAssetsIn3d(map);
+                });
+            }
         });
     };
 

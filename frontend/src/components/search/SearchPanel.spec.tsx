@@ -92,7 +92,17 @@ describe('SearchPanel', () => {
     });
 
     it('renders search input and draw button by default', () => {
-        render(<SearchPanel mapRef={mockMapRef} showLayerControl={() => { } } hideLayerControl={() => { } } drawRef={mockDrawRef} isPanelOpen={false} setIsPanelOpen={() => { } } setPlacing={() => { } } />);
+        render(
+            <SearchPanel
+                mapRef={mockMapRef}
+                showLayerControl={() => {}}
+                hideLayerControl={() => {}}
+                drawRef={mockDrawRef}
+                isPanelOpen={false}
+                setIsPanelOpen={() => {}}
+                setPlacing={() => {}}
+            />
+        );
         expect(screen.getByTestId('search-input')).toBeInTheDocument();
         expect(screen.getByTestId('draw-polygon-button')).toBeInTheDocument();
     });

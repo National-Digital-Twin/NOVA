@@ -20,7 +20,7 @@ const DeletePolygonButton = ({ drawRef, isVisible, onPolygonDeleted, hideLayerCo
     if (!isVisible) return null;
 
     return (
-        <ControlIcon onClick={handleClick} aria-label="Delete Polygon">
+        <ControlIcon onClick={handleClick} aria-label="Delete polygon" showTooltip={true}>
             <img src="/icons/delete-polygon.svg" alt="Delete polygon icon" width={24} height={24} />
         </ControlIcon>
     );

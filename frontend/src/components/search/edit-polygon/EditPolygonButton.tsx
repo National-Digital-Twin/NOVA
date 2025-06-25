@@ -93,7 +93,7 @@ const EditPolygonButton = ({ onPolygonEdited, hideLayerControl, mapRef, drawRef,
     if (!isVisible) return null;
 
     return (
-        <ControlIcon onClick={handleClick} aria-label="Edit Polygon">
+        <ControlIcon onClick={handleClick} aria-label="Edit polygon" showTooltip={true}>
             <img src={'/icons/edit-polygon.svg'} alt="Edit polygon icon" width={24} height={24} />
         </ControlIcon>
     );
