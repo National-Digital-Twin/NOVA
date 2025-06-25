@@ -27,6 +27,7 @@ const MapComponent = () => {
     } | null>(null);
     const [placing, setPlacing] = useState(false);
     const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
+    const [isPanelOpen, setIsPanelOpen] = useState(false);
     const drawRef = useMapboxDraw(mapRef, isMapInitialized);
 
     const handleStyleChange = (newStyle: MapStyle) => {
@@ -84,11 +85,13 @@ const MapComponent = () => {
                 {isMapInitialized && (
                     <>
                         <SearchPanel 
-                            mapRef={mapRef} 
                             drawRef={drawRef}
                             hideLayerControl={() => setShowLayerControl(false)} 
-                            showLayerControl={() => setShowLayerControl(true)} 
-                            setPlacing={setPlacing} />
+                            isPanelOpen={isPanelOpen}
+                            mapRef={mapRef} 
+                            setIsPanelOpen={setIsPanelOpen}
+                            setPlacing={setPlacing}
+                            showLayerControl={() => setShowLayerControl(true)}  />
                         <MapControls mapRef={mapRef} onStyleChange={handleStyleChange} currentStyle={mapStyle} />
                         {placing && mousePos && (
                             <div
@@ -115,6 +118,7 @@ const MapComponent = () => {
                                 mapRef={mapRef}
                                 onDragEnd={handleMarkerDragEnd}
                                 setMarkerPosition={setMarkerPosition}
+                                setIsPanelOpen={setIsPanelOpen}
                                 setPlacing={setPlacing}
                             />
                         )}

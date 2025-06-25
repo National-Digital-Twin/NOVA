@@ -14,7 +14,7 @@ describe('AssetMarker', () => {
         const actual = await vi.importActual('react-map-gl/maplibre');
         return {
             ...actual,
-            Marker: ({ longitude, latitude, children }) => (
+            Marker: ({ longitude, latitude, children }: { longitude: number, latitude: number, children: React.ReactNode }) => (
             <div
                 data-testid="mock-marker"
                 data-lng={longitude}
@@ -69,7 +69,7 @@ describe('AssetMarker', () => {
         const marker = screen.getByAltText('Wind Turbine');
         fireEvent.click(marker);
 
-        const connectButton = screen.getByLabelText('Connect to grid button');
+        const connectButton = screen.getByLabelText('Connect to grid');
         fireEvent.click(connectButton);
 
         await waitFor(() => {
@@ -86,7 +86,7 @@ describe('AssetMarker', () => {
         const marker = screen.getByAltText('Wind Turbine');
         fireEvent.click(marker);
 
-        const deleteButton = screen.getByLabelText('Delete Asset button');
+        const deleteButton = screen.getByLabelText('Delete Asset');
         fireEvent.click(deleteButton);
 
         expect(setMarkerMock).toHaveBeenCalledOnce();
@@ -101,7 +101,7 @@ describe('AssetMarker', () => {
         const marker = screen.getByAltText('Wind Turbine');
         fireEvent.click(marker);
 
-        const moveButton = screen.getByLabelText('Move button');
+        const moveButton = screen.getByLabelText('Move');
         fireEvent.click(moveButton);
 
         expect(setMarkerMock).toHaveBeenCalledOnce();

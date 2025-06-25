@@ -3,7 +3,7 @@ import BoltIcon from '@mui/icons-material/Bolt';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import EditIcon from '@mui/icons-material/Edit';
 import OpenWithIcon from '@mui/icons-material/OpenWith';
-import ControlButton from '../../shared/control-button/ControlButton';
+import ControlIcon from '../../shared/control-icon/ControlIcon';
 
 const ControlsContainer = styled(Box)(({ theme }) => ({
   position: 'absolute',
@@ -37,42 +37,38 @@ const AssetControls: React.FC<AssetControlsProps> = ({
   // Wrapper function to handle button clicks
   // Since ControlsContainer already stops propagation with its onClick handler,
   // we just need to ensure this function returns a parameterless function
-  // that matches ControlButton's onClick type
-  // Explicitly type the returned function to match ControlButton's onClick type
+  // that matches ControlIcon's onClick type
+  // Explicitly type the returned function to match ControlIcon's onClick type
   const handleButtonClick = (callback?: () => void): (() => void) => () => {
     if (callback) callback();
   };
 
   return (
     <ControlsContainer onClick={(e) => e.stopPropagation()}>
-      <ControlButton
-        onClick={() => (onEditClick || (() => console.log('Edit clicked')))}
+      <ControlIcon
+        onClick={handleButtonClick(onEditClick || (() => console.log('Edit clicked')))}
         aria-label="Edit"
-        showTooltip
       >
         <EditIcon />
-      </ControlButton>
-      <ControlButton
+      </ControlIcon>
+      <ControlIcon
         onClick={handleButtonClick(onBoltClick || (() => console.log('Bolt clicked')))}
         aria-label="Connect to grid"
-        showTooltip
       >
         <BoltIcon />
-      </ControlButton>
-      <ControlButton
+      </ControlIcon>
+      <ControlIcon
         onClick={handleButtonClick(onDeleteClick || (() => console.log('Delete clicked')))}
         aria-label="Delete Asset"
-        showTooltip
       >
         <DeleteForeverIcon />
-      </ControlButton>
-      <ControlButton
+      </ControlIcon>
+      <ControlIcon
         onClick={handleButtonClick(onMoveClick || (() => console.log('Move clicked')))}
         aria-label="Move"
-        showTooltip
       >
         <OpenWithIcon />
-      </ControlButton>
+      </ControlIcon>
     </ControlsContainer>
   );
 };

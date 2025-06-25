@@ -1,7 +1,5 @@
 import { Box, styled } from '@mui/material';
-import { useState } from 'react';
 import ControlButton from '../../../shared/control-button/ControlButton';
-import type { Variation } from './AddAsset';
 import AddAssetPanel from './AddAssetPanel';
 
 const StyledContainer = styled(Box)({
@@ -9,12 +7,12 @@ const StyledContainer = styled(Box)({
 });
 
 interface AddAssetButtonProps {
-    onAssetSelect: (variant: Variation) => void;
+    isPanelOpen: boolean;
+    onAssetSelect: (placing: boolean) => void;
+    setIsPanelOpen: (isPanelOpen: boolean) => void;
 }
 
-const AddAssetButton = ({ onAssetSelect }: AddAssetButtonProps) => {
-    const [isPanelOpen, setIsPanelOpen] = useState(false);
-
+const AddAssetButton = ({ isPanelOpen, onAssetSelect, setIsPanelOpen }: AddAssetButtonProps) => {
     const handleTogglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
     };
@@ -23,8 +21,8 @@ const AddAssetButton = ({ onAssetSelect }: AddAssetButtonProps) => {
         setIsPanelOpen(false);
     };
 
-    const handleAssetSelect = (variant: Variation) => {
-        onAssetSelect(variant);
+    const handleAssetSelect = () => {
+        onAssetSelect(true);
         setIsPanelOpen(false);
     };
 

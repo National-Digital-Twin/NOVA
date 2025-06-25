@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import MapComponent from '../../components/map/MapComponent';
 
 vi.mock('../../components/search/SearchPanel', () => ({
-    default: ({ showLayerControl, setPlacing }: { showLayerControl: () => void, setPlacing: () => void}) => (
+    default: ({ setPlacing, showLayerControl }: { setPlacing: () => void, showLayerControl: () => void}) => (
         <div data-testid="search-panel">
             <button onClick={showLayerControl}>Show Layer Panel</button>
             <button onClick={setPlacing}>Add Asset</button>
@@ -21,7 +21,6 @@ vi.mock('react-map-gl/maplibre', () => ({
                     viewState: { longitude: -1.33, latitude: 50.65, zoom: 10, pitch: 60, bearing: 0, padding: { top: 0, bottom: 0, left: 0, right: 0 } },
                 });
                 onLoad?.();
-
                 const fakeMapEvent = { lngLat: { lng: -1.33, lat: 50.65 } };
                 onClick?.(fakeMapEvent);
             }}
@@ -80,7 +79,6 @@ describe('MapComponent', () => {
         render(<MapComponent />);
         fireEvent.click(screen.getByTestId('map')); // Initialise map
         fireEvent.click(screen.getByText('Show Layer Panel')); // Trigger setShowLayerControl(true)
-
         expect(screen.getByText('Layers')).toBeInTheDocument(); // From LayerControlPanel
     });
 
