@@ -47,7 +47,7 @@ const HideLayersButton = ({ mapRef }: HideLayersButtonProps) => {
     if (!isHeatmapPresent) return null;
 
     return (
-        <ControlIcon onClick={handleClick} isActive={!isActive} aria-label="Toggle layer visibility">
+        <ControlIcon onClick={handleClick} isActive={!isActive} aria-label="Toggle layer visibility" showTooltip={true}>
             <img src={isActive ? '/icons/hide-layers-white.svg' : '/icons/hide-layers.svg'} alt="Toggle layer visibility icon" width={24} height={24} />
         </ControlIcon>
     );

@@ -69,6 +69,10 @@ const ViewToggleButton = ({ mapRef, onStyleChange, is3D, setIs3D, currentStyle }
 
                 isTransitioning.current = false;
             });
+
+            map.once('idle', () => {
+                MapVisualHelper.visualiseAssetsIn3d(map);
+            });
         });
     };
 
