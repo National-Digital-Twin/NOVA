@@ -10,7 +10,14 @@ interface ListItem {
 
 describe('SubstationsList', () => {
   it('renders with default items', () => {
-    render(<SubstationsList />);
+    const manyItems: ListItem[] = [
+      { text: 'Item 1', distance: '100km' },
+      { text: 'Item 2', distance: '200km' },
+      { text: 'Item 3', distance: '300km' },
+      { text: 'Item 4', distance: '400km' },
+      { text: 'Item 5', distance: '500km' }
+    ];
+    render(<SubstationsList items={manyItems} />);
 
     expect(screen.getByText('Item 1')).toBeInTheDocument();
     expect(screen.getByText('Item 2')).toBeInTheDocument();
@@ -60,7 +67,14 @@ describe('SubstationsList', () => {
   });
 
   it('disables confirm button until an item is selected', () => {
-    render(<SubstationsList />);
+    const manyItems: ListItem[] = [
+      { text: 'Item 1', distance: '100km' },
+      { text: 'Item 2', distance: '200km' },
+      { text: 'Item 3', distance: '300km' },
+      { text: 'Item 4', distance: '400km' },
+      { text: 'Item 5', distance: '500km' }
+    ];
+    render(<SubstationsList items={manyItems} />);
 
     const confirmButton = screen.getByText('Confirm');
     expect(confirmButton).toBeDisabled();
@@ -70,8 +84,15 @@ describe('SubstationsList', () => {
   });
 
   it('calls onConfirm with the selected item when confirm button is clicked', () => {
+    const manyItems: ListItem[] = [
+      { text: 'Item 1', distance: '100km' },
+      { text: 'Item 2', distance: '200km' },
+      { text: 'Item 3', distance: '300km' },
+      { text: 'Item 4', distance: '400km' },
+      { text: 'Item 5', distance: '500km' }
+    ];
     const mockOnConfirm = vi.fn();
-    render(<SubstationsList onConfirm={mockOnConfirm} />);
+    render(<SubstationsList items={manyItems} onConfirm={mockOnConfirm} />);
 
     // Select an item
     fireEvent.click(screen.getByText('Item 1'));
