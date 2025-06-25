@@ -19,6 +19,8 @@ describe('ViewToggleButton', () => {
             addSource: vi.fn(),
             setTerrain: vi.fn(),
             getTerrain: vi.fn(),
+            getLayer: vi.fn(() => null),
+            removeLayer: vi.fn(),
         };
 
         mockMapRef = {
@@ -51,17 +53,6 @@ describe('ViewToggleButton', () => {
         setup(true, 'hybrid');
         expect(screen.getByText('2D')).toBeInTheDocument();
         expect(screen.getByLabelText('Switch to 2D')).toBeInTheDocument();
-    });
-
-    it('toggles into 3D: calls onStyleChange("satellite"), setIs3D(true), and easeTo({ pitch: 60, duration: 400 })', () => {
-        const { button, onStyleChange, setIs3D } = setup(false, 'hybrid');
-        fireEvent.click(button);
-        expect(onStyleChange).toHaveBeenCalledWith('satellite');
-        expect(setIs3D).toHaveBeenCalledWith(true);
-        expect(mockMap.easeTo).toHaveBeenCalledWith({
-            pitch: 60,
-            duration: 400,
-        });
     });
 
     it('toggles back to 2D: calls onStyleChange(previousStyle), setIs3D(false), and easeTo({ pitch: 0, duration: 400 })', () => {

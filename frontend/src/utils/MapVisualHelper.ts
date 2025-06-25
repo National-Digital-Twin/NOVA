@@ -4,7 +4,7 @@ import type { GeoJSONSource } from 'maplibre-gl';
 import type { MapRef } from 'react-map-gl/maplibre';
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/Addons.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 // Used to ensure mouse events include feature information. any type is used as property could be of any object.
 type FeatureEvent = MapMouseEvent & {

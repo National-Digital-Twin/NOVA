@@ -156,7 +156,7 @@ describe('EditPolygonButton', () => {
 
         const button = screen.getByTestId('control-icon');
         expect(button).toBeInTheDocument();
-        expect(button.getAttribute('aria-label')).toBe('Edit Polygon');
+        expect(button.getAttribute('aria-label')).toBe('Edit polygon');
     });
 
     it('does not render when not visible', () => {
