@@ -31,7 +31,6 @@ describe('ViewToggleButton', () => {
 
         // Stub helper methods to prevent side effects
         vi.spyOn(MapVisualHelper, 'removeHeatmapLayer').mockImplementation(() => {});
-        vi.spyOn(MapVisualHelper, 'getCachedHeatmapGeojson').mockReturnValue(null);
         vi.spyOn(MapVisualHelper, 'addOrUpdateHeatmapLayer').mockImplementation(() => {});
     });
 

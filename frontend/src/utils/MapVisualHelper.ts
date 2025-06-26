@@ -30,20 +30,6 @@ export class MapVisualHelper {
     private static readonly maskLayerId = 'mask-layer';
     private static readonly heatmapLayerId = 'heatmap-layer';
     private static readonly threeDimensionalAssetsLayer = '3d-assets-layer';
-    private static issuesPopup: Popup | null = null;
-    private static cachedHeatmapGeojson: FeatureCollection | null = null;
-    private static markerPosition: {
-        longitude?: number;
-        latitude?: number;
-    } | null;
-
-    static setMarkerPosition(markerPosition: { longitude?: number; latitude?: number }) {
-        this.markerPosition = markerPosition;
-    }
-
-    static removeMarkerPosition() {
-        this.markerPosition = null;
-    }
 
     /**
      * Applies a dimmed mask over the entire map except inside the given polygon and centers the map on that polygon.
@@ -212,7 +198,6 @@ export class MapVisualHelper {
 
         if (!map.getSource(id)) {
             map.addSource(id, { type: 'geojson', data: geojson });
-            MapVisualHelper.cachedHeatmapGeojson = geojson;
 
             map.addLayer({
                 id,
@@ -250,27 +235,6 @@ export class MapVisualHelper {
         const id = this.heatmapLayerId;
         if (map.getLayer(id)) map.removeLayer(id);
         if (map.getSource(id)) map.removeSource(id);
-
-        MapVisualHelper.removeIssuesPopup();
-        this.cachedHeatmapGeojson = null;
-    }
-
-    /**
-     * Removes the issue popup if present on a heatmap.
-     */
-    static removeIssuesPopup() {
-        if (MapVisualHelper.issuesPopup) {
-            MapVisualHelper.issuesPopup.remove();
-            MapVisualHelper.issuesPopup = null;
-        }
-    }
-
-    /**
-     * Getter for cached heatmap geojson data.
-     * @returns geojson of the polygons for cached heatmap contents.
-     */
-    static getCachedHeatmapGeojson(): FeatureCollection | null {
-        return this.cachedHeatmapGeojson;
     }
 
     /**
@@ -290,8 +254,6 @@ export class MapVisualHelper {
                 map.setLayoutProperty(id, 'visibility', 'none');
             }
         });
-
-        MapVisualHelper.removeIssuesPopup();
 
         return toHide;
     }
@@ -314,7 +276,7 @@ export class MapVisualHelper {
      * Helper method to visualise assets placed on the map in 3d.
      * @param map  - The MapLibre map instance.
      */
-    static async visualiseAssetsIn3d(map: Map) {
+    static async visualiseAssetsIn3d(map: Map, markerPosition: { longitude?: number; latitude?: number } | null) {
         MapVisualHelper.remove3DAssets(map);
 
         // Note this needs to be adjusted to turbine-a depending on asset type
@@ -322,13 +284,17 @@ export class MapVisualHelper {
         model.scale.set(1, 1, 1);
 
         // Use the stored marker position if available, else don't render
-        const { longitude, latitude } = this.markerPosition || {};
-        if (longitude === undefined || latitude === undefined) {
+        if (!markerPosition) {
             console.warn('No marker position set. Skipping visualisation.');
             return;
         }
 
-        const position = new LngLat(longitude, latitude);
+        if (markerPosition.longitude === undefined || markerPosition.latitude === undefined) {
+            console.warn('Marker position is missing longitude or latitude. Skipping visualisation.');
+            return;
+        }
+
+        const position = new LngLat(markerPosition.longitude, markerPosition.latitude);
         const elevation = map.queryTerrainElevation(position) || 0;
         const origin = MercatorCoordinate.fromLngLat(position, elevation);
         const scale = origin.meterInMercatorCoordinateUnits();
@@ -372,7 +338,7 @@ export class MapVisualHelper {
         map.addLayer(layer);
 
         map.easeTo({
-            center: [longitude, latitude],
+            center: [markerPosition.longitude, markerPosition.latitude],
             zoom: 16.5,
             pitch: 60,
             bearing: 0,
@@ -424,7 +390,6 @@ export class MapVisualHelper {
             </div>
         `;
 
-        MapVisualHelper.removeIssuesPopup();
-        MapVisualHelper.issuesPopup = new Popup({ closeButton: true }).setLngLat(e.lngLat).setHTML(html).addTo(map);
+        new Popup({ closeButton: true }).setLngLat(e.lngLat).setHTML(html).addTo(map);
     }
 }

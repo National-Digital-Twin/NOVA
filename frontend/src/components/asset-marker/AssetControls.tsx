@@ -19,39 +19,28 @@ const ControlsContainer = styled(Box)(({ theme }) => ({
 }));
 
 interface AssetControlsProps {
-    onBoltClick?: () => void;
-    onDeleteClick?: () => void;
-    onEditClick?: () => void;
-    onMoveClick?: () => void;
+    onBoltClick: () => void;
+    onDeleteClick: () => void;
+    onEditClick: () => void;
+    onMoveClick: () => void;
 }
 
 /**
  * A component for displaying control buttons for an asset marker
  */
 const AssetControls: React.FC<AssetControlsProps> = ({ onBoltClick, onDeleteClick, onEditClick, onMoveClick }) => {
-    // Wrapper function to handle button clicks
-    // Since ControlsContainer already stops propagation with its onClick handler,
-    // we just need to ensure this function returns a parameterless function
-    // that matches ControlIcon's onClick type
-    // Explicitly type the returned function to match ControlIcon's onClick type
-    const handleButtonClick =
-        (callback?: () => void): (() => void) =>
-        () => {
-            if (callback) callback();
-        };
-
     return (
         <ControlsContainer onClick={(e) => e.stopPropagation()}>
-            <ControlIcon onClick={handleButtonClick(onEditClick || (() => console.log('Edit clicked')))} aria-label="Edit">
+            <ControlIcon onClick={onEditClick} aria-label="Edit" showTooltip>
                 <EditIcon />
             </ControlIcon>
-            <ControlIcon onClick={handleButtonClick(onBoltClick || (() => console.log('Bolt clicked')))} aria-label="Connect to grid">
+            <ControlIcon onClick={onBoltClick} aria-label="Connect to grid" showTooltip>
                 <BoltIcon />
             </ControlIcon>
-            <ControlIcon onClick={handleButtonClick(onDeleteClick || (() => console.log('Delete clicked')))} aria-label="Delete Asset">
+            <ControlIcon onClick={onDeleteClick} aria-label="Delete Asset" showTooltip>
                 <DeleteForeverIcon />
             </ControlIcon>
-            <ControlIcon onClick={handleButtonClick(onMoveClick || (() => console.log('Move clicked')))} aria-label="Move">
+            <ControlIcon onClick={onMoveClick} aria-label="Move" showTooltip>
                 <OpenWithIcon />
             </ControlIcon>
         </ControlsContainer>

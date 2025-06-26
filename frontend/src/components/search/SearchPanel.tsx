@@ -42,11 +42,10 @@ interface SearchPanelProps {
     mapRef: React.RefObject<MapRef>;
     isPanelOpen: boolean;
     setIsPanelOpen: (isPanelOpen: boolean) => void;
-    setPlacing: (placing: boolean) => void;
     showLayerControl: () => void;
 }
 
-const SearchPanel = ({ drawRef, hideLayerControl, mapRef, isPanelOpen, setIsPanelOpen, setPlacing, showLayerControl }: SearchPanelProps) => {
+const SearchPanel = ({ drawRef, hideLayerControl, mapRef, isPanelOpen, setIsPanelOpen, showLayerControl }: SearchPanelProps) => {
     const popupRef = useRef<maplibregl.Popup | null>(null);
     const [polygonDrawn, setPolygonDrawn] = useState(false);
     const [polygonConfirmed, setPolygonConfirmed] = useState(false);
@@ -100,7 +99,7 @@ const SearchPanel = ({ drawRef, hideLayerControl, mapRef, isPanelOpen, setIsPane
             </SearchGroup>
 
             <SearchGroup>
-                <AddAssetButton mapRef={mapRef} onAssetSelect={setPlacing} isPanelOpen={isPanelOpen} setIsPanelOpen={setIsPanelOpen} />
+                <AddAssetButton isPanelOpen={isPanelOpen} setIsPanelOpen={setIsPanelOpen} />
             </SearchGroup>
         </SearchContainer>
     );

@@ -1,6 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MapVisualHelper } from './MapVisualHelper';
 import type { FeatureCollection, Polygon } from 'geojson';
+import { Popup } from 'maplibre-gl';
+
+// Mock GLTFLoader for visualiseAssetsIn3d
+vi.mock('three/examples/jsm/loaders/GLTFLoader.js', () => ({
+    GLTFLoader: class {
+        loadAsync = vi.fn().mockResolvedValue({
+            scene: { scale: { set: vi.fn() } },
+        });
+    },
+}));
 
 const createMockMap = () => {
     const listeners: Record<string, Function[]> = {};
@@ -32,6 +42,7 @@ const createMockMap = () => {
         getCanvas: () => ({ style: { cursor: '' } }),
         flyTo: vi.fn(),
         setCenter: vi.fn(),
+        queryTerrainElevation: vi.fn(() => 0),
     };
 };
 
@@ -116,13 +127,7 @@ describe('MapVisualHelper', () => {
     it('extractFirstPolygon returns polygon', () => {
         const geojson: FeatureCollection = {
             type: 'FeatureCollection',
-            features: [
-                {
-                    geometry: { type: 'Polygon', coordinates: [] },
-                    type: 'Feature',
-                    properties: null,
-                },
-            ],
+            features: [{ geometry: { type: 'Polygon', coordinates: [] }, type: 'Feature', properties: null }],
         };
         expect(MapVisualHelper.extractFirstPolygon(geojson)).not.toBeNull();
     });
@@ -130,13 +135,7 @@ describe('MapVisualHelper', () => {
     it('extractFirstPolygon returns null for invalid type', () => {
         const geojson: FeatureCollection = {
             type: 'FeatureCollection',
-            features: [
-                {
-                    geometry: { type: 'LineString', coordinates: [] },
-                    type: 'Feature',
-                    properties: null,
-                },
-            ],
+            features: [{ geometry: { type: 'LineString', coordinates: [] }, type: 'Feature', properties: null }],
         };
         expect(MapVisualHelper.extractFirstPolygon(geojson)).toBeNull();
     });
@@ -171,24 +170,11 @@ describe('MapVisualHelper', () => {
         expect(map.addLayer).toHaveBeenCalled();
     });
 
-    it('removeHeatmapLayer removes source, layer and popup', () => {
+    it('removeHeatmapLayer removes source and layer', () => {
         const mapRef = { current: { getMap: () => map } };
         map.getSource.mockReturnValue(true);
         map.getLayer.mockReturnValue(true);
         MapVisualHelper.removeHeatmapLayer(mapRef as any);
-        expect(map.removeLayer).toHaveBeenCalledWith('heatmap-layer');
-        expect(map.removeSource).toHaveBeenCalledWith('heatmap-layer');
-    });
-
-    it('removeHeatmapLayer does nothing if no popup', () => {
-        (MapVisualHelper as any).issuesPopup = null;
-
-        map.getLayer.mockReturnValue(true);
-        map.getSource.mockReturnValue(true);
-
-        const mapRef = { current: { getMap: () => map } };
-        MapVisualHelper.removeHeatmapLayer(mapRef as any);
-
         expect(map.removeLayer).toHaveBeenCalledWith('heatmap-layer');
         expect(map.removeSource).toHaveBeenCalledWith('heatmap-layer');
     });
@@ -209,5 +195,40 @@ describe('MapVisualHelper', () => {
         const feature = {};
         const result = (MapVisualHelper as any)._parseIssueFromFeature(feature);
         expect(result).toEqual([]);
+    });
+
+    it('_handleClick creates popup with issue text', () => {
+        const addTo = vi.fn().mockReturnThis();
+        const setHTML = vi.fn().mockReturnValue({ addTo });
+        const setLngLat = vi.fn().mockReturnValue({ setHTML });
+
+        vi.spyOn(Popup.prototype, 'setLngLat').mockImplementation(setLngLat as any);
+        vi.spyOn(Popup.prototype, 'setHTML').mockImplementation(setHTML as any);
+        vi.spyOn(Popup.prototype, 'addTo').mockImplementation(addTo as any);
+
+        const event = {
+            lngLat: { lng: 0, lat: 0 },
+            features: [{ properties: { issue: 'Test issue' } }],
+            target: map,
+        };
+
+        (MapVisualHelper as any)._handleClick(event);
+        expect(setLngLat).toHaveBeenCalled();
+        expect(setHTML).toHaveBeenCalledWith(expect.stringContaining('Test issue'));
+        expect(addTo).toHaveBeenCalledWith(map);
+    });
+
+    it('visualiseAssetsIn3d logs and skips if marker is null', async () => {
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+        await MapVisualHelper.visualiseAssetsIn3d(map, null);
+        expect(warn).toHaveBeenCalledWith('No marker position set. Skipping visualisation.');
+        warn.mockRestore();
+    });
+
+    it('visualiseAssetsIn3d logs and skips if lat/lng is missing', async () => {
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+        await MapVisualHelper.visualiseAssetsIn3d(map, { latitude: 10 });
+        expect(warn).toHaveBeenCalledWith(expect.stringContaining('longitude or latitude'));
+        warn.mockRestore();
     });
 });

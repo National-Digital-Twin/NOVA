@@ -1,10 +1,10 @@
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import type { FeatureCollection, Geometry } from 'geojson';
-import maplibregl from 'maplibre-gl';
 import { useCallback, useEffect, useState } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
 import ControlIcon from '../../../shared/control-icon/ControlIcon';
 import { MapVisualHelper } from '../../../utils/MapVisualHelper';
+import { useMapStore } from '../../../stores/useMapStore';
 
 interface DrawPolygonButtonProps {
     onPolygonDrawn: (geojson: FeatureCollection<Geometry>) => void;
@@ -16,43 +16,25 @@ interface DrawPolygonButtonProps {
 
 const DrawPolygonButton = ({ onPolygonDrawn, mapRef, drawRef, isVisible, polygonDrawn }: DrawPolygonButtonProps) => {
     const [isActive, setIsActive] = useState(false);
+    const preventPolygonEdit = useMapStore((s) => s.preventPolygonEdit);
 
     useEffect(() => {
         setIsActive(polygonDrawn);
     }, [polygonDrawn]);
 
     useEffect(() => {
-        if (!polygonDrawn || !mapRef.current || !drawRef.current) return;
+        if (!polygonDrawn) return;
 
         const map = mapRef.current;
-        const draw = drawRef.current;
 
-        if (!draw) return;
-
-        const mode = draw.getMode();
-        if (mode.startsWith('draw')) {
-            return;
-        }
-
-        const preventEdit = (e: maplibregl.MapMouseEvent & { target: maplibregl.Map }) => {
-            const features = map.queryRenderedFeatures([e.point.x, e.point.y], {
-                layers: ['gl-draw-polygon-fill.cold'],
-            });
-
-            if (features.length > 0) {
-                draw.changeMode('simple_select', { featureIds: [] });
-                e.preventDefault();
-            }
-        };
-
-        map.on('click', preventEdit);
-        map.on('contextmenu', preventEdit);
+        map.on('click', preventPolygonEdit);
+        map.on('contextmenu', preventPolygonEdit);
 
         return () => {
-            map.off('click', preventEdit);
-            map.off('contextmenu', preventEdit);
+            map.off('click', preventPolygonEdit);
+            map.off('contextmenu', preventPolygonEdit);
         };
-    }, [polygonDrawn, mapRef, drawRef]);
+    }, [polygonDrawn, mapRef, drawRef, preventPolygonEdit]);
 
     const handleClick = useCallback(() => {
         if (!mapRef.current || !drawRef || polygonDrawn) return;
