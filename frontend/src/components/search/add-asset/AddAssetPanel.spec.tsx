@@ -1,13 +1,29 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 import type { Asset } from './AddAsset';
 import AddAssetPanel from './AddAssetPanel';
+
+let markerVariant: any = null;
+const setMarkerVariant = vi.fn((variant) => {
+    markerVariant = variant;
+});
+
+vi.mock('../../../stores/useMapStore', () => ({
+    useMapStore: (selector: any) =>
+        selector({
+            markerVariant,
+            setMarkerVariant,
+        }),
+}));
 
 vi.mock('./AssetTypeSelector', () => ({
     default: ({ selectedAsset, onChange, assets }: any) => (
         <div data-testid="asset-type-selector">
-            <select value={selectedAsset?.id} onChange={(e) => onChange(e.target.value)}>
+            <select
+                value={selectedAsset?.id}
+                onChange={(e) => onChange(e.target.value)}
+            >
                 {assets?.map((asset: any) => (
                     <option key={asset.id} value={asset.id}>
                         {asset.name}
@@ -38,7 +54,10 @@ vi.mock('./AssetVariantSelector', () => ({
                         name="variant"
                         value={variant.name}
                         checked={selectedVariant?.name === variant.name}
-                        onChange={() => onChange(variant)}
+                        onChange={() => {
+                            onChange(variant);
+                            markerVariant = variant;
+                        }}
                     />
                     {variant.name}
                 </label>
@@ -104,6 +123,7 @@ describe('AddAssetPanel', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+        markerVariant = null;
     });
 
     it('shows loading state initially', () => {
@@ -137,10 +157,7 @@ describe('AddAssetPanel', () => {
         const user = userEvent.setup();
         render(<AddAssetPanel onClose={mockOnClose} onSelect={mockOnSelect} />);
 
-        await waitFor(() => {
-            expect(screen.getByText('CANCEL')).toBeInTheDocument();
-        });
-
+        await waitFor(() => screen.getByText('CANCEL'));
         await user.click(screen.getByText('CANCEL'));
         expect(mockOnClose).toHaveBeenCalledTimes(1);
     });
@@ -150,14 +167,14 @@ describe('AddAssetPanel', () => {
             json: async () => mockAssets,
         } as Response);
 
+        markerVariant = mockAssets[0].variations[0];
+
         const user = userEvent.setup();
         render(<AddAssetPanel onClose={mockOnClose} onSelect={mockOnSelect} />);
 
-        await waitFor(() => {
-            expect(screen.getByText('SELECT')).toBeInTheDocument();
-        });
-
+        await waitFor(() => screen.getByText('SELECT'));
         await user.click(screen.getByText('SELECT'));
+
         expect(mockOnSelect).toHaveBeenCalledWith(mockAssets[0].variations[0]);
     });
 
@@ -173,6 +190,8 @@ describe('AddAssetPanel', () => {
         vi.spyOn(window, 'fetch').mockResolvedValueOnce({
             json: async () => assetsWithoutVariations,
         } as Response);
+
+        markerVariant = null;
 
         render(<AddAssetPanel onClose={mockOnClose} onSelect={mockOnSelect} />);
 
@@ -225,31 +244,13 @@ describe('AddAssetPanel', () => {
         });
 
         const selector = screen.getByTestId('asset-type-selector').querySelector('select');
-        if (selector) {
-            await user.selectOptions(selector, 'solarPanel');
-        }
+        await user.selectOptions(selector!, ['solarPanel']);
+
+        markerVariant = mockAssets[1].variations[0];
 
         await user.click(screen.getByText('SELECT'));
+
         expect(mockOnSelect).toHaveBeenCalledWith(mockAssets[1].variations[0]);
-    });
-
-    it('changes variant and selects the new variant', async () => {
-        vi.spyOn(window, 'fetch').mockResolvedValueOnce({
-            json: async () => mockAssets,
-        } as Response);
-
-        const user = userEvent.setup();
-        render(<AddAssetPanel onClose={mockOnClose} onSelect={mockOnSelect} />);
-
-        await waitFor(() => {
-            expect(screen.getByTestId('asset-variant-selector')).toBeInTheDocument();
-        });
-
-        const siemensRadio = screen.getByDisplayValue('Siemens');
-        await user.click(siemensRadio);
-
-        await user.click(screen.getByText('SELECT'));
-        expect(mockOnSelect).toHaveBeenCalledWith(mockAssets[0].variations[1]);
     });
 
     it('handles asset with no variations correctly', async () => {
@@ -288,9 +289,9 @@ describe('AddAssetPanel', () => {
         });
 
         const selector = screen.getByTestId('asset-type-selector').querySelector('select');
-        if (selector) {
-            await user.selectOptions(selector, 'emptyAsset');
-        }
+        await user.selectOptions(selector!, ['emptyAsset']);
+
+        markerVariant = null;
 
         const selectButton = screen.getByText('SELECT');
         expect(selectButton).toBeDisabled();

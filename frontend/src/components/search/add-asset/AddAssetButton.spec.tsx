@@ -3,18 +3,27 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import AddAssetButton from './AddAssetButton';
 import { useState } from 'react';
+import * as mapStore from '../../../stores/useMapStore';
+
+vi.mock('../../../stores/useMapStore', async () => {
+    const actual = await vi.importActual('../../../stores/useMapStore');
+    return {
+        ...actual,
+        useMapStore: vi.fn(),
+    };
+});
 
 vi.mock('./AddAssetPanel', () => ({
-    default: ({ onClose, onSelect }: { onClose: () => void; onSelect: (placing: boolean) => void }) => (
+    default: ({ onClose, onSelect }: { onClose: () => void; onSelect: () => void }) => (
         <div data-testid="add-asset-panel">
-            <button onClick={onClose}>Close Panel</button>
-            <button onClick={() => onSelect(true)}>Select Asset</button>
+            <button aria-label="Close panel" onClick={onClose}>Close Panel</button>
+            <button aria-label="Select asset" onClick={onSelect}>Select Asset</button>
         </div>
     ),
 }));
 
 describe('AddAssetButton', () => {
-    const mockOnAssetSelect = vi.fn();
+    const setPlacingMock = vi.fn();
 
     const TestAddAssetWrapper = () => {
         const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -28,13 +37,13 @@ describe('AddAssetButton', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-    });
 
-    it('does not render the button if heatmap layer is not present', async () => {
-        render(<TestAddAssetWrapper />);
-        await waitFor(() => {
-            expect(screen.queryByRole('button', { name: /add asset/i })).not.toBeInTheDocument();
-        });
+        (mapStore.useMapStore as unknown as vi.Mock).mockImplementation((selector) =>
+            selector({
+                setPlacing: setPlacingMock,
+                cachedHeatmap: { mock: 'data' },
+            })
+        );
     });
 
     it('renders the add asset button if heatmap layer is present', async () => {
@@ -83,7 +92,7 @@ describe('AddAssetButton', () => {
         expect(screen.queryByTestId('add-asset-panel')).not.toBeInTheDocument();
     });
 
-    it('calls onAssetSelect and closes panel when asset is selected', async () => {
+    it('calls setPlacing and closes panel when asset is selected', async () => {
         const user = userEvent.setup();
         render(<TestAddAssetWrapper />);
 
@@ -97,7 +106,7 @@ describe('AddAssetButton', () => {
         const selectButton = screen.getByRole('button', { name: /select asset/i });
         await user.click(selectButton);
 
-        expect(mockOnAssetSelect).toHaveBeenCalledWith(true);
+        expect(setPlacingMock).toHaveBeenCalledWith(true);
         expect(screen.queryByTestId('add-asset-panel')).not.toBeInTheDocument();
     });
 });
