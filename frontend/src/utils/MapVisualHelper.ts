@@ -30,7 +30,6 @@ export class MapVisualHelper {
     private static readonly maskLayerId = 'mask-layer';
     private static readonly heatmapLayerId = 'heatmap-layer';
     private static readonly threeDimensionalAssetsLayer = '3d-assets-layer';
-    private static issuesPopup: Popup | null = null;
 
     /**
      * Applies a dimmed mask over the entire map except inside the given polygon and centers the map on that polygon.
@@ -236,20 +235,7 @@ export class MapVisualHelper {
         const id = this.heatmapLayerId;
         if (map.getLayer(id)) map.removeLayer(id);
         if (map.getSource(id)) map.removeSource(id);
-
-        MapVisualHelper.removeIssuesPopup();
     }
-
-    /**
-     * Removes the issue popup if present on a heatmap.
-     */
-    static removeIssuesPopup() {
-        if (MapVisualHelper.issuesPopup) {
-            MapVisualHelper.issuesPopup.remove();
-            MapVisualHelper.issuesPopup = null;
-        }
-    }
-
 
     /**
      * Hides all non-base layers on the map and returns the IDs of those hidden layers.
@@ -268,8 +254,6 @@ export class MapVisualHelper {
                 map.setLayoutProperty(id, 'visibility', 'none');
             }
         });
-
-        MapVisualHelper.removeIssuesPopup();
 
         return toHide;
     }
@@ -406,7 +390,6 @@ export class MapVisualHelper {
             </div>
         `;
 
-        MapVisualHelper.removeIssuesPopup();
-        MapVisualHelper.issuesPopup = new Popup({ closeButton: true }).setLngLat(e.lngLat).setHTML(html).addTo(map);
+        new Popup({ closeButton: true }).setLngLat(e.lngLat).setHTML(html).addTo(map);
     }
 }
