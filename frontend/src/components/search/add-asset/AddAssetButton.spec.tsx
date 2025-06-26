@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach, type Mock } from 'vitest';
 import AddAssetButton from './AddAssetButton';
 import { useState } from 'react';
 import * as mapStore from '../../../stores/useMapStore';
@@ -37,7 +37,7 @@ describe('AddAssetButton', () => {
     beforeEach(() => {
         vi.clearAllMocks();
 
-        (mapStore.useMapStore as unknown as vi.Mock).mockImplementation((selector) =>
+        (mapStore.useMapStore as unknown as Mock).mockImplementation((selector) =>
             selector({
                 setPlacing: setPlacingMock,
                 cachedHeatmap: { mock: 'data' },
