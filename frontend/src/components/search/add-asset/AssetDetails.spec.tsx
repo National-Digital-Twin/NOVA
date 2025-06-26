@@ -28,14 +28,14 @@ describe('AssetDetails', () => {
 
         expect(screen.getByText('Preview')).toBeInTheDocument();
         expect(screen.getByText('Specifications')).toBeInTheDocument();
-        expect(screen.getByAltText('Wind Turbine preview')).toBeInTheDocument();
+        expect(screen.getByLabelText('Wind Turbine preview')).toBeInTheDocument();
     });
 
     it('displays the variant image in preview tab', () => {
         render(<AssetDetails selectedAsset={mockAsset} selectedVariant={mockVariant} />);
 
-        const image = screen.getByAltText('Wind Turbine preview');
-        expect(image).toHaveAttribute('src', '/images/turbine-one.png');
+        const bannerImage = screen.getByLabelText('Wind Turbine preview');
+        expect(bannerImage).toHaveStyle({ backgroundImage: 'url(/images/turbine-one.png)' });
     });
 
     it('switches to specifications tab when clicked', async () => {
@@ -72,7 +72,7 @@ describe('AssetDetails', () => {
         expect(screen.getByText('Model')).toBeInTheDocument();
 
         await user.click(screen.getByText('Preview'));
-        expect(screen.getByAltText('Wind Turbine preview')).toBeInTheDocument();
+        expect(screen.getByLabelText('Wind Turbine preview')).toBeInTheDocument();
     });
 
     it('shows specifications list when specifications tab is active', async () => {

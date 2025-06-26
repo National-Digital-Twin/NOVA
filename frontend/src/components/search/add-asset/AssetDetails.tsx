@@ -21,11 +21,23 @@ const PreviewContent = styled(Box)(({ theme }) => ({
     display: 'flex',
     flexDirection: 'column',
     gap: theme.spacing(2),
-    '& img': {
-        borderRadius: theme.shape.borderRadius,
-        maxWidth: '100%',
-    },
 }));
+
+const AssetPreview = styled(Box)(({ theme }) => ({
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: 'cover',
+    borderRadius: theme.shape.borderRadius,
+    height: '320px',
+    width: '100%',
+    position: 'relative',
+}));
+
+const TabContentContainer = styled(Box)({
+    maxHeight: 'calc(75vh - 300px)',
+    minHeight: '150px',
+    overflow: 'auto',
+});
 
 const SpecificationsContent = styled(Box)();
 
@@ -72,10 +84,10 @@ const AssetDetails = ({ selectedAsset, selectedVariant }: AssetDetailsProps) => 
                 <Tab label="Specifications" />
             </StyledTabs>
 
-            <Box>
+            <TabContentContainer>
                 {activeTab === 0 && (
                     <PreviewContent>
-                        <img src={selectedVariant.image} alt={`${selectedAsset.name} preview`} />
+                        <AssetPreview sx={{ backgroundImage: `url(${selectedVariant.image})` }} aria-label={`${selectedAsset.name} preview`} />
                     </PreviewContent>
                 )}
                 {activeTab === 1 && (
@@ -89,7 +101,7 @@ const AssetDetails = ({ selectedAsset, selectedVariant }: AssetDetailsProps) => 
                         </StyledList>
                     </SpecificationsContent>
                 )}
-            </Box>
+            </TabContentContainer>
         </>
     );
 };
