@@ -9,42 +9,44 @@ import ZoomInButton from './zoom-in/ZoomInButton';
 import ZoomOutButton from './zoom-out/ZoomOutButton';
 
 const ControlsContainer = styled(Box)({
-    position: 'absolute',
-    top: '1rem',
-    right: '1rem',
     display: 'flex',
     flexDirection: 'column',
     gap: '1rem',
+    position: 'absolute',
+    right: '1rem',
+    top: '1rem',
     zIndex: 1,
 });
 
 const ControlGroup = styled(Box)(({ theme }) => ({
-    display: 'flex',
-    flexDirection: 'column',
     backgroundColor: theme.palette.background.paper,
     borderRadius: theme.shape.borderRadius,
     boxShadow: theme.shadows[2],
+    display: 'flex',
+    flexDirection: 'column',
 }));
 
 const ControlDivider = styled(Box)(({ theme }) => ({
-    width: '100%',
-    height: 2,
     backgroundColor: theme.palette.divider,
+    height: 2,
+    width: '100%',
 }));
 
 interface MapControlsProps {
     mapRef: React.RefObject<MapRef>;
-    onStyleChange: (style: MapStyle) => void;
     currentStyle: MapStyle;
+    is3D: boolean;
+    onStyleChange: (style: MapStyle) => void;
+    setIs3D: (is3d: boolean) => void;
 }
 
-const MapControls = ({ mapRef, onStyleChange, currentStyle }: MapControlsProps) => {
+const MapControls = ({ mapRef, onStyleChange, currentStyle, is3D, setIs3D }: MapControlsProps) => {
     return (
         <ControlsContainer>
             <ControlGroup role="group" aria-label="View controls">
                 <CompassButton mapRef={mapRef} />
                 <ControlDivider />
-                <ViewToggleButton mapRef={mapRef} />
+                <ViewToggleButton mapRef={mapRef} onStyleChange={onStyleChange} is3D={is3D} setIs3D={setIs3D} currentStyle={currentStyle} />
             </ControlGroup>
 
             <ControlGroup role="group" aria-label="Zoom controls">
@@ -54,11 +56,11 @@ const MapControls = ({ mapRef, onStyleChange, currentStyle }: MapControlsProps) 
             </ControlGroup>
 
             <ControlGroup role="group" aria-label="Map style controls">
-                <MapStylePanel onStyleChange={onStyleChange} currentStyle={currentStyle} />
+                <MapStylePanel currentStyle={currentStyle} onStyleChange={onStyleChange} />
             </ControlGroup>
 
             <ControlGroup role="group" aria-label="Map legend controls">
-                <MapLegendPanel />
+                <MapLegendPanel mapRef={mapRef} />
             </ControlGroup>
         </ControlsContainer>
     );

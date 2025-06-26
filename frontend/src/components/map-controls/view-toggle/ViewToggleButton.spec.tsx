@@ -1,63 +1,67 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import type { MapRef } from 'react-map-gl/maplibre';
-import { describe, expect, it, vi } from 'vitest';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import ViewToggleButton from './ViewToggleButton';
+import type { MapStyle } from '../../../types/map';
+import { MapVisualHelper } from '../../../utils/MapVisualHelper';
 
 describe('ViewToggleButton', () => {
-    const mockMap = {
-        easeTo: vi.fn(),
-        getPitch: () => 0,
-    };
+    let mockMap: any;
+    let mockMapRef: React.RefObject<MapRef>;
 
-    const mockMapRef = {
-        current: {
-            getMap: () => mockMap,
-        },
-    } as unknown as React.RefObject<MapRef>;
+    beforeEach(() => {
+        mockMap = {
+            easeTo: vi.fn(),
+            isMoving: () => false,
+            once: (_event: string, cb: () => void) => cb(),
+            getSource: () => null,
+            addSource: vi.fn(),
+            setTerrain: vi.fn(),
+            getTerrain: vi.fn(),
+            getLayer: vi.fn(() => null),
+            removeLayer: vi.fn(),
+        };
 
-    it('renders with 2D text initially', () => {
-        render(<ViewToggleButton mapRef={mockMapRef} />);
-        expect(screen.getByText('2D')).toBeInTheDocument();
+        mockMapRef = {
+            current: {
+                getMap: () => mockMap,
+            },
+        } as unknown as React.RefObject<MapRef>;
+
+        // Stub helper methods to prevent side effects
+        vi.spyOn(MapVisualHelper, 'removeHeatmapLayer').mockImplementation(() => {});
+        vi.spyOn(MapVisualHelper, 'addOrUpdateHeatmapLayer').mockImplementation(() => {});
     });
 
-    it('renders with correct aria label initially', () => {
-        render(<ViewToggleButton mapRef={mockMapRef} />);
+    function setup(initial3D: boolean, initialStyle: MapStyle) {
+        const onStyleChange = vi.fn();
+        const setIs3D = vi.fn();
+        render(<ViewToggleButton mapRef={mockMapRef} onStyleChange={onStyleChange} is3D={initial3D} setIs3D={setIs3D} currentStyle={initialStyle} />);
+        const button = screen.getByRole('button');
+        return { button, onStyleChange, setIs3D };
+    }
+
+    it('renders "3D" when is3D is false', () => {
+        setup(false, 'basic');
+        expect(screen.getByText('3D')).toBeInTheDocument();
+        expect(screen.getByLabelText('Switch to 3D')).toBeInTheDocument();
+    });
+
+    it('renders "2D" when is3D is true', () => {
+        setup(true, 'hybrid');
+        expect(screen.getByText('2D')).toBeInTheDocument();
         expect(screen.getByLabelText('Switch to 2D')).toBeInTheDocument();
     });
 
-    it('toggles between 2D and 3D text when clicked', () => {
-        render(<ViewToggleButton mapRef={mockMapRef} />);
-        const button = screen.getByRole('button');
-
-        expect(screen.getByText('2D')).toBeInTheDocument();
-
+    it('toggles back to 2D: calls onStyleChange(previousStyle), setIs3D(false), and easeTo({ pitch: 0, duration: 400 })', () => {
+        const { button, onStyleChange, setIs3D } = setup(true, 'hybrid');
         fireEvent.click(button);
-        expect(screen.getByText('3D')).toBeInTheDocument();
-
-        fireEvent.click(button);
-        expect(screen.getByText('2D')).toBeInTheDocument();
-    });
-
-    it('calls easeTo with correct parameters when toggling to 2D', () => {
-        render(<ViewToggleButton mapRef={mockMapRef} />);
-        const button = screen.getByRole('button');
-        fireEvent.click(button);
-
+        expect(onStyleChange).toHaveBeenCalledWith('hybrid');
+        expect(setIs3D).toHaveBeenCalledWith(false);
         expect(mockMap.easeTo).toHaveBeenCalledWith({
             pitch: 0,
-            duration: 300,
-        });
-    });
-
-    it('calls easeTo with correct parameters when toggling to 3D', () => {
-        render(<ViewToggleButton mapRef={mockMapRef} />);
-        const button = screen.getByRole('button');
-        fireEvent.click(button);
-        fireEvent.click(button);
-
-        expect(mockMap.easeTo).toHaveBeenCalledWith({
-            pitch: 60,
-            duration: 300,
+            duration: 400,
         });
     });
 });

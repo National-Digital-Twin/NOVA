@@ -9,5 +9,4 @@ const ResizeObserverMock = vi.fn(() => ({
 
 vi.stubGlobal('ResizeObserver', ResizeObserverMock);
 
-// Mock for maplibre-gl and other browser APIs that don't exist in JSDOM
 global.URL.createObjectURL = vi.fn(() => 'blob:mock-url');

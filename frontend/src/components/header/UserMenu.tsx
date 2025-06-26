@@ -18,8 +18,8 @@ const StyledMenu = styled(Menu)(({ theme }) => ({
 
 const StyledDivider = styled(Divider)(({ theme }) => ({
     backgroundColor: theme.palette.divider,
-    opacity: 0.3,
     margin: theme.spacing(1) + ' 0',
+    opacity: 0.3,
 }));
 
 const UsernameTypography = styled(Typography)(({ theme }) => ({
@@ -45,7 +45,7 @@ const UserMenu = () => {
         const fetchUserData = async () => {
             try {
                 const userData = await userService.getUserData();
-                setUsername(userData.displayName);
+                setUsername(userData.email);
             } catch (err) {
                 console.error('Failed to fetch user data:', err);
             }

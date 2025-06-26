@@ -37,7 +37,7 @@ describe('DeletePolygonButton', () => {
 
         render(<DeletePolygonButton drawRef={nullDrawRef} isVisible={true} onPolygonDeleted={onPolygonDeletedMock} hideLayerControl={hideLayerControlMock} />);
 
-        const button = screen.getByLabelText('Delete polygon button');
+        const button = screen.getByLabelText('Delete polygon');
         fireEvent.click(button);
 
         expect(onPolygonDeletedMock).not.toHaveBeenCalled();

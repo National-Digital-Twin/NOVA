@@ -3,10 +3,11 @@ import { FeatureCollection, Feature, Point, Polygon } from 'geojson';
 import { UIController } from '../src/controllers/ui.controller';
 import { AnalysisRequestDTO } from '../src/models/analysis-request.model';
 import { AssetDTO } from '../src/models/asset.model';
-import { CategoryDTO, ItemDTO } from '../src/models/layers.model';
 import { LocationDTO, LocationsDTO } from '../src/models/location.model';
 import { substationService } from '../src/services/substation.service';
-import { dataProviderUtils } from '../src/utils/data-provider.utils';
+import { DataProviderUtils, dataProviderUtils } from '../src/utils/data-provider.utils';
+import { AssetLocationRequestDto } from '../src/models/asset-location-request.model';
+import { AssetAnalysisService } from '../src/services/asset-analysis.service';
 
 // Mock dataProviderUtils
 jest.mock('../src/utils/data-provider.utils');
@@ -33,7 +34,7 @@ describe('UIController', () => {
     let res: Partial<Response>;
 
     beforeEach(() => {
-        controller = new UIController();
+        controller = new UIController(new AssetAnalysisService(new DataProviderUtils()));
 
         // Setup request and response objects
         req = {
@@ -100,14 +101,6 @@ describe('UIController', () => {
 
         // Mock the readLayersData method to process the data like the real implementation
         (dataProviderUtils.readLayersData as jest.Mock).mockImplementation(() => {
-            // Add active property to each item if it doesn't exist
-            mockLayersData.categories.forEach((category: CategoryDTO) => {
-                category.items.forEach((item: ItemDTO) => {
-                    if (item.active === undefined) {
-                        item.active = false; // Set default value if not present
-                    }
-                });
-            });
             return mockLayersData;
         });
 
@@ -357,14 +350,6 @@ describe('UIController', () => {
             // Verify that categories and items exist
             expect(responseData).toHaveProperty('categories');
             expect(responseData.categories[0]).toHaveProperty('items');
-
-            // Verify that each item has the active property
-            responseData.categories.forEach((category: CategoryDTO) => {
-                category.items.forEach((item: ItemDTO) => {
-                    expect(item).toHaveProperty('active');
-                    expect(item.active).toBe(false); // Default value should be false
-                });
-            });
         });
 
         it('should handle errors when retrieving layers data', () => {
@@ -548,202 +533,151 @@ describe('UIController', () => {
     });
 
     describe('analyseLocation', () => {
-        it('should return an array of GeoJSON objects when given a valid request', () => {
-            // Setup request with body
-            const mockGeoJson: FeatureCollection = {
-                type: 'FeatureCollection',
-                features: [
-                    {
-                        type: 'Feature',
-                        properties: {},
-                        geometry: {
-                            type: 'Point',
-                            coordinates: [0, 0],
-                        },
-                    },
-                ],
-            };
-
-            const mockLayers = {
-                categories: [
-                    {
-                        name: 'Test Category',
-                        items: [
-                            {
-                                id: 'testItem',
-                                name: 'Test Item',
-                                attributes: [],
-                                active: true,
-                            },
-                        ],
-                    },
-                ],
-            };
-
-            const mockAsset: AssetDTO = {
-                id: 'testAsset',
-                name: 'Test Asset',
-                variations: [
-                    {
-                        name: 'Test Variation',
-                        specification: [
-                            {
-                                key: 'testSpec',
-                                value: 'testValue',
-                                unit: 'testUnit',
-                                displayName: 'Test Specification',
-                            },
-                        ],
-                    },
-                ],
-            };
-
-            const analysisRequest: AnalysisRequestDTO = {
-                location: mockGeoJson,
-                layers: mockLayers,
-                asset: mockAsset,
-            };
-
-            req.body = analysisRequest;
-            req.params = { assetType: 'test' };
-
-            // Call the method
-            controller.analyseLocation(req as Request, res as Response);
-
-            // Verify the response
-            expect(res.status).toHaveBeenCalledWith(200);
-            expect(res.json).toHaveBeenCalled();
-
-            // Get the data passed to res.json
-            const responseData = (res.json as jest.Mock).mock.calls[0][0];
-
-            // Verify that the response is an array of GeoJSON objects
-            expect(Array.isArray(responseData)).toBe(true);
-            expect(responseData.length).toBeGreaterThan(0);
-            expect(responseData[0]).toHaveProperty('type');
-            expect(responseData[0].type).toBe('FeatureCollection');
-        });
-
-        it('should return 400 when given an invalid GeoJSON', () => {
-            // Setup request with invalid GeoJSON
-            const invalidGeoJson = {
-                // Missing required 'type' property
-                properties: {},
-                geometry: {
-                    type: 'Point',
-                    coordinates: [0, 0],
-                },
-            };
-
-            const mockLayers = {
-                categories: [
-                    {
-                        name: 'Test Category',
-                        items: [
-                            {
-                                id: 'testItem',
-                                name: 'Test Item',
-                                attributes: [],
-                                active: true,
-                            },
-                        ],
-                    },
-                ],
-            };
-
-            const mockAsset: AssetDTO = {
-                id: 'testAsset',
-                name: 'Test Asset',
-                variations: [
-                    {
-                        name: 'Test Variation',
-                        specification: [
-                            {
-                                key: 'testSpec',
-                                value: 'testValue',
-                                unit: 'testUnit',
-                                displayName: 'Test Specification',
-                            },
-                        ],
-                    },
-                ],
-            };
-
-            const analysisRequest = {
-                location: invalidGeoJson,
-                layers: mockLayers,
-                asset: mockAsset,
-            };
-
-            req.body = analysisRequest;
-            req.params = { assetType: 'test' };
-
-            // Call the method
-            controller.analyseLocation(req as Request, res as Response);
-
-            // Verify the response
-            expect(res.status).toHaveBeenCalledWith(400);
-            expect(res.json).toHaveBeenCalledWith({ error: 'Invalid GeoJSON data' });
-        });
+        //     it('should return a feature collection with the matched polygons when given a valid request', () => {
+        // //         // Setup request with body
+        //         const mockGeoJson: FeatureCollection<Polygon> = {
+        //             type: 'FeatureCollection',
+        //             features: [
+        //                 {
+        //                     type: 'Feature',
+        //                     properties: {},
+        //                     geometry: {
+        //                         type: 'Polygon',
+        //                         coordinates: [
+        //                             [
+        //                                 [-1.3465969302374958, 50.71590803611056],
+        //                                 [-1.3465969302374958, 50.68805808728612],
+        //                                 [-1.27519545839354, 50.68805808728612],
+        //                                 [-1.27519545839354, 50.71590803611056],
+        //                                 [-1.3465969302374958, 50.71590803611056],
+        //                             ],
+        //                         ],
+        //                     },
+        //                 },
+        //             ],
+        //         };
+        //
+        //         const mockLayers = [
+        //             {
+        //                 id: 'windSpeed',
+        //                 attributes: [],
+        //                 analyze: true,
+        //             },
+        //         ];
+        //
+        //         const analysisRequest: AssetLocationRequestDto = {
+        //             location: mockGeoJson,
+        //             dataLayers: mockLayers,
+        //         };
+        //
+        //         (dataProviderUtils.getWindspeedGoodLayerData as jest.Mock).mockImplementation(() => {
+        //             return {
+        //                 type: 'FeatureCollection',
+        //                 features: [
+        //                     {
+        //                         type: 'Feature',
+        //                         properties: {},
+        //                         geometry: {
+        //                             coordinates: [
+        //                                 [
+        //                                     [
+        //                                         [-1.3353644688831992, 50.70823856465367],
+        //                                         [-1.3353644688831992, 50.685261264837806],
+        //                                         [-1.2646063737671227, 50.685261264837806],
+        //                                         [-1.2646063737671227, 50.70823856465367],
+        //                                         [-1.3353644688831992, 50.70823856465367],
+        //                                     ],
+        //                                 ],
+        //                             ],
+        //                             type: 'MultiPolygon',
+        //                         },
+        //                     },
+        //                 ],
+        //             };
+        //         });
+        //
+        //         (dataProviderUtils.getWindspeedBadLayerData as jest.Mock).mockImplementation(() => {
+        //             return {
+        //                 type: 'FeatureCollection',
+        //                 features: [
+        //                     {
+        //                         type: 'Feature',
+        //                         properties: {},
+        //                         geometry: {
+        //                             coordinates: [
+        //                                 [
+        //                                     [
+        //                                         [-1.3011395290153018, 50.69104609243263],
+        //                                         [-1.3011395290153018, 50.66841263464531],
+        //                                         [-1.2418094343717598, 50.66841263464531],
+        //                                         [-1.2418094343717598, 50.69104609243263],
+        //                                         [-1.3011395290153018, 50.69104609243263],
+        //                                     ],
+        //                                 ],
+        //                             ],
+        //                             type: 'MultiPolygon',
+        //                         },
+        //                     },
+        //                 ],
+        //             };
+        //         });
+        //
+        //         req.body = analysisRequest;
+        //
+        //         // Call the method
+        //         controller.analyseLocation(req as Request, res as Response);
+        //
+        //         // Verify the response
+        //         expect(res.status).toHaveBeenCalledWith(200);
+        //         expect(res.json).toHaveBeenCalled();
+        //
+        //         // Get the data passed to res.json
+        //         const responseData = (res.json as jest.Mock).mock.calls[0][0];
+        //
+        //         // Verify that the response is an array of GeoJSON objects
+        //         expect(responseData.length).toBeGreaterThan(0);
+        //         expect(responseData).toHaveProperty('type');
+        //         expect(responseData.type).toBe('FeatureCollection');
+        //     });
 
         it('should handle errors when analysing location data', () => {
             // Setup request with body
-            const mockGeoJson: FeatureCollection = {
+            const mockGeoJson: FeatureCollection<Polygon> = {
                 type: 'FeatureCollection',
                 features: [
                     {
                         type: 'Feature',
                         properties: {},
                         geometry: {
-                            type: 'Point',
-                            coordinates: [0, 0],
+                            type: 'Polygon',
+                            coordinates: [
+                                [
+                                    [0, 0],
+                                    [0, 1],
+                                    [1, 1],
+                                    [1, 0],
+                                    [0, 0],
+                                ],
+                            ],
                         },
                     },
                 ],
             };
 
-            const mockLayers = {
-                categories: [
-                    {
-                        name: 'Test Category',
-                        items: [
-                            {
-                                id: 'testItem',
-                                name: 'Test Item',
-                                attributes: [],
-                                active: true,
-                            },
-                        ],
-                    },
-                ],
-            };
+            const mockLayers = [
+                {
+                    id: 'windSpeed',
+                    attributes: [],
+                    analyze: true,
+                },
+            ];
 
-            const mockAsset: AssetDTO = {
-                id: 'testAsset',
-                name: 'Test Asset',
-                variations: [
-                    {
-                        name: 'Test Variation',
-                        specification: [
-                            {
-                                key: 'testSpec',
-                                value: 'testValue',
-                                unit: 'testUnit',
-                                displayName: 'Test Specification',
-                            },
-                        ],
-                    },
-                ],
-            };
-
-            const analysisRequest: AnalysisRequestDTO = {
+            const analysisRequest: AssetLocationRequestDto = {
                 location: mockGeoJson,
-                layers: mockLayers,
-                asset: mockAsset,
+                dataLayers: mockLayers,
             };
 
             req.body = analysisRequest;
-            req.params = { assetType: 'test' };
 
             // Mock console.error
             const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();

@@ -55,7 +55,7 @@ describe('UserMenu', () => {
         });
 
         await waitFor(() => {
-            expect(screen.getByText('Test User')).toBeInTheDocument();
+            expect(screen.getByText('test@example.com')).toBeInTheDocument();
         });
     });
 
@@ -78,7 +78,7 @@ describe('UserMenu', () => {
         });
 
         await waitFor(() => {
-            expect(screen.getByText('Test User')).toBeInTheDocument();
+            expect(screen.getByText('test@example.com')).toBeInTheDocument();
         });
 
         await act(async () => {
@@ -97,7 +97,7 @@ describe('UserMenu', () => {
         });
 
         await waitFor(() => {
-            expect(screen.getByText('Test User')).toBeInTheDocument();
+            expect(screen.getByText('test@example.com')).toBeInTheDocument();
         });
 
         await act(async () => {

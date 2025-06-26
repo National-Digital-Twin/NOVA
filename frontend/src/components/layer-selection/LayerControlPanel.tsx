@@ -1,126 +1,257 @@
-/**
- * LayerControlPanel
- *
- * A React component that provides an interactive panel for selecting map layers to be used in Heatmap calculations.
- * Users can:
- * - Search for layers
- * - Expand/collapse grouped layer categories
- * - Toggle checkboxes to include/exclude layers
- * - Request a heatmap be calculated based on selected layers
- */
-
-import React, { useState, useMemo, useId } from 'react';
 import {
-    Paper,
     Accordion,
-    AccordionSummary,
     AccordionDetails,
-    Checkbox,
-    TextField,
-    Button,
-    Typography,
-    Divider,
-    InputAdornment,
-    IconButton,
+    AccordionSummary,
     Box,
+    Button,
+    Checkbox,
+    CircularProgress,
+    Divider,
+    Drawer,
+    IconButton,
+    InputAdornment,
+    MenuItem,
+    Paper,
+    TextField,
+    Typography,
 } from '@mui/material';
+import React, { useEffect, useId, useMemo, useState } from 'react';
+
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SearchIcon from '@mui/icons-material/Search';
-import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import type { MapRef } from 'react-map-gl/maplibre';
+import { MapVisualHelper } from '../../utils/MapVisualHelper';
+import type MapboxDraw from '@mapbox/mapbox-gl-draw';
+import { useMapStore } from '../../stores/useMapStore';
 
-import '../../App.scss';
+interface LayerControlPanelProps {
+    mapRef: React.RefObject<MapRef>;
+    drawRef: React.RefObject<MapboxDraw | null>;
+}
 
-// Types used internally by the component
-type LayerItem = { name: string };
-type LayerGroup = { [group: string]: LayerItem[] };
+interface Attribute {
+    id: string;
+    description: string;
+    defaultValue: string | number;
+    valueType: 'number' | 'string';
+    options?: string[];
+}
 
-// Static layer data grouped by category
-const layers: LayerGroup = {
-    'Environmental protected sites': [
-        { name: 'Areas of outstanding natural beauty' },
-        { name: 'Special protection areas' },
-        { name: 'Sites of special scientific interest' },
-        { name: 'Special areas of conservation' },
-    ],
-    Weather: [{ name: 'Wind speed' }],
-    Residential: [{ name: 'Built up areas' }],
-    'Network infrastructure': [],
-    Consumption: [],
-};
+interface LayerItem {
+    id: string;
+    name: string;
+    attributes: Attribute[];
+}
 
-// Main layer panel component
-const LayerControlPanel = () => {
-    // Determine first non-empty category for initial expansion
-    const defaultExpandedCategory = Object.entries(layers).find(([, items]) => items.length > 0)?.[0] || '';
+interface LayerApiResponse {
+    categories: {
+        name: string;
+        items: LayerItem[];
+    }[];
+}
 
-    const idPrefix = useId(); // Unique prefix for form controls
+const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
+    const idPrefix = useId();
 
-    // State for search text input
+    const [layers, setLayers] = useState<Record<string, LayerItem[]>>({});
     const [searchTerm, setSearchTerm] = useState('');
-
-    // Whether the panel is expanded or collapsed
     const [open, setOpen] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const [checkedLayers, setCheckedLayers] = useState<Record<string, boolean>>({});
+    const [layerSettings, setLayerSettings] = useState<Record<string, Record<string, string>>>({});
+    const [expandedPanels, setExpandedPanels] = useState<string[]>([]);
+    const [propOpen, setPropOpen] = useState(false);
+    const [currentLayer, setCurrentLayer] = useState<string | null>(null);
+    const [layersLoaded, setLayersLoaded] = useState(false);
+    const [loadError, setLoadError] = useState(false);
+    const setCachedHeatmap = useMapStore((s) => s.setCachedHeatmap);
 
-    // Tracks which layers are checked
-    const [checkedLayers, setCheckedLayers] = useState<Record<string, boolean>>(() => {
-        const initial: Record<string, boolean> = {};
-        Object.values(layers).forEach((group) => {
-            group.forEach((item) => {
-                initial[item.name] = true; // all checked by default
+    const fetchLayers = async () => {
+        try {
+            setLoadError(false);
+            const response = await fetch('/api/ui/layers');
+            if (!response.ok) throw new Error('API error');
+            const data: LayerApiResponse = await response.json();
+
+            const transformed: Record<string, LayerItem[]> = {};
+            const checks: Record<string, boolean> = {};
+            const defaults: Record<string, Record<string, string>> = {};
+
+            data.categories.forEach((category) => {
+                if (!category.items?.length) return;
+
+                transformed[category.name] = category.items.map((item) => {
+                    const attributes = item.attributes;
+
+                    checks[item.name] = true;
+                    defaults[item.name] = {};
+                    attributes.forEach((a) => {
+                        defaults[item.name][a.description] = String(a.defaultValue);
+                    });
+
+                    return {
+                        id: item.id,
+                        name: item.name,
+                        attributes,
+                    };
+                });
             });
-        });
-        return initial;
-    });
 
-    // Which accordion panels are expanded
-    const [expandedPanels, setExpandedPanels] = useState<string[]>(defaultExpandedCategory ? [defaultExpandedCategory] : []);
+            setLayers(transformed);
+            setCheckedLayers(checks);
+            setLayerSettings(defaults);
 
-    // Checkbox toggle handler
-    const handleCheckboxChange = (layerName: string) => {
-        setCheckedLayers((prev) => ({
-            ...prev,
-            [layerName]: !prev[layerName],
-        }));
+            const firstCategory = Object.keys(transformed)[0];
+            if (firstCategory) setExpandedPanels([firstCategory]);
+
+            setLayersLoaded(true);
+        } catch (err) {
+            console.error('Failed to load layers', err);
+            setLoadError(true);
+        }
     };
 
-    // Accordion toggle handler
+    useEffect(() => {
+        fetchLayers();
+    }, []);
+
+    const handleCheckboxChange = (name: string) => {
+        setCheckedLayers((prev) => ({ ...prev, [name]: !prev[name] }));
+    };
+
     const handleAccordionToggle = (category: string) => {
         setExpandedPanels((prev) => (prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]));
     };
 
-    // Search change handler
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setSearchTerm(value);
+        const v = e.target.value;
+        setSearchTerm(v);
 
-        if (value.trim() === '') return;
+        if (!v.trim()) {
+            const firstCategory = Object.keys(layers)[0];
+            setExpandedPanels(firstCategory ? [firstCategory] : []);
+            return;
+        }
 
-        const lower = value.toLowerCase();
-        const matching = Object.entries(layers)
+        const lower = v.toLowerCase();
+        const matches = Object.entries(layers)
             .filter(([, items]) => items.some((item) => item.name.toLowerCase().includes(lower)))
-            .map(([category]) => category);
+            .map(([cat]) => cat);
 
-        setExpandedPanels(matching);
+        setExpandedPanels(matches);
     };
 
-    // Clear search and reset expanded panel
     const clearSearch = () => {
         setSearchTerm('');
-        setExpandedPanels(defaultExpandedCategory ? [defaultExpandedCategory] : []);
+        const firstCategory = Object.keys(layers)[0];
+        setExpandedPanels(firstCategory ? [firstCategory] : []);
     };
 
-    // Handle Apply button
-    const handleApply = () => {
-        console.log('Apply clicked');
+    const openProps = (name: string) => {
+        setCurrentLayer(name);
+        setPropOpen(true);
     };
 
-    // Memoised list of filtered layer entries
+    const closeProps = () => {
+        setPropOpen(false);
+        setCurrentLayer(null);
+    };
+
+    const handleParamChange = (label: string, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        if (!currentLayer) return;
+        const raw = e.target.value;
+        setLayerSettings((prev) => ({
+            ...prev,
+            [currentLayer]: {
+                ...prev[currentLayer],
+                [label]: raw,
+            },
+        }));
+    };
+
+    const handleParamBlur = (label: string) => {
+        if (!currentLayer) return;
+        const txt = layerSettings[currentLayer][label];
+        const num = Number(txt);
+        const final = isNaN(num) ? '' : String(num);
+        setLayerSettings((prev) => ({
+            ...prev,
+            [currentLayer]: {
+                ...prev[currentLayer],
+                [label]: final,
+            },
+        }));
+    };
+
+    const confirmProps = () => {
+        closeProps();
+    };
+
+    const handleApply = async () => {
+        if (!mapRef.current || !drawRef.current) return;
+
+        const userDrawnPolygon = MapVisualHelper.getFirstPolygon(drawRef.current);
+        if (!userDrawnPolygon) {
+            console.warn('No user drawn polygon found');
+            return;
+        }
+        const featureCollection = MapVisualHelper.getFeatureCollection(drawRef.current);
+
+        // Fetch user selected layers and attributes
+        const allLayers: LayerItem[] = Object.values(layers).flat();
+
+        const dataLayers = allLayers.map((layer) => {
+            const attributes = layer.attributes.map((attr) => ({
+                id: attr.id,
+                value: layerSettings[layer.name]?.[attr.description] ?? '',
+            }));
+
+            return {
+                id: layer.id,
+                attributes,
+                analyze: checkedLayers[layer.name] ?? true,
+            };
+        });
+
+        const payload = {
+            location: featureCollection,
+            dataLayers,
+        };
+
+        setLoading(true);
+        try {
+            const response = await fetch('/api/ui/location/analyse', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to submit analysis request');
+            }
+
+            const geojson = await response.json();
+
+            setCachedHeatmap(geojson);
+            MapVisualHelper.addOrUpdateHeatmapLayer(mapRef, geojson);
+        } catch (err) {
+            console.error('Analysis request failed', err);
+        } finally {
+            setLoading(false);
+        }
+        setLoading(false);
+    };
+
     const filteredLayerEntries = useMemo(() => {
         return Object.entries(layers).map(([category, items]) => {
-            const filteredItems = items.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase()));
-            if (filteredItems.length === 0) return null;
+            const visible = items.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase()));
+            if (!visible.length) return null;
 
             return (
                 <Accordion
@@ -134,18 +265,17 @@ const LayerControlPanel = () => {
                         <Typography>{category}</Typography>
                     </AccordionSummary>
                     <AccordionDetails sx={{ pt: 0.5, pb: 0 }}>
-                        {filteredItems.map((item) => {
+                        {visible.map((item) => {
                             const checkboxId = `${idPrefix}-${item.name.replace(/\s+/g, '-')}`;
                             return (
                                 <Box key={item.name} className="layer-item">
                                     <label htmlFor={checkboxId}>
                                         <Typography variant="body2">{item.name}</Typography>
-                                        <Checkbox
-                                            id={checkboxId}
-                                            checked={checkedLayers[item.name] || false}
-                                            onChange={() => handleCheckboxChange(item.name)}
-                                        />
+                                        <Checkbox id={checkboxId} checked={checkedLayers[item.name]} onChange={() => handleCheckboxChange(item.name)} />
                                     </label>
+                                    <IconButton size="small" onClick={() => openProps(item.name)}>
+                                        <MoreVertIcon fontSize="small" />
+                                    </IconButton>
                                 </Box>
                             );
                         })}
@@ -153,20 +283,49 @@ const LayerControlPanel = () => {
                 </Accordion>
             );
         });
-    }, [searchTerm, expandedPanels, checkedLayers, idPrefix]);
+    }, [searchTerm, expandedPanels, checkedLayers, idPrefix, layers]);
 
     const hasSearchResults = filteredLayerEntries.some(Boolean);
 
+    if (!layersLoaded && !loadError) {
+        return null;
+    }
+
+    if (loadError) {
+        return (
+            <Box
+                sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    bgcolor: 'rgba(255,255,255,0.6)',
+                    zIndex: 1400,
+                }}
+            >
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                    Failed to load layers. Please try again.
+                </Typography>
+                <Button variant="contained" onClick={fetchLayers}>
+                    Retry
+                </Button>
+            </Box>
+        );
+    }
+
     return (
         <>
-            {/* Toggle button */}
             <Box className="layer-panel-toggle" sx={{ left: open ? '430px' : '1rem' }}>
-                <IconButton onClick={() => setOpen(!open)}>
+                <IconButton onClick={() => setOpen((o) => !o)}>
                     <ArrowBackIosNewIcon fontSize="small" sx={{ transform: !open ? 'rotate(180deg)' : 'none' }} />
                 </IconButton>
             </Box>
 
-            {/* Panel content */}
             {open && (
                 <Paper className="layer-panel" elevation={4}>
                     <Box className="layer-panel-header">
@@ -222,6 +381,76 @@ const LayerControlPanel = () => {
                         </Button>
                     </Box>
                 </Paper>
+            )}
+
+            <Drawer anchor="left" open={propOpen} onClose={closeProps}>
+                <Box sx={{ width: 280 }}>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            pl: 2,
+                            pr: 1,
+                            pt: 1,
+                            mb: 2,
+                        }}
+                    >
+                        <Typography variant="h6">Properties panel</Typography>
+                        <IconButton onClick={closeProps}>
+                            <HighlightOffIcon />
+                        </IconButton>
+                    </Box>
+
+                    <Box sx={{ px: 2 }}>
+                        {currentLayer &&
+                            Object.values(layers)
+                                .flat()
+                                .find((li) => li.name === currentLayer)!
+                                .attributes.map((attr) => (
+                                    <TextField
+                                        key={attr.id}
+                                        label={attr.description}
+                                        type={attr.valueType === 'number' ? 'number' : 'text'}
+                                        select={(attr.options?.length ?? 0) > 0}
+                                        fullWidth
+                                        value={layerSettings[currentLayer][attr.description]}
+                                        onChange={(e) => handleParamChange(attr.description, e)}
+                                        onBlur={() => handleParamBlur(attr.description)}
+                                        sx={{ mb: 3 }}
+                                    >
+                                        {attr.options?.map((option) => (
+                                            <MenuItem key={option} value={option}>
+                                                {option}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
+                                ))}
+
+                        <Button variant="contained" fullWidth onClick={confirmProps}>
+                            CONFIRM
+                        </Button>
+                    </Box>
+                </Box>
+            </Drawer>
+
+            {loading && (
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        bgcolor: 'rgba(255,255,255,0.6)',
+                        zIndex: 1400,
+                    }}
+                >
+                    <CircularProgress />
+                </Box>
             )}
         </>
     );

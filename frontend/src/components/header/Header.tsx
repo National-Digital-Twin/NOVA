@@ -4,10 +4,10 @@ import novaLogo from '../../assets/nova-logo.svg';
 import UserMenu from './UserMenu';
 
 const Toolbar = styled(AppBar)(({ theme }) => ({
-    height: 'var(--header-height)',
+    alignItems: 'center',
     display: 'flex',
     flexDirection: 'row',
-    alignItems: 'center',
+    height: 'var(--header-height)',
     justifyContent: 'space-between',
     paddingLeft: theme.spacing(2),
     paddingRight: theme.spacing(2),

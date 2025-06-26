@@ -4,9 +4,9 @@
   "type": "module",
   "scripts": {
     "build": "(cd ./frontend && npm run build) && (cd ./api && npm run build)",
-    "start": "concurrently \"npm run start --workspace api\" \"npm run start --workspace frontend\"",
+    "start": "concurrently \"npm run dev --workspace api\" \"npm run start --workspace frontend\"",
     "dev:frontend": "npm run start --workspace frontend",
-    "dev:backend": "npm run start --workspace api",
+    "dev:backend": "npm run dev --workspace api",
     "lint": "npm run lint --workspace api && npm run lint --workspace frontend",
     "clean": "rm -rf ./**/*dist && rm -rf node_modules && rm -rf ./**/node_modules"
   },
@@ -14,5 +14,8 @@
     "api",
     "frontend"
   ],
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
 }
