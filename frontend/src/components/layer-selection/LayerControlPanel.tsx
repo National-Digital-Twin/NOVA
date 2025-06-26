@@ -26,6 +26,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { MapVisualHelper } from '../../utils/MapVisualHelper';
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
+import { useMapStore } from '../../stores/useMapStore';
 
 interface LayerControlPanelProps {
     mapRef: React.RefObject<MapRef>;
@@ -67,6 +68,7 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
     const [currentLayer, setCurrentLayer] = useState<string | null>(null);
     const [layersLoaded, setLayersLoaded] = useState(false);
     const [loadError, setLoadError] = useState(false);
+    const setCachedHeatmap = useMapStore((s) => s.setCachedHeatmap);
 
     const fetchLayers = async () => {
         try {
@@ -236,6 +238,7 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
 
             const geojson = await response.json();
 
+            setCachedHeatmap(geojson);
             MapVisualHelper.removeIssuesPopup();
             MapVisualHelper.addOrUpdateHeatmapLayer(mapRef, geojson);
         } catch (err) {

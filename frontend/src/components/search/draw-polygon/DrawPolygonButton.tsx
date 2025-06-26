@@ -1,6 +1,5 @@
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import type { FeatureCollection, Geometry } from 'geojson';
-import maplibregl from 'maplibre-gl';
 import { useCallback, useEffect, useState } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
 import ControlIcon from '../../../shared/control-icon/ControlIcon';

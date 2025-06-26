@@ -1,10 +1,9 @@
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
-import Point from '@mapbox/point-geometry';
 import type { MapLayerMouseEvent } from 'maplibre-gl';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { create } from 'zustand';
-import { MapVisualHelper } from '../utils/MapVisualHelper';
 import type { Variation } from '../components/search/add-asset/AddAsset';
+import type { FeatureCollection } from 'geojson';
 
 interface MapState {
   mapRef: MapRef | null;
@@ -25,6 +24,9 @@ interface MapState {
   
   preventPolygonEdit: (e: MouseEvent) => void;
   handleMapClick: (e: MapLayerMouseEvent) => void;
+
+  cachedHeatmap: FeatureCollection | null;
+  setCachedHeatmap: (featureCollection: FeatureCollection | null) => void,
 }
 
 export const useMapStore = create<MapState>((set, get) => ({
@@ -43,6 +45,9 @@ export const useMapStore = create<MapState>((set, get) => ({
   setMarkerBearing: (bearing) => set({markerBearing: bearing}),
   markerVariant: null,
   setMarkerVariant: (variant) => set({markerVariant: variant}),
+
+  cachedHeatmap: null,
+  setCachedHeatmap: (featureCollection) => set({cachedHeatmap: featureCollection}),
 
   preventPolygonEdit: (e: MouseEvent) => {
     let x: number;
@@ -82,7 +87,6 @@ export const useMapStore = create<MapState>((set, get) => ({
     if (get().placing) {
         const { lngLat } = e;
         get().setMarkerPosition({ longitude: lngLat.lng, latitude: lngLat.lat });
-        MapVisualHelper.setMarkerPosition({ longitude: lngLat.lng, latitude: lngLat.lat });
 
         // set bearing
         const mapRef = get().mapRef;

@@ -33,10 +33,10 @@ const MapComponent = () => {
     const drawRef = useMapboxDraw(mapRef, isMapInitialized);
     const setDrawRef = useMapStore((s) => s.setDrawRef);
     const [is3D, setIs3D] = useState(false);
+    const cachedHeatMap = useMapStore((s) => s.cachedHeatmap);
 
     const handleStyleChange = (newStyle: MapStyle) => {
         setMapStyle(newStyle);
-        const cachedHeatMap = MapVisualHelper.getCachedHeatmapGeojson();
         const userDrawnPolygon = drawRef.current ? MapVisualHelper.getFirstPolygon(drawRef.current) : null;
         if (mapRef.current && userDrawnPolygon && cachedHeatMap) {
             mapRef.current.getMap().once('styledata', () => {

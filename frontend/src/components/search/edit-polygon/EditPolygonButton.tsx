@@ -7,6 +7,7 @@ import type { MapRef } from 'react-map-gl/maplibre';
 import ControlIcon from '../../../shared/control-icon/ControlIcon';
 import { MapVisualHelper } from '../../../utils/MapVisualHelper';
 import ConfirmPolygonButton from '../../map-controls/confirm-polygon/ConfirmPolygonButton';
+import { useMapStore } from '../../../stores/useMapStore';
 
 interface EditPolygonButtonProps {
     onPolygonEdited: (geojson: FeatureCollection<Geometry>) => void;
@@ -19,6 +20,7 @@ interface EditPolygonButtonProps {
 
 const EditPolygonButton = ({ onPolygonEdited, hideLayerControl, mapRef, drawRef, polygonConfirmationPopUpRef, isVisible }: EditPolygonButtonProps) => {
     const [isActive, setIsActive] = useState(false);
+    const setCachedHeatmap = useMapStore((s) => s.setCachedHeatmap);
 
     const handleClick = () => {
         if (isActive) return;
@@ -31,7 +33,9 @@ const EditPolygonButton = ({ onPolygonEdited, hideLayerControl, mapRef, drawRef,
         hideLayerControl();
         MapVisualHelper.removeDimmedMask(map);
         MapVisualHelper.removeExistingPopup(polygonConfirmationPopUpRef);
+
         MapVisualHelper.removeHeatmapLayer(mapRef);
+        setCachedHeatmap(null); // ✅ now a normal function call
 
         map.getCanvas().style.cursor = 'grab';
 

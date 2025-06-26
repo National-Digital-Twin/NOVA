@@ -31,19 +31,6 @@ export class MapVisualHelper {
     private static readonly heatmapLayerId = 'heatmap-layer';
     private static readonly threeDimensionalAssetsLayer = '3d-assets-layer';
     private static issuesPopup: Popup | null = null;
-    private static cachedHeatmapGeojson: FeatureCollection | null = null;
-    private static markerPosition: {
-        longitude?: number;
-        latitude?: number;
-    } | null;
-
-    static setMarkerPosition(markerPosition: { longitude?: number; latitude?: number }) {
-        this.markerPosition = markerPosition;
-    }
-
-    static removeMarkerPosition() {
-        this.markerPosition = null;
-    }
 
     /**
      * Applies a dimmed mask over the entire map except inside the given polygon and centers the map on that polygon.
@@ -212,7 +199,6 @@ export class MapVisualHelper {
 
         if (!map.getSource(id)) {
             map.addSource(id, { type: 'geojson', data: geojson });
-            MapVisualHelper.cachedHeatmapGeojson = geojson;
 
             map.addLayer({
                 id,
@@ -252,7 +238,6 @@ export class MapVisualHelper {
         if (map.getSource(id)) map.removeSource(id);
 
         MapVisualHelper.removeIssuesPopup();
-        this.cachedHeatmapGeojson = null;
     }
 
     /**
@@ -265,13 +250,6 @@ export class MapVisualHelper {
         }
     }
 
-    /**
-     * Getter for cached heatmap geojson data.
-     * @returns geojson of the polygons for cached heatmap contents.
-     */
-    static getCachedHeatmapGeojson(): FeatureCollection | null {
-        return this.cachedHeatmapGeojson;
-    }
 
     /**
      * Hides all non-base layers on the map and returns the IDs of those hidden layers.
@@ -314,7 +292,7 @@ export class MapVisualHelper {
      * Helper method to visualise assets placed on the map in 3d.
      * @param map  - The MapLibre map instance.
      */
-    static async visualiseAssetsIn3d(map: Map) {
+    static async visualiseAssetsIn3d(map: Map, markerPosition: { longitude?: number; latitude?: number; } | null) {
         MapVisualHelper.remove3DAssets(map);
 
         // Note this needs to be adjusted to turbine-a depending on asset type
@@ -322,13 +300,17 @@ export class MapVisualHelper {
         model.scale.set(1, 1, 1);
 
         // Use the stored marker position if available, else don't render
-        const { longitude, latitude } = this.markerPosition || {};
-        if (longitude === undefined || latitude === undefined) {
+        if (!markerPosition) {
             console.warn('No marker position set. Skipping visualisation.');
             return;
         }
 
-        const position = new LngLat(longitude, latitude);
+        if (markerPosition.longitude === undefined || markerPosition.latitude === undefined) {
+            console.warn('Marker position is missing longitude or latitude. Skipping visualisation.');
+            return;
+        }
+
+        const position = new LngLat(markerPosition.longitude, markerPosition.latitude);
         const elevation = map.queryTerrainElevation(position) || 0;
         const origin = MercatorCoordinate.fromLngLat(position, elevation);
         const scale = origin.meterInMercatorCoordinateUnits();
@@ -372,7 +354,7 @@ export class MapVisualHelper {
         map.addLayer(layer);
 
         map.easeTo({
-            center: [longitude, latitude],
+            center: [markerPosition.longitude, markerPosition.latitude],
             zoom: 16.5,
             pitch: 60,
             bearing: 0,
