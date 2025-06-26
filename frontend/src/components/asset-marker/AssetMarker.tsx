@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Marker, type MapRef, type MarkerDragEvent, type MarkerEvent } from 'react-map-gl/maplibre';
+import { Marker, useMap, type MapRef, type MarkerDragEvent, type MarkerEvent } from 'react-map-gl/maplibre';
 import windTurbineIcon from '../../assets/Windturbine_blue_unselected.svg';
 import windTurbineSelectedIcon from '../../assets/Windturbine_blue_selected.svg';
 import AssetControls from './AssetControls';
@@ -35,7 +35,7 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({
     const setPlacing = useMapStore((s) => s.setPlacing);
     const setMarkerPosition = useMapStore((s) => s.setMarkerPosition);
     const preventPolygonEdit = useMapStore((s) => s.preventPolygonEdit);
-
+    
     const handleMarkerClick = (e: React.MouseEvent) => {
         // handle event propogation
         e.stopPropagation();

@@ -5,6 +5,7 @@ import type { Asset, Variation } from './AddAsset';
 import AssetDetails from './AssetDetails';
 import AssetTypeSelector from './AssetTypeSelector';
 import AssetVariantSelector from './AssetVariantSelector';
+import { useMapStore } from '../../../stores/useMapStore';
 
 const AddAssetPanelContainer = styled(Box)(({ theme }) => ({
     backgroundColor: theme.palette.background.paper,
@@ -41,7 +42,8 @@ interface AddAssetPanelProps {
 const AddAssetPanel = ({ onClose, onSelect }: AddAssetPanelProps) => {
     const [assets, setAssets] = useState<Asset[]>([]);
     const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
-    const [selectedVariant, setSelectedVariant] = useState<Variation | null>(null);
+    const setSelectedVariant = useMapStore((s) => s.setMarkerVariant);
+    const selectedVariant = useMapStore((s) => s.markerVariant);
 
     useEffect(() => {
         fetch('/data/assets.json')
