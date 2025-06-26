@@ -21,21 +21,14 @@ interface AssetMarkerProps {
 /**
  * A reusable component for displaying a wind turbine marker on the map
  */
-const AssetMarker: React.FC<AssetMarkerProps> = ({
-    longitude,
-    latitude,
-    onBoltClick,
-    isSelected = false,
-    onDragEnd,
-    setIsPanelOpen,
-}) => {
+const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltClick, isSelected = false, onDragEnd, setIsPanelOpen }) => {
     const markerRef = useRef<HTMLDivElement>(null);
     const [showControls, setShowControls] = useState(false);
     const [showSubstationsList, setShowSubstationsList] = useState(false);
     const setPlacing = useMapStore((s) => s.setPlacing);
     const setMarkerPosition = useMapStore((s) => s.setMarkerPosition);
     const preventPolygonEdit = useMapStore((s) => s.preventPolygonEdit);
-    
+
     const handleMarkerClick = (e: React.MouseEvent) => {
         // handle event propogation
         e.stopPropagation();

@@ -25,12 +25,7 @@ const createMockMap = () => {
         removeSource: vi.fn(),
         setLayoutProperty: vi.fn(),
         getStyle: vi.fn(() => ({
-            layers: [
-                { id: 'background' },
-                { id: 'basemap' },
-                { id: 'heatmap-layer' },
-                { id: 'gl-custom-layer' },
-            ],
+            layers: [{ id: 'background' }, { id: 'basemap' }, { id: 'heatmap-layer' }, { id: 'gl-custom-layer' }],
         })),
         on: vi.fn((event, cb) => {
             listeners[event] = listeners[event] || [];
@@ -61,7 +56,15 @@ describe('MapVisualHelper', () => {
     it('applyDimmedMaskAndPanToPolygon adds mask and pans', () => {
         const polygon: Polygon = {
             type: 'Polygon',
-            coordinates: [[[1, 1], [5, 1], [5, 5], [1, 5], [1, 1]]],
+            coordinates: [
+                [
+                    [1, 1],
+                    [5, 1],
+                    [5, 5],
+                    [1, 5],
+                    [1, 1],
+                ],
+            ],
         };
         map.getSource.mockReturnValue(undefined);
         map.getLayer.mockReturnValue(undefined);
@@ -82,7 +85,14 @@ describe('MapVisualHelper', () => {
     it('getConfirmationPopupCoordinates calculates offset location', () => {
         const polygon: Polygon = {
             type: 'Polygon',
-            coordinates: [[[1, 1], [5, 1], [3, 6], [1, 1]]],
+            coordinates: [
+                [
+                    [1, 1],
+                    [5, 1],
+                    [3, 6],
+                    [1, 1],
+                ],
+            ],
         };
         const result = MapVisualHelper.getConfirmationPopupCoordinates(polygon, map);
         expect(map.project).toHaveBeenCalled();

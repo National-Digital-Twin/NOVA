@@ -13,7 +13,7 @@ interface DeletePolygonButtonProps {
 const DeletePolygonButton = ({ drawRef, isVisible, onPolygonDeleted, hideLayerControl }: DeletePolygonButtonProps) => {
     const setCachedHeatmap = useMapStore((s) => s.setCachedHeatmap);
     const setMarkerPosition = useMapStore((s) => s.setMarkerPosition);
-    
+
     const handleClick = useCallback(() => {
         if (!drawRef.current) return;
         drawRef.current.deleteAll();

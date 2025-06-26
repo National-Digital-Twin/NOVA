@@ -41,7 +41,7 @@ beforeEach(() => {
                 throw new Error('Function not implemented.');
             },
             markerPosition: null,
-            setMarkerPosition: function (_position: { longitude?: number; latitude?: number; } | null): void {
+            setMarkerPosition: function (_position: { longitude?: number; latitude?: number } | null): void {
                 throw new Error('Function not implemented.');
             },
             markerBearing: null,
@@ -58,7 +58,7 @@ beforeEach(() => {
             cachedHeatmap: null,
             setCachedHeatmap: function (_featureCollection: FeatureCollection | null): void {
                 throw new Error('Function not implemented.');
-            }
+            },
         })
     );
     vi.clearAllMocks();
@@ -213,11 +213,11 @@ describe('DrawPolygonButton', () => {
                 preventPolygonEdit: (e: MouseEvent) => {
                     const mode = draw.getMode();
                     if (mode.startsWith('draw')) return;
-    
+
                     const features = map.queryRenderedFeatures([10, 10], {
                         layers: ['gl-draw-polygon-fill.cold'],
                     });
-    
+
                     if (features.length > 0) {
                         draw.changeMode('simple_select', { featureIds: [] });
                         e.preventDefault();

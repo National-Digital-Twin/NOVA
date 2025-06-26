@@ -20,10 +20,7 @@ vi.mock('../../../stores/useMapStore', () => ({
 vi.mock('./AssetTypeSelector', () => ({
     default: ({ selectedAsset, onChange, assets }: any) => (
         <div data-testid="asset-type-selector">
-            <select
-                value={selectedAsset?.id}
-                onChange={(e) => onChange(e.target.value)}
-            >
+            <select value={selectedAsset?.id} onChange={(e) => onChange(e.target.value)}>
                 {assets?.map((asset: any) => (
                     <option key={asset.id} value={asset.id}>
                         {asset.name}

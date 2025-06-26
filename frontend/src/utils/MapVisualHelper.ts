@@ -276,7 +276,7 @@ export class MapVisualHelper {
      * Helper method to visualise assets placed on the map in 3d.
      * @param map  - The MapLibre map instance.
      */
-    static async visualiseAssetsIn3d(map: Map, markerPosition: { longitude?: number; latitude?: number; } | null) {
+    static async visualiseAssetsIn3d(map: Map, markerPosition: { longitude?: number; latitude?: number } | null) {
         MapVisualHelper.remove3DAssets(map);
 
         // Note this needs to be adjusted to turbine-a depending on asset type

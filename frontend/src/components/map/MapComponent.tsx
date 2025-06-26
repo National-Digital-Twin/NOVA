@@ -51,21 +51,26 @@ const MapComponent = () => {
     };
 
     // Handle marker drag end to update marker position
-    const handleMarkerDragEnd = useCallback((longitude: number, latitude: number) => {
-        console.log('Marker position updated:', { longitude, latitude });
-        setMarkerPosition({ longitude, latitude });
-    }, []);
+    const handleMarkerDragEnd = useCallback(
+        (longitude: number, latitude: number) => {
+            console.log('Marker position updated:', { longitude, latitude });
+            setMarkerPosition({ longitude, latitude });
+        },
+        [setMarkerPosition]
+    );
 
     useEffect(() => {
         if (mapRef.current) {
             setMapRef(mapRef.current);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mapRef.current]);
 
     useEffect(() => {
         if (drawRef.current) {
             setDrawRef(drawRef.current);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [drawRef.current]);
 
     useEffect(() => {

@@ -13,12 +13,7 @@ describe('HideLayersButton', () => {
         return {
             getLayer: vi.fn(),
             getStyle: vi.fn(() => ({
-                layers: [
-                    { id: 'background' },
-                    { id: 'basemap-road' },
-                    { id: 'heatmap-layer' },
-                    { id: 'custom-layer-1' },
-                ],
+                layers: [{ id: 'background' }, { id: 'basemap-road' }, { id: 'heatmap-layer' }, { id: 'custom-layer-1' }],
             })),
             setLayoutProperty: vi.fn(),
         };
@@ -58,7 +53,7 @@ describe('HideLayersButton', () => {
                     throw new Error('Function not implemented.');
                 },
                 markerPosition: null,
-                setMarkerPosition: function (_position: { longitude?: number; latitude?: number; } | null): void {
+                setMarkerPosition: function (_position: { longitude?: number; latitude?: number } | null): void {
                     throw new Error('Function not implemented.');
                 },
                 markerBearing: null,
@@ -77,7 +72,7 @@ describe('HideLayersButton', () => {
                 },
                 setCachedHeatmap: function (_featureCollection: FeatureCollection | null): void {
                     throw new Error('Function not implemented.');
-                }
+                },
             })
         );
         render(<HideLayersButton mapRef={mockMapRef()} />);
@@ -103,7 +98,7 @@ describe('HideLayersButton', () => {
                     throw new Error('Function not implemented.');
                 },
                 markerPosition: null,
-                setMarkerPosition: function (_position: { longitude?: number; latitude?: number; } | null): void {
+                setMarkerPosition: function (_position: { longitude?: number; latitude?: number } | null): void {
                     throw new Error('Function not implemented.');
                 },
                 markerBearing: null,
@@ -122,7 +117,7 @@ describe('HideLayersButton', () => {
                 },
                 setCachedHeatmap: function (_featureCollection: FeatureCollection | null): void {
                     throw new Error('Function not implemented.');
-                }
+                },
             })
         );
 

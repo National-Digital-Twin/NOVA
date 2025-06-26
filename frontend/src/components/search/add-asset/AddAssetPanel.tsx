@@ -57,7 +57,7 @@ const AddAssetPanel = ({ onClose, onSelect }: AddAssetPanelProps) => {
                     }
                 }
             });
-    }, []);
+    }, [setSelectedVariant]);
 
     const handleAssetChange = (assetId: string) => {
         const asset = assets.find((a) => a.id === assetId);

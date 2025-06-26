@@ -29,7 +29,6 @@ const AddAssetButton = ({ isPanelOpen, setIsPanelOpen }: AddAssetButtonProps) =>
         setIsPanelOpen(false);
     };
 
-
     if (!cachedHeatmap) return null;
 
     return (

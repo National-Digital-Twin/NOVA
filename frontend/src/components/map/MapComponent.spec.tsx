@@ -114,9 +114,7 @@ describe('MapComponent', () => {
     });
 
     it('shows the wind turbine pending icon when placing asset', async () => {
-        vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) =>
-            selector({ ...baseStoreMock, placing: true, markerPosition: null })
-        );
+        vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) => selector({ ...baseStoreMock, placing: true, markerPosition: null }));
 
         render(<MapComponent />);
         fireEvent.click(screen.getByTestId('map'));

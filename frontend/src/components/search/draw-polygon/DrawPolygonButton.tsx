@@ -23,7 +23,7 @@ const DrawPolygonButton = ({ onPolygonDrawn, mapRef, drawRef, isVisible, polygon
     }, [polygonDrawn]);
 
     useEffect(() => {
-        if (!polygonDrawn ) return;
+        if (!polygonDrawn) return;
 
         const map = mapRef.current;
 
@@ -34,7 +34,7 @@ const DrawPolygonButton = ({ onPolygonDrawn, mapRef, drawRef, isVisible, polygon
             map.off('click', preventPolygonEdit);
             map.off('contextmenu', preventPolygonEdit);
         };
-    }, [polygonDrawn, mapRef, drawRef]);
+    }, [polygonDrawn, mapRef, drawRef, preventPolygonEdit]);
 
     const handleClick = useCallback(() => {
         if (!mapRef.current || !drawRef || polygonDrawn) return;

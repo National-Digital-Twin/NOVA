@@ -16,8 +16,12 @@ vi.mock('../../../stores/useMapStore', async () => {
 vi.mock('./AddAssetPanel', () => ({
     default: ({ onClose, onSelect }: { onClose: () => void; onSelect: () => void }) => (
         <div data-testid="add-asset-panel">
-            <button aria-label="Close panel" onClick={onClose}>Close Panel</button>
-            <button aria-label="Select asset" onClick={onSelect}>Select Asset</button>
+            <button aria-label="Close panel" onClick={onClose}>
+                Close Panel
+            </button>
+            <button aria-label="Select asset" onClick={onSelect}>
+                Select Asset
+            </button>
         </div>
     ),
 }));
@@ -27,12 +31,7 @@ describe('AddAssetButton', () => {
 
     const TestAddAssetWrapper = () => {
         const [isPanelOpen, setIsPanelOpen] = useState(false);
-        return (
-            <AddAssetButton
-                setIsPanelOpen={setIsPanelOpen}
-                isPanelOpen={isPanelOpen}
-            />
-        );
+        return <AddAssetButton setIsPanelOpen={setIsPanelOpen} isPanelOpen={isPanelOpen} />;
     };
 
     beforeEach(() => {
