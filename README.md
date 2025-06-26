@@ -6,7 +6,7 @@
 
 ## Overview  
 
-This repository has been put together to support with new repository creation. When you create a new repository you can use this template, as a base to ensure you include all the standard documentation, folder structure and a few base build pipelines. 
+NOVA application.
 
 While initially this repositories focus has been on creating a set of base template documentation files, the intent is to continue expanding this to include pipeline checks, that could help ensure documentation follows basic rules and checks through standard continuous integration (CI) validation examples in the future.   
 
