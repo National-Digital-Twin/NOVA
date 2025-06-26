@@ -19,6 +19,17 @@ vi.mock('../map-substations-list/substationsApi', () => ({
     fetchSubstations: vi.fn(() => [{ text: 'Test', distance: 1 }]),
 }));
 
+vi.mock('./AssetControls', () => ({
+    default: ({ onBoltClick, onDeleteClick, onMoveClick, onEditClick }: any) => (
+      <>
+        <button aria-label="Connect to grid" onClick={onBoltClick}>Connect</button>
+        <button aria-label="Delete Asset" onClick={onDeleteClick}>Delete</button>
+        <button aria-label="Move" onClick={onMoveClick}>Move</button>
+        <button aria-label="Edit" onClick={onEditClick}>Edit</button>
+      </>
+    ),
+  }));
+
 describe('AssetMarker', () => {
     const lat = 50.66;
     const lng = -1.28;
