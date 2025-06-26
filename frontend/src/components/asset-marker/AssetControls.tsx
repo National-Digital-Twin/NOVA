@@ -29,17 +29,6 @@ interface AssetControlsProps {
  * A component for displaying control buttons for an asset marker
  */
 const AssetControls: React.FC<AssetControlsProps> = ({ onBoltClick, onDeleteClick, onEditClick, onMoveClick }) => {
-    // Wrapper function to handle button clicks
-    // Since ControlsContainer already stops propagation with its onClick handler,
-    // we just need to ensure this function returns a parameterless function
-    // that matches ControlIcon's onClick type
-    // Explicitly type the returned function to match ControlIcon's onClick type
-    const handleButtonClick =
-        (callback?: () => void): (() => void) =>
-        () => {
-            if (callback) callback();
-        };
-
     return (
         <ControlsContainer onClick={(e) => e.stopPropagation()}>
             <ControlIcon onClick={onEditClick} aria-label="Edit" showTooltip>
