@@ -21,6 +21,7 @@ const createMockMap = () => {
         getLayer: vi.fn(),
         addLayer: vi.fn(),
         fitBounds: vi.fn(),
+        getBearing: vi.fn(() => 0),
         removeLayer: vi.fn(),
         removeSource: vi.fn(),
         setLayoutProperty: vi.fn(),
