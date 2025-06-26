@@ -1,4 +1,6 @@
 import { Box, styled } from '@mui/material';
+import { useEffect, useState } from 'react';
+import type { MapRef } from 'react-map-gl/maplibre';
 import ControlButton from '../../../shared/control-button/ControlButton';
 import AddAssetPanel from './AddAssetPanel';
 
@@ -7,12 +9,32 @@ const StyledContainer = styled(Box)({
 });
 
 interface AddAssetButtonProps {
+    mapRef: React.RefObject<MapRef>;
     isPanelOpen: boolean;
     onAssetSelect: (placing: boolean) => void;
     setIsPanelOpen: (isPanelOpen: boolean) => void;
 }
 
-const AddAssetButton = ({ isPanelOpen, onAssetSelect, setIsPanelOpen }: AddAssetButtonProps) => {
+const AddAssetButton = ({ mapRef, isPanelOpen, onAssetSelect, setIsPanelOpen }: AddAssetButtonProps) => {
+    const [isHeatmapPresent, setIsHeatmapPresent] = useState(false);
+
+    useEffect(() => {
+        const map = mapRef.current?.getMap();
+        if (!map) return;
+
+        const checkLayer = () => {
+            const hasHeatmap = !!map.getLayer('heatmap-layer');
+            setIsHeatmapPresent(hasHeatmap);
+        };
+
+        map.on('styledata', checkLayer);
+        checkLayer();
+
+        return () => {
+            map.off('styledata', checkLayer);
+        };
+    }, [mapRef]);
+
     const handleTogglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
     };
@@ -25,6 +47,8 @@ const AddAssetButton = ({ isPanelOpen, onAssetSelect, setIsPanelOpen }: AddAsset
         onAssetSelect(true);
         setIsPanelOpen(false);
     };
+
+    if (!isHeatmapPresent) return null;
 
     return (
         <StyledContainer>

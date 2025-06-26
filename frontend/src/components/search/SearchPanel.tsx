@@ -100,7 +100,7 @@ const SearchPanel = ({ drawRef, hideLayerControl, mapRef, isPanelOpen, setIsPane
             </SearchGroup>
 
             <SearchGroup>
-                <AddAssetButton onAssetSelect={setPlacing} isPanelOpen={isPanelOpen} setIsPanelOpen={setIsPanelOpen} />
+                <AddAssetButton mapRef={mapRef} onAssetSelect={setPlacing} isPanelOpen={isPanelOpen} setIsPanelOpen={setIsPanelOpen} />
             </SearchGroup>
         </SearchContainer>
     );
