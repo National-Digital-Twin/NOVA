@@ -63,9 +63,17 @@ const ControlIcon = ({ onClick, children, 'aria-label': ariaLabel, isActive, dis
         <Box>
             {showTooltip ? (
                 <StyledTooltip title={ariaLabel}>
-                    <StyledIconButton onClick={onClick} isActive={isActive} disabled={disabled} aria-pressed={ariaPressed} aria-label={ariaLabel + ' button'}>
-                        {children}
-                    </StyledIconButton>
+                    <span>
+                        <StyledIconButton
+                            onClick={onClick}
+                            isActive={isActive}
+                            disabled={disabled}
+                            aria-pressed={ariaPressed}
+                            aria-label={ariaLabel + ' button'}
+                        >
+                            {children}
+                        </StyledIconButton>
+                    </span>
                 </StyledTooltip>
             ) : (
                 <StyledIconButton onClick={onClick} aria-label={ariaLabel} isActive={isActive} disabled={disabled} aria-pressed={ariaPressed}>
