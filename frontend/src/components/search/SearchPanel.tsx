@@ -72,21 +72,26 @@ const SearchPanel = ({ drawRef, hideLayerControl, mapRef, isPanelOpen, setIsPane
             </SearchGroup>
 
             <SearchGroup role="group" aria-label="Drawing controls">
-                <DeletePolygonButton
-                    drawRef={drawRef}
-                    isVisible={polygonDrawn && polygonConfirmed}
-                    onPolygonDeleted={handlePolygonDeleted}
-                    hideLayerControl={hideLayerControl}
-                />
-                <StyledDivider orientation="vertical" flexItem />
-                <EditPolygonButton
-                    mapRef={mapRef}
-                    drawRef={drawRef}
-                    polygonConfirmationPopUpRef={popupRef}
-                    isVisible={polygonDrawn && polygonConfirmed}
-                    onPolygonEdited={handlePolygonEdited}
-                    hideLayerControl={hideLayerControl}
-                />
+                {polygonConfirmed && (
+                    <>
+                        <DeletePolygonButton
+                            drawRef={drawRef}
+                            isVisible={polygonDrawn && polygonConfirmed}
+                            onPolygonDeleted={handlePolygonDeleted}
+                            hideLayerControl={hideLayerControl}
+                        />
+                        <StyledDivider orientation="vertical" flexItem />
+                        <EditPolygonButton
+                            mapRef={mapRef}
+                            drawRef={drawRef}
+                            polygonConfirmationPopUpRef={popupRef}
+                            isVisible={polygonDrawn && polygonConfirmed}
+                            onPolygonEdited={handlePolygonEdited}
+                            hideLayerControl={hideLayerControl}
+                        />
+                    </>
+                )}
+
                 <DrawPolygonButton
                     mapRef={mapRef}
                     drawRef={drawRef}
@@ -94,7 +99,7 @@ const SearchPanel = ({ drawRef, hideLayerControl, mapRef, isPanelOpen, setIsPane
                     onPolygonDrawn={handlePolygonDrawn}
                     polygonDrawn={polygonDrawn}
                 />
-                <StyledDivider orientation="vertical" flexItem />
+
                 <HideLayersButton mapRef={mapRef} />
             </SearchGroup>
 
