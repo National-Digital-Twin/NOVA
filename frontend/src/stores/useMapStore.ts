@@ -49,36 +49,33 @@ export const useMapStore = create<MapState>((set, get) => ({
   cachedHeatmap: null,
   setCachedHeatmap: (featureCollection) => set({cachedHeatmap: featureCollection}),
 
-  preventPolygonEdit: (e: MouseEvent) => {
+  preventPolygonEdit: (e: MouseEvent | { point?: { x: number; y: number } } & MouseEvent) => {
     let x: number;
     let y: number;
-
-    if ('point' in e && e.point && typeof e.point.x === 'number') {
-        // It's a MapMouseEvent
-        x = e.point.x;
-        y = e.point.y;
+  
+    if ('point' in e && e.point && typeof e.point.x === 'number' && typeof e.point.y === 'number') {
+      // TypeScript now knows e.point has x and y
+      x = e.point.x;
+      y = e.point.y;
     } else {
-        // It's a DOM MouseEvent
-        x = e.clientX;
-        y = e.clientY;
+      x = e.clientX;
+      y = e.clientY;
     }
-
+  
     const map = get().mapRef;
     const draw = get().drawRef;
     if (map && draw) {
-        const mode = draw.getMode();
-        if (mode.startsWith('draw')) {
-            return;
-        }
-
-        const features = map.queryRenderedFeatures([x, y], {
-            layers: ['gl-draw-polygon-fill.cold'],
-        });
-
-        if (features.length > 0) {
-            draw.changeMode('simple_select', { featureIds: [] });
-            e.preventDefault();
-        }
+      const mode = draw.getMode();
+      if (mode.startsWith('draw')) return;
+  
+      const features = map.queryRenderedFeatures([x, y], {
+        layers: ['gl-draw-polygon-fill.cold'],
+      });
+  
+      if (features.length > 0) {
+        draw.changeMode('simple_select', { featureIds: [] });
+        e.preventDefault();
+      }
     }
   },
 

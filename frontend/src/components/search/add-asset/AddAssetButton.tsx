@@ -14,6 +14,7 @@ interface AddAssetButtonProps {
 
 const AddAssetButton = ({ isPanelOpen, setIsPanelOpen }: AddAssetButtonProps) => {
     const setPlacing = useMapStore((s) => s.setPlacing);
+    const cachedHeatmap = useMapStore((s) => s.cachedHeatmap);
 
     const handleTogglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
@@ -27,6 +28,9 @@ const AddAssetButton = ({ isPanelOpen, setIsPanelOpen }: AddAssetButtonProps) =>
         setPlacing(true);
         setIsPanelOpen(false);
     };
+
+
+    if (!cachedHeatmap) return null;
 
     return (
         <StyledContainer>

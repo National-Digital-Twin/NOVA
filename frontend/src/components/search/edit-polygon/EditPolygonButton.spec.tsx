@@ -1,10 +1,12 @@
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import type { MapRef } from 'react-map-gl/maplibre';
+import type { MapLayerMouseEvent, MapRef } from 'react-map-gl/maplibre';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MapVisualHelper } from '../../../utils/MapVisualHelper';
 import EditPolygonButton from './EditPolygonButton';
+import * as mapStore from '../../../stores/useMapStore';
+import type { Variation } from '../add-asset/AddAsset';
 
 vi.mock('maplibre-gl', () => ({
     default: {
@@ -59,7 +61,44 @@ describe('EditPolygonButton', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-
+    
+        vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) =>
+            selector({
+                setCachedHeatmap: vi.fn(),
+                mapRef: null,
+                setMapRef: function (_ref: MapRef): void {
+                    throw new Error('Function not implemented.');
+                },
+                drawRef: null,
+                setDrawRef: function (_ref: MapboxDraw): void {
+                    throw new Error('Function not implemented.');
+                },
+                placing: false,
+                setPlacing: function (_placing: boolean): void {
+                    throw new Error('Function not implemented.');
+                },
+                markerPosition: null,
+                setMarkerPosition: function (_position: { longitude?: number; latitude?: number; } | null): void {
+                    throw new Error('Function not implemented.');
+                },
+                markerBearing: null,
+                setMarkerBearing: function (_bearing: number): void {
+                    throw new Error('Function not implemented.');
+                },
+                markerVariant: null,
+                setMarkerVariant: function (_variant: Variation | null): void {
+                    throw new Error('Function not implemented.');
+                },
+                preventPolygonEdit: function (_e: MouseEvent): void {
+                    throw new Error('Function not implemented.');
+                },
+                handleMapClick: function (_e: MapLayerMouseEvent): void {
+                    throw new Error('Function not implemented.');
+                },
+                cachedHeatmap: null
+            })
+        );
+    
         (MapVisualHelper.getFirstPolygon as any).mockReturnValue({
             type: 'Polygon',
             coordinates: [
@@ -72,7 +111,7 @@ describe('EditPolygonButton', () => {
                 ],
             ],
         });
-
+    
         (MapVisualHelper.getFeatureCollection as any).mockReturnValue({
             type: 'FeatureCollection',
             features: [
@@ -95,9 +134,9 @@ describe('EditPolygonButton', () => {
                 },
             ],
         });
-
+    
         (MapVisualHelper.getConfirmationPopupCoordinates as any).mockReturnValue([0.5, 0.5]);
-
+    
         mapMock = {
             getCanvas: () => ({ style: { cursor: '' } }),
             on: vi.fn(),
@@ -119,25 +158,25 @@ describe('EditPolygonButton', () => {
                 getSouth: () => -90,
             })),
         };
-
+    
         drawMock = {
             changeMode: vi.fn(),
         };
-
+    
         mockMapRef = {
             current: {
                 getMap: () => mapMock,
             },
         } as any;
-
+    
         mockDrawRef = {
             current: drawMock,
         } as any;
-
+    
         mockPopupRef = {
             current: null,
         } as any;
-
+    
         mockOnPolygonEdited = vi.fn();
         mockHideLayerControl = vi.fn();
     });

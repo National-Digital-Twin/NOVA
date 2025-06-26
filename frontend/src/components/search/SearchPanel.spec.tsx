@@ -100,7 +100,6 @@ describe('SearchPanel', () => {
                 drawRef={mockDrawRef}
                 isPanelOpen={false}
                 setIsPanelOpen={() => {}}
-                setPlacing={() => {}}
             />
         );
         expect(screen.getByTestId('search-input')).toBeInTheDocument();

@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Marker, useMap, type MapRef, type MarkerDragEvent, type MarkerEvent } from 'react-map-gl/maplibre';
+import { Marker, type MapRef, type MarkerDragEvent } from 'react-map-gl/maplibre';
 import windTurbineIcon from '../../assets/Windturbine_blue_unselected.svg';
 import windTurbineSelectedIcon from '../../assets/Windturbine_blue_selected.svg';
 import AssetControls from './AssetControls';

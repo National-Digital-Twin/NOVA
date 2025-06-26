@@ -5,7 +5,6 @@ import maplibregl from 'maplibre-gl';
 import { createRoot } from 'react-dom/client';
 import { MapVisualHelper } from '../utils/MapVisualHelper';
 import ConfirmPolygonButton from '../components/map-controls/confirm-polygon/ConfirmPolygonButton';
-import { useMapStore } from '../stores/useMapStore';
 
 interface UsePolygonHandlersProps {
     mapRef: React.RefObject<MapRef>;

@@ -16,22 +16,22 @@ const AddAssetPanelContainer = styled(Box)(({ theme }) => ({
     left: 0,
     position: 'absolute',
     top: 'calc(100% + 16px)',
-    width: 320,
+    width: 280,
     zIndex: 1000,
 }));
 
 const PanelContent = styled(Box)(({ theme }) => ({
     display: 'flex',
     flexDirection: 'column',
-    gap: theme.spacing(2),
-    padding: theme.spacing(3),
+    gap: theme.spacing(1),
+    padding: theme.spacing(2),
 }));
 
 const PanelFooter = styled(Box)(({ theme }) => ({
     display: 'flex',
     gap: theme.spacing(2),
     justifyContent: 'center',
-    padding: theme.spacing(0, 0, 3),
+    paddingBottom: theme.spacing(2),
 }));
 
 interface AddAssetPanelProps {

@@ -8,7 +8,15 @@ describe('AssetControls', () => {
     });
 
     it('renders all buttons', () => {
-        render(<AssetControls />);
+        render(<AssetControls onBoltClick={function (): void {
+            throw new Error('Function not implemented.');
+        } } onDeleteClick={function (): void {
+            throw new Error('Function not implemented.');
+        } } onEditClick={function (): void {
+            throw new Error('Function not implemented.');
+        } } onMoveClick={function (): void {
+            throw new Error('Function not implemented.');
+        } } />);
 
         expect(screen.getByLabelText('Edit')).toBeInTheDocument();
         expect(screen.getByLabelText('Connect to grid')).toBeInTheDocument();
