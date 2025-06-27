@@ -1,8 +1,7 @@
 import { Box, styled } from '@mui/material';
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
-import maplibregl from 'maplibre-gl';
-import { useCallback, useRef } from 'react';
-import type { MapRef } from 'react-map-gl/maplibre';
+import { useCallback } from 'react';
+import { type MapRef } from 'react-map-gl/maplibre';
 import DeletePolygonButton from './delete-polygon/DeletePolygonButton';
 import DrawPolygonButton from './draw-polygon/DrawPolygonButton';
 import EditPolygonButton from './edit-polygon/EditPolygonButton';
@@ -11,6 +10,7 @@ import SearchInput from './search-input/SearchInput';
 import { MapVisualHelper } from '../../utils/MapVisualHelper';
 import { usePolygonHandlers } from '../../hooks/usePolygonHandlers';
 import AddAssetButton from './add-asset/AddAssetButton';
+import { useMapStore } from '../../stores/useMapStore';
 
 const SearchContainer = styled(Box)({
     display: 'flex',
@@ -32,7 +32,6 @@ const SearchGroup = styled(Box)(({ theme }) => ({
     position: 'relative',
 }));
 
-
 interface SearchPanelProps {
     drawRef: React.RefObject<MapboxDraw | null>;
     mapRef: React.RefObject<MapRef>;
@@ -41,11 +40,9 @@ interface SearchPanelProps {
 }
 
 const SearchPanel = ({ drawRef, mapRef, isPanelOpen, setIsPanelOpen }: SearchPanelProps) => {
-    const {
-        handlePolygonDeleted,
-        startPolygonDraw,
-        startPolygonEdit
-    } = usePolygonHandlers({ mapRef, drawRef });
+    const cachedHeatmap = useMapStore((s) => s.cachedHeatmap);
+
+    const { handlePolygonDeleted, startPolygonDraw, startPolygonEdit } = usePolygonHandlers({ mapRef, drawRef });
 
     const handleLocationSelect = useCallback(
         (lat: number, long: number, zoom: number) => {
@@ -64,7 +61,7 @@ const SearchPanel = ({ drawRef, mapRef, isPanelOpen, setIsPanelOpen }: SearchPan
                 <DrawPolygonButton startPolygonDraw={startPolygonDraw} />
                 <DeletePolygonButton deletePolygon={handlePolygonDeleted} />
                 <EditPolygonButton startPolygonEdit={startPolygonEdit} />
-                <HideLayersButton mapRef={mapRef} />
+                <HideLayersButton mapRef={mapRef} cachedHeatmap={cachedHeatmap} />
             </SearchGroup>
 
             <SearchGroup>

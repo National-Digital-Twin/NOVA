@@ -60,12 +60,7 @@ const MapComponent = () => {
             >
                 {isMapInitialized && (
                     <>
-                        <SearchPanel
-                            drawRef={drawRef}
-                            isPanelOpen={isPanelOpen}
-                            mapRef={mapRef}
-                            setIsPanelOpen={setIsPanelOpen}
-                        />
+                        <SearchPanel drawRef={drawRef} isPanelOpen={isPanelOpen} mapRef={mapRef} setIsPanelOpen={setIsPanelOpen} />
                         <MapControls mapRef={mapRef} onStyleChange={handleStyleChange} currentStyle={mapStyle} is3D={is3D} setIs3D={setIs3D} />
                         {placing && mousePos && (
                             <div

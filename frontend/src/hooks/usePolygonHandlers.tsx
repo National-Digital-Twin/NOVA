@@ -33,50 +33,58 @@ export function usePolygonHandlers({ mapRef, drawRef }: UsePolygonHandlersProps)
     useEffect(() => {
         const map = mapRef.current?.getMap();
         if (!map) return;
-      
+
         const shouldPrevent = polygonStatus === 'pendingConfirmation' || polygonStatus === 'confirmed';
         if (!shouldPrevent) return;
-      
+
         const handler = (e: maplibregl.MapMouseEvent) => {
-          const draw = drawRef.current;
-          preventPolygonEdit(map, draw, e.point);
+            const draw = drawRef.current;
+            preventPolygonEdit(map, draw, e.point);
         };
-      
+
         map.on('click', handler);
         map.on('contextmenu', handler);
-      
+
         return () => {
-          map.off('click', handler);
-          map.off('contextmenu', handler);
+            map.off('click', handler);
+            map.off('contextmenu', handler);
         };
-      }, [mapRef, drawRef, polygonStatus]);
+    }, [mapRef, drawRef, polygonStatus]);
 
+    const handlePolygonConfirmed = useCallback(
+        (geojson: FeatureCollection<Geometry>) => {
+            setPolygonStatus('confirmed');
 
-    const handlePolygonConfirmed = useCallback((geojson: FeatureCollection<Geometry>) => {
-        setPolygonStatus('confirmed');
+            const polygon = MapVisualHelper.extractFirstPolygon(geojson);
+            if (polygon) {
+                MapVisualHelper.applyDimmedMaskAndPanToPolygon(mapRef.current!.getMap(), polygon);
+            }
+        },
+        [mapRef, setPolygonStatus]
+    );
 
-        const polygon = MapVisualHelper.extractFirstPolygon(geojson);
-        if (polygon) {
-            MapVisualHelper.applyDimmedMaskAndPanToPolygon(mapRef.current!.getMap(), polygon);
-        }
-    }, [mapRef, setPolygonStatus]);
+    const showConfirmationPopup = useCallback(
+        (polygon: Polygon, onConfirm: () => void) => {
+            const popup = createConfirmationPopup(polygon, onConfirm, mapRef.current!.getMap());
+            setPopupRef(popup);
+        },
+        [mapRef, setPopupRef]
+    );
 
-    const showConfirmationPopup = useCallback((polygon: Polygon, onConfirm: () => void) => {
-        const popup = createConfirmationPopup(polygon, onConfirm, mapRef.current!.getMap());
-        setPopupRef(popup);
-    }, [mapRef, setPopupRef]);
+    const handlePolygonDrawn = useCallback(
+        (geojson: FeatureCollection<Geometry>) => {
+            setPolygonStatus('pendingConfirmation');
 
-    const handlePolygonDrawn = useCallback((geojson: FeatureCollection<Geometry>) => {
-        setPolygonStatus('pendingConfirmation');
+            const polygon = MapVisualHelper.extractFirstPolygon(geojson);
+            if (!polygon) return;
 
-        const polygon = MapVisualHelper.extractFirstPolygon(geojson);
-        if (!polygon) return;
-
-        showConfirmationPopup(polygon, () => {
-            MapVisualHelper.removeExistingPopup(useMapStore.getState().polygonConfirmPopup);
-            handlePolygonConfirmed(geojson);
-        });
-    }, [setPolygonStatus, showConfirmationPopup, handlePolygonConfirmed]);
+            showConfirmationPopup(polygon, () => {
+                MapVisualHelper.removeExistingPopup(useMapStore.getState().polygonConfirmPopup);
+                handlePolygonConfirmed(geojson);
+            });
+        },
+        [setPolygonStatus, showConfirmationPopup, handlePolygonConfirmed]
+    );
 
     const startPolygonDraw = useCallback(() => {
         const map = mapRef.current;
@@ -105,16 +113,19 @@ export function usePolygonHandlers({ mapRef, drawRef }: UsePolygonHandlersProps)
         map.on('draw.modechange', handleModeChange);
     }, [mapRef, drawRef, handlePolygonDrawn, setPolygonStatus]);
 
-    const handlePolygonEdited = useCallback((geojson: FeatureCollection<Geometry>) => {
-        setPolygonStatus('confirmed');
+    const handlePolygonEdited = useCallback(
+        (geojson: FeatureCollection<Geometry>) => {
+            setPolygonStatus('confirmed');
 
-        const polygon = MapVisualHelper.extractFirstPolygon(geojson);
-        if (polygon) {
-            MapVisualHelper.applyDimmedMaskAndPanToPolygon(mapRef.current!.getMap(), polygon);
-        }
+            const polygon = MapVisualHelper.extractFirstPolygon(geojson);
+            if (polygon) {
+                MapVisualHelper.applyDimmedMaskAndPanToPolygon(mapRef.current!.getMap(), polygon);
+            }
 
-        MapVisualHelper.remove3DAssets(mapRef.current.getMap());
-    }, [setPolygonStatus, mapRef]);
+            MapVisualHelper.remove3DAssets(mapRef.current.getMap());
+        },
+        [setPolygonStatus, mapRef]
+    );
 
     const startPolygonEdit = useCallback(() => {
         const draw = drawRef.current;
@@ -139,12 +150,16 @@ export function usePolygonHandlers({ mapRef, drawRef }: UsePolygonHandlersProps)
             const latestPolygon = MapVisualHelper.getFirstPolygon(draw);
             if (!latestPolygon) return;
 
-            const popup = createConfirmationPopup(latestPolygon, () => {
-                draw.changeMode('simple_select', { featureIds: [] });
-                MapVisualHelper.removeExistingPopup(useMapStore.getState().polygonConfirmPopup);
-                setPolygonStatus('confirmed');
-                handlePolygonEdited(MapVisualHelper.getFeatureCollection(draw));
-            }, map);
+            const popup = createConfirmationPopup(
+                latestPolygon,
+                () => {
+                    draw.changeMode('simple_select', { featureIds: [] });
+                    MapVisualHelper.removeExistingPopup(useMapStore.getState().polygonConfirmPopup);
+                    setPolygonStatus('confirmed');
+                    handlePolygonEdited(MapVisualHelper.getFeatureCollection(draw));
+                },
+                map
+            );
 
             setPopupRef(popup);
 
@@ -182,7 +197,7 @@ export function usePolygonHandlers({ mapRef, drawRef }: UsePolygonHandlersProps)
             MapVisualHelper.removeHeatmapLayer(mapRef);
             MapVisualHelper.remove3DAssets(mapRef.current.getMap());
         }
-    }, [mapRef, setPolygonStatus]);
+    }, [mapRef, setPolygonStatus, clearMarkerValues, setCachedHeatmap, drawRef]);
 
     return {
         handlePolygonDrawn,

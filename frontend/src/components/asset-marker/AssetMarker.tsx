@@ -17,14 +17,7 @@ interface AssetMarkerProps {
     setIsPanelOpen?: (isPanelOpen: boolean) => void;
 }
 
-const AssetMarker: React.FC<AssetMarkerProps> = ({
-    longitude,
-    latitude,
-    onBoltClick,
-    isSelected = false,
-    onDragEnd,
-    setIsPanelOpen,
-}) => {
+const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltClick, isSelected = false, onDragEnd, setIsPanelOpen }) => {
     const markerRef = useRef<HTMLDivElement>(null);
     const [showControls, setShowControls] = useState(false);
     const [showSubstationsList, setShowSubstationsList] = useState(false);
@@ -40,8 +33,8 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({
         if (map) {
             disableDrawLayerClicks(map, drawRef);
         }
-        setShowControls(v => !v)
-      }
+        setShowControls((v) => !v);
+    };
 
     const handleDragEnd = (event: MarkerDragEvent) => {
         console.log('Marker dragged to:', event.lngLat);
@@ -55,10 +48,7 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({
 
     return (
         <Marker longitude={longitude} latitude={latitude} anchor="bottom" draggable={true} onDragEnd={handleDragEnd}>
-            <div
-                ref={markerRef}
-                style={{ position: 'relative' }}
-            >
+            <div ref={markerRef} style={{ position: 'relative' }}>
                 {showControls && (
                     <AssetControls
                         onBoltClick={() => {
@@ -100,10 +90,10 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({
                     </div>
                 )}
                 <img
-                src={isSelected ? windTurbineSelectedIcon : windTurbineIcon}
-                alt="Wind Turbine"
-                style={{ width: 60, height: 60, cursor: 'pointer', pointerEvents: 'auto' }}
-                onClick={handleMarkerClick}
+                    src={isSelected ? windTurbineSelectedIcon : windTurbineIcon}
+                    alt="Wind Turbine"
+                    style={{ width: 60, height: 60, cursor: 'pointer', pointerEvents: 'auto' }}
+                    onClick={handleMarkerClick}
                 />
             </div>
         </Marker>

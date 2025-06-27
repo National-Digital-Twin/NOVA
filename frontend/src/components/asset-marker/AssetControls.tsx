@@ -5,7 +5,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import OpenWithIcon from '@mui/icons-material/OpenWith';
 import ControlIcon from '../../shared/control-icon/ControlIcon';
 
-const ControlsContainer = styled(Box)(({ theme }) => ({
+const ControlsContainer = styled(Box)(() => ({
     position: 'absolute',
     top: '-70px',
     left: '50%',
@@ -13,8 +13,6 @@ const ControlsContainer = styled(Box)(({ theme }) => ({
     display: 'flex',
     gap: '8px',
     padding: '3px',
-    borderRadius: '3px',
-    boxShadow: theme.shadows[2],
     zIndex: 1000,
 }));
 

@@ -1,5 +1,5 @@
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
-import type { MapLayerMouseEvent, Popup } from 'maplibre-gl';
+import type { Popup } from 'maplibre-gl';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { create } from 'zustand';
 import type { Variation } from '../components/search/add-asset/AddAsset';
@@ -7,7 +7,7 @@ import type { FeatureCollection } from 'geojson';
 
 export type PolygonStatus = 'none' | 'drawing' | 'editing' | 'pendingConfirmation' | 'confirmed';
 
-interface MapState {
+export interface MapState {
     mapRef: MapRef | null;
     setMapRef: (ref: MapRef) => void;
 
@@ -38,7 +38,7 @@ interface MapState {
     clearMarkerValues: () => void;
 }
 
-export const useMapStore = create<MapState>((set, get) => ({
+export const useMapStore = create<MapState>((set) => ({
     mapRef: null,
     setMapRef: (ref) => set({ mapRef: ref }),
 
@@ -64,5 +64,5 @@ export const useMapStore = create<MapState>((set, get) => ({
     polygonStatus: 'none',
     setPolygonStatus: (status) => set({ polygonStatus: status }),
 
-    clearMarkerValues: () => set({markerBearing: null, markerVariant: null, markerPosition: null})
+    clearMarkerValues: () => set({ markerBearing: null, markerVariant: null, markerPosition: null }),
 }));

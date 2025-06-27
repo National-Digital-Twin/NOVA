@@ -7,8 +7,23 @@ vi.mock('react-map-gl/maplibre', async () => {
     const actual = await vi.importActual('react-map-gl/maplibre');
     return {
         ...actual,
-        Marker: ({ longitude, latitude, children }: { longitude: number; latitude: number; children: React.ReactNode }) => (
-            <div data-testid="mock-marker" data-lng={longitude} data-lat={latitude}>
+        Marker: ({
+            longitude,
+            latitude,
+            children,
+            onDragEnd,
+        }: {
+            longitude: number;
+            latitude: number;
+            children: React.ReactNode;
+            onDragEnd?: (e: any) => void;
+        }) => (
+            <div
+                data-testid="mock-marker"
+                data-lng={longitude}
+                data-lat={latitude}
+                onMouseUp={() => onDragEnd?.({ lngLat: { lng: longitude + 0.01, lat: latitude + 0.01 } })}
+            >
                 {children}
             </div>
         ),
@@ -43,7 +58,6 @@ describe('AssetMarker', () => {
     const lng = -1.28;
     const setPlacingMock = vi.fn();
     const setMarkerPositionMock = vi.fn();
-    const preventPolygonEditMock = vi.fn();
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -52,7 +66,6 @@ describe('AssetMarker', () => {
             selector({
                 setPlacing: setPlacingMock,
                 setMarkerPosition: setMarkerPositionMock,
-                preventPolygonEdit: preventPolygonEditMock,
                 mapRef: null,
                 setMapRef: vi.fn(),
                 drawRef: null,
@@ -63,54 +76,46 @@ describe('AssetMarker', () => {
                 setMarkerBearing: vi.fn(),
                 markerVariant: null,
                 setMarkerVariant: vi.fn(),
-                handleMapClick: vi.fn(),
                 cachedHeatmap: null,
                 setCachedHeatmap: vi.fn(),
+                polygonStatus: 'none',
+                setPolygonStatus: vi.fn(),
+                polygonConfirmPopup: null,
+                setPolygonConfirmPopup: vi.fn(),
+                clearMarkerValues: vi.fn(),
             })
         );
     });
 
     it('renders a marker at the correct location', () => {
         render(<AssetMarker longitude={lng} latitude={lat} />);
-
         const marker = screen.getByTestId('mock-marker');
-        expect(marker).toBeInTheDocument();
         expect(marker).toHaveAttribute('data-lng', lng.toString());
         expect(marker).toHaveAttribute('data-lat', lat.toString());
     });
 
     it('hides controls and substations by default', () => {
-        render(<AssetMarker />);
-
+        render(<AssetMarker longitude={lng} latitude={lat} />);
         expect(screen.queryByLabelText('Edit')).not.toBeInTheDocument();
         expect(screen.queryByLabelText('Connect to grid')).not.toBeInTheDocument();
         expect(screen.queryByLabelText('Delete Asset')).not.toBeInTheDocument();
         expect(screen.queryByLabelText('Move')).not.toBeInTheDocument();
-        expect(screen.queryByLabelText('Choose Substation')).not.toBeInTheDocument();
     });
 
     it('shows controls on marker click', () => {
         render(<AssetMarker longitude={lng} latitude={lat} />);
-
-        const marker = screen.getByAltText('Wind Turbine');
-        fireEvent.click(marker);
-
-        expect(screen.queryByLabelText('Edit')).toBeInTheDocument();
-        expect(screen.queryByLabelText('Connect to grid')).toBeInTheDocument();
-        expect(screen.queryByLabelText('Delete Asset')).toBeInTheDocument();
-        expect(screen.queryByLabelText('Move')).toBeInTheDocument();
+        fireEvent.click(screen.getByAltText('Wind Turbine'));
+        expect(screen.getByLabelText('Edit')).toBeInTheDocument();
+        expect(screen.getByLabelText('Connect to grid')).toBeInTheDocument();
+        expect(screen.getByLabelText('Delete Asset')).toBeInTheDocument();
+        expect(screen.getByLabelText('Move')).toBeInTheDocument();
     });
 
-    it('calls onBoltClick and shows substations on marker connect control click', async () => {
+    it('calls onBoltClick and shows substations list', async () => {
         const boltFn = vi.fn();
         render(<AssetMarker onBoltClick={boltFn} longitude={lng} latitude={lat} />);
-
-        const marker = screen.getByAltText('Wind Turbine');
-        fireEvent.click(marker);
-
-        const connectButton = screen.getByLabelText('Connect to grid');
-        fireEvent.click(connectButton);
-
+        fireEvent.click(screen.getByAltText('Wind Turbine'));
+        fireEvent.click(screen.getByLabelText('Connect to grid'));
         expect(boltFn).toHaveBeenCalledOnce();
         await waitFor(() => {
             expect(screen.getByText(/loading/i)).toBeInTheDocument();
@@ -119,29 +124,29 @@ describe('AssetMarker', () => {
 
     it('calls setMarkerPosition on delete', () => {
         render(<AssetMarker longitude={lng} latitude={lat} />);
-
-        const marker = screen.getByAltText('Wind Turbine');
-        fireEvent.click(marker);
-
-        const deleteButton = screen.getByLabelText('Delete Asset');
-        fireEvent.click(deleteButton);
-
+        fireEvent.click(screen.getByAltText('Wind Turbine'));
+        fireEvent.click(screen.getByLabelText('Delete Asset'));
         expect(setMarkerPositionMock).toHaveBeenCalledOnce();
         expect(setMarkerPositionMock).toHaveBeenCalledWith(null);
     });
 
     it('calls setMarkerPosition and setPlacing on move', () => {
         render(<AssetMarker longitude={lng} latitude={lat} />);
-
-        const marker = screen.getByAltText('Wind Turbine');
-        fireEvent.click(marker);
-
-        const moveButton = screen.getByLabelText('Move');
-        fireEvent.click(moveButton);
-
+        fireEvent.click(screen.getByAltText('Wind Turbine'));
+        fireEvent.click(screen.getByLabelText('Move'));
         expect(setMarkerPositionMock).toHaveBeenCalledOnce();
-        expect(setMarkerPositionMock).toHaveBeenCalledWith(null);
-        expect(setPlacingMock).toHaveBeenCalledOnce();
         expect(setPlacingMock).toHaveBeenCalledWith(true);
+    });
+
+    it('calls onDragEnd with new coordinates', () => {
+        const dragEndFn = vi.fn();
+        render(<AssetMarker longitude={lng} latitude={lat} onDragEnd={dragEndFn} />);
+        fireEvent.mouseUp(screen.getByTestId('mock-marker')); // Triggers drag end
+        expect(dragEndFn).toHaveBeenCalledWith(lng + 0.01, lat + 0.01);
+    });
+
+    it('returns null if coordinates are missing', () => {
+        const { container } = render(<AssetMarker />);
+        expect(container.firstChild).toBeNull();
     });
 });

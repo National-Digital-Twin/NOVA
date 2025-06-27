@@ -207,8 +207,8 @@ export class MapVisualHelper {
                 type: 'fill',
                 source: id,
                 paint: {
-                    'fill-color': ['match', ['get', 'suitability'], 'red', '#e74c3c', 'amber', '#f39c12', 'green', '#27ae60', '#cccccc'],
-                    'fill-opacity': 0.5,
+                    'fill-color': ['match', ['get', 'suitability'], 'darkRed', '#881d11', 'red', '#e74c3c', 'amber', '#f39c12', 'green', '#27ae60', '#cccccc'],
+                    'fill-opacity': ['match', ['get', 'suitability'], 'darkRed', 0.8, 'red', 0.7, 'amber', 0.4, 'green', 0.4, 0.6],
                     'fill-antialias': false,
                 },
             });
@@ -404,7 +404,7 @@ export class MapVisualHelper {
         if (target?.tagName === 'IMG') {
             // It's a marker click — ignore this event
             return;
-          }
+        }
 
         // Collect and flatten all issues from every feature, then de-duplicate.
         const allIssues = features.flatMap((feature) => MapVisualHelper._parseIssueFromFeature(feature));

@@ -10,7 +10,7 @@
                         {
                             "id": "minDistance",
                             "description": "Set distance from AONB (km)",
-                            "defaultValue": 10,
+                            "defaultValue": 1,
                             "valueType": "number"
                         }
                     ]
@@ -22,7 +22,7 @@
                         {
                             "id": "minDistance",
                             "description": "Set distance from SSSI (km)",
-                            "defaultValue": 20,
+                            "defaultValue": 2,
                             "valueType": "number"
                         }
                     ]
@@ -31,14 +31,7 @@
                     "active": true,
                     "id": "specialAreasOfConservation",
                     "name": "Special Areas of Conservation (SAC)",
-                    "attributes": [
-                        {
-                            "id": "minDistance",
-                            "description": "Set distance from SAC (km)",
-                            "defaultValue": 20,
-                            "valueType": "number"
-                        }
-                    ]
+                    "attributes": []
                 }
             ]
         },
@@ -52,7 +45,7 @@
                         {
                             "id": "minDistance",
                             "description": "Set distance from BUA (km)",
-                            "defaultValue": 10,
+                            "defaultValue": 1,
                             "valueType": "number"
                         }
                     ]

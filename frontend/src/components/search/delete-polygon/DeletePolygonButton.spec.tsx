@@ -1,46 +1,44 @@
-import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import DeletePolygonButton from './DeletePolygonButton';
+import { useMapStore } from '../../../stores/useMapStore';
 
-vi.mock('@mapbox/mapbox-gl-draw');
+// Mock zustand store
+vi.mock('../../../stores/useMapStore', () => ({
+  useMapStore: vi.fn(),
+}));
 
 describe('DeletePolygonButton', () => {
-    const deleteAllMock = vi.fn();
-    const onPolygonDeletedMock = vi.fn();
-    const hideLayerControlMock = vi.fn();
+  const deletePolygonMock = vi.fn();
 
-    const mockDrawRef = {
-        current: {
-            deleteAll: deleteAllMock,
-        },
-    } as unknown as React.RefObject<MapboxDraw>;
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
-    beforeEach(() => {
-        vi.clearAllMocks();
-    });
+  it('does not render when polygonStatus is neither "editing" nor "confirmed"', () => {
+    (useMapStore as unknown as Mock).mockImplementation((selector) =>
+      selector({ polygonStatus: 'idle' })
+    );
 
-    it('does not render when isVisible is false', () => {
-        render(<DeletePolygonButton drawRef={mockDrawRef} isVisible={false} onPolygonDeleted={onPolygonDeletedMock} hideLayerControl={hideLayerControlMock} />);
+    render(<DeletePolygonButton deletePolygon={deletePolygonMock} />);
+    expect(screen.queryByLabelText('Delete polygon')).not.toBeInTheDocument();
+  });
 
-        expect(screen.queryByLabelText('Delete polygon')).not.toBeInTheDocument();
-    });
+  it('renders the button when polygonStatus is "editing"', () => {
+    (useMapStore as unknown as Mock).mockImplementation((selector) =>
+      selector({ polygonStatus: 'editing' })
+    );
 
-    it('renders the button when isVisible is true', () => {
-        render(<DeletePolygonButton drawRef={mockDrawRef} isVisible={true} onPolygonDeleted={onPolygonDeletedMock} hideLayerControl={hideLayerControlMock} />);
+    render(<DeletePolygonButton deletePolygon={deletePolygonMock} />);
+    expect(screen.getByLabelText('Delete polygon')).toBeInTheDocument();
+  });
 
-        expect(screen.getByLabelText('Delete polygon')).toBeInTheDocument();
-    });
+  it('renders the button when polygonStatus is "confirmed"', () => {
+    (useMapStore as unknown as Mock).mockImplementation((selector) =>
+      selector({ polygonStatus: 'confirmed' })
+    );
 
-    it('handles null drawRef.current gracefully', () => {
-        const nullDrawRef = { current: null } as unknown as React.RefObject<MapboxDraw>;
-
-        render(<DeletePolygonButton drawRef={nullDrawRef} isVisible={true} onPolygonDeleted={onPolygonDeletedMock} hideLayerControl={hideLayerControlMock} />);
-
-        const button = screen.getByLabelText('Delete polygon');
-        fireEvent.click(button);
-
-        expect(onPolygonDeletedMock).not.toHaveBeenCalled();
-        expect(hideLayerControlMock).not.toHaveBeenCalled();
-    });
+    render(<DeletePolygonButton deletePolygon={deletePolygonMock} />);
+    expect(screen.getByLabelText('Delete polygon')).toBeInTheDocument();
+  });
 });

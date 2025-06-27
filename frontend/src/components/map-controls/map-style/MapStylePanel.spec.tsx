@@ -7,9 +7,7 @@ describe('MapStylePanel', () => {
     const mockOnStyleChange = vi.fn();
 
     const setup = (currentStyle: MapStyle = 'basic') => {
-        render(<MapStylePanel onStyleChange={mockOnStyleChange} currentStyle={currentStyle} />);
-        // Open the panel
-        fireEvent.click(screen.getByLabelText('Change map style'));
+        render(<MapStylePanel onStyleChange={mockOnStyleChange} currentStyle={currentStyle} isOpen={true} onToggle={vi.fn()} />);
     };
 
     it('renders all map style options', () => {

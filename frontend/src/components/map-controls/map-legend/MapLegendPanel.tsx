@@ -41,10 +41,11 @@ const ColorLine = styled(Box, {
 
 interface MapLegendPanelProps {
     mapRef: React.RefObject<MapRef>;
+    isOpen: boolean;
+    onToggle: () => void;
 }
 
-const MapLegendPanel = ({ mapRef }: MapLegendPanelProps) => {
-    const [showPanel, setShowPanel] = useState(false);
+const MapLegendPanel = ({ mapRef, isOpen, onToggle }: MapLegendPanelProps) => {
     const [isHeatmapPresent, setIsHeatmapPresent] = useState(false);
 
     useEffect(() => {
@@ -68,25 +69,25 @@ const MapLegendPanel = ({ mapRef }: MapLegendPanelProps) => {
 
     return (
         <div style={{ position: 'relative' }}>
-            <ControlIcon onClick={() => setShowPanel(!showPanel)} aria-label="Show map legend" aria-expanded={showPanel} aria-controls="map-legend-panel">
-                <img src="/icons/legend.svg" alt="Legend" width={24} height={24} />
+            <ControlIcon onClick={onToggle} aria-label="Show map legend" aria-expanded={isOpen} aria-controls="map-legend-panel" isActive={isOpen}>
+                <img src={isOpen ? '/icons/legend-white.svg' : '/icons/legend.svg'} alt="Legend" width={24} height={24} />
             </ControlIcon>
 
-            {showPanel && (
+            {isOpen && (
                 <StyledPanel id="map-legend-panel" role="dialog" aria-label="Map legend" style={{ right: 'calc(100% + 1rem)' }}>
                     <LegendTitle variant="subtitle1">Legend</LegendTitle>
-                    <LegendSubtitle variant="subtitle2">Location Suitability</LegendSubtitle>
+                    <LegendSubtitle variant="subtitle2">Location suitability</LegendSubtitle>
                     <LegendItem>
                         <ColorLine color="#4CAF50" data-testid="color-line" />
-                        <span>Most Suitable</span>
+                        <span>Most suitable</span>
                     </LegendItem>
                     <LegendItem>
                         <ColorLine color="#FF9800" data-testid="color-line" />
-                        <span>Moderate Suitability</span>
+                        <span>Moderate suitability</span>
                     </LegendItem>
                     <LegendItem>
                         <ColorLine color="#F44336" data-testid="color-line" />
-                        <span>Least Suitable</span>
+                        <span>Least suitable</span>
                     </LegendItem>
                 </StyledPanel>
             )}

@@ -7,6 +7,7 @@ import MapStylePanel from './map-style/MapStylePanel';
 import ViewToggleButton from './view-toggle/ViewToggleButton';
 import ZoomInButton from './zoom-in/ZoomInButton';
 import ZoomOutButton from './zoom-out/ZoomOutButton';
+import { useState } from 'react';
 
 const ControlsContainer = styled(Box)({
     display: 'flex',
@@ -41,6 +42,8 @@ interface MapControlsProps {
 }
 
 const MapControls = ({ mapRef, onStyleChange, currentStyle, is3D, setIs3D }: MapControlsProps) => {
+    const [openPanel, setOpenPanel] = useState<'style' | 'legend' | null>(null);
+
     return (
         <ControlsContainer>
             <ControlGroup role="group" aria-label="View controls">
@@ -56,11 +59,20 @@ const MapControls = ({ mapRef, onStyleChange, currentStyle, is3D, setIs3D }: Map
             </ControlGroup>
 
             <ControlGroup role="group" aria-label="Map style controls">
-                <MapStylePanel currentStyle={currentStyle} onStyleChange={onStyleChange} />
+                <MapStylePanel
+                    currentStyle={currentStyle}
+                    onStyleChange={onStyleChange}
+                    isOpen={openPanel === 'style'}
+                    onToggle={() => setOpenPanel((prev) => (prev === 'style' ? null : 'style'))}
+                />
             </ControlGroup>
 
             <ControlGroup role="group" aria-label="Map legend controls">
-                <MapLegendPanel mapRef={mapRef} />
+                <MapLegendPanel
+                    mapRef={mapRef}
+                    isOpen={openPanel === 'legend'}
+                    onToggle={() => setOpenPanel((prev) => (prev === 'legend' ? null : 'legend'))}
+                />
             </ControlGroup>
         </ControlsContainer>
     );
