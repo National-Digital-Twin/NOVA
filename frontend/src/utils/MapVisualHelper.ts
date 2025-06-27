@@ -5,6 +5,7 @@ import type { MapRef } from 'react-map-gl/maplibre';
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import type { Variation } from '../components/search/add-asset/AddAsset';
 
 // Used to ensure mouse events include feature information. any type is used as property could be of any object.
 type FeatureEvent = MapMouseEvent & {
@@ -91,6 +92,7 @@ export class MapVisualHelper {
             {
                 padding: { top: 50, bottom: 50, left: 450, right: 66 },
                 duration: 2000,
+                bearing: map.getBearing(),
             }
         );
     }
@@ -276,11 +278,22 @@ export class MapVisualHelper {
      * Helper method to visualise assets placed on the map in 3d.
      * @param map  - The MapLibre map instance.
      */
-    static async visualiseAssetsIn3d(map: Map, markerPosition: { longitude?: number; latitude?: number } | null) {
+    static async visualiseAssetsIn3d(
+        map: Map,
+        markerPosition: { longitude?: number; latitude?: number } | null,
+        markerBearing: number | null,
+        markerVariant: Variation | null
+    ) {
         MapVisualHelper.remove3DAssets(map);
 
-        // Note this needs to be adjusted to turbine-a depending on asset type
-        const { scene: model } = await new GLTFLoader().loadAsync('models/turbine-b.glb');
+        const modelMap: Record<string, string> = {
+            Vestas: 'models/turbine-a.glb',
+            'Siemens Gamesa': 'models/turbine-b.glb',
+        };
+
+        const modelPath = modelMap[markerVariant?.name ?? ''];
+
+        const { scene: model } = await new GLTFLoader().loadAsync(modelPath);
         model.scale.set(1, 1, 1);
 
         // Use the stored marker position if available, else don't render
@@ -315,6 +328,14 @@ export class MapVisualHelper {
                 light.position.set(100, 200, 100);
                 scene.add(light, model);
 
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+                scene.add(ambientLight);
+
+                if (markerBearing !== null && markerBearing !== undefined) {
+                    const bearingInRadians = THREE.MathUtils.degToRad(markerBearing + 180);
+                    model.rotation.y = bearingInRadians;
+                }
+
                 const renderer = new THREE.WebGLRenderer({
                     canvas: map.getCanvas(),
                     context: gl,
@@ -341,7 +362,7 @@ export class MapVisualHelper {
             center: [markerPosition.longitude, markerPosition.latitude],
             zoom: 16.5,
             pitch: 60,
-            bearing: 0,
+            bearing: markerBearing ?? 0,
             duration: 1000,
             offset: [0, 100], // shift map centre 100px down (so asset appears higher)
         });

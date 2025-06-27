@@ -21,6 +21,7 @@ const createMockMap = () => {
         getLayer: vi.fn(),
         addLayer: vi.fn(),
         fitBounds: vi.fn(),
+        getBearing: vi.fn(() => 0),
         removeLayer: vi.fn(),
         removeSource: vi.fn(),
         setLayoutProperty: vi.fn(),
@@ -220,14 +221,14 @@ describe('MapVisualHelper', () => {
 
     it('visualiseAssetsIn3d logs and skips if marker is null', async () => {
         const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-        await MapVisualHelper.visualiseAssetsIn3d(map, null);
+        await MapVisualHelper.visualiseAssetsIn3d(map, null, null, null);
         expect(warn).toHaveBeenCalledWith('No marker position set. Skipping visualisation.');
         warn.mockRestore();
     });
 
     it('visualiseAssetsIn3d logs and skips if lat/lng is missing', async () => {
         const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-        await MapVisualHelper.visualiseAssetsIn3d(map, { latitude: 10 });
+        await MapVisualHelper.visualiseAssetsIn3d(map, { latitude: 10 }, null, null);
         expect(warn).toHaveBeenCalledWith(expect.stringContaining('longitude or latitude'));
         warn.mockRestore();
     });
