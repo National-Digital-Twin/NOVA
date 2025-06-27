@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MapVisualHelper } from './MapVisualHelper';
 import type { FeatureCollection, Polygon } from 'geojson';
 import { Popup } from 'maplibre-gl';
-import { useMapStore } from '../stores/useMapStore';
 
 // Mock Zustand store
 vi.mock('../stores/useMapStore', () => ({
