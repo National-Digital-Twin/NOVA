@@ -35,11 +35,9 @@ const SearchGroup = styled(Box)(({ theme }) => ({
 
 interface SearchPanelProps {
     drawRef: React.RefObject<MapboxDraw | null>;
-    hideLayerControl: () => void;
     mapRef: React.RefObject<MapRef>;
     isPanelOpen: boolean;
     setIsPanelOpen: (isPanelOpen: boolean) => void;
-    showLayerControl: () => void;
 }
 
 const SearchPanel = ({ drawRef, mapRef, isPanelOpen, setIsPanelOpen }: SearchPanelProps) => {

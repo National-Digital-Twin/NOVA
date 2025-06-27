@@ -7,6 +7,7 @@ import { MapVisualHelper } from '../utils/MapVisualHelper';
 import ConfirmPolygonButton from '../components/map-controls/confirm-polygon/ConfirmPolygonButton';
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { useMapStore } from '../stores/useMapStore';
+import { preventPolygonEdit } from '../utils/MapEditGuards';
 
 interface UsePolygonHandlersProps {
     mapRef: React.RefObject<MapRef>;
@@ -25,28 +26,31 @@ function createConfirmationPopup(polygon: Polygon, onConfirm: () => void, map: m
 export function usePolygonHandlers({ mapRef, drawRef }: UsePolygonHandlersProps) {
     const polygonStatus = useMapStore((s) => s.polygonStatus);
     const setPopupRef = useMapStore((s) => s.setPolygonConfirmPopup);
-    const preventPolygonEdit = useMapStore((s) => s.preventPolygonEdit);
     const setPolygonStatus = useMapStore((s) => s.setPolygonStatus);
     const setCachedHeatmap = useMapStore((s) => s.setCachedHeatmap);
     const clearMarkerValues = useMapStore((s) => s.clearMarkerValues);
 
     useEffect(() => {
-        const map = mapRef.current;
+        const map = mapRef.current?.getMap();
         if (!map) return;
-
-        const shouldPreventEdit =
-            polygonStatus === 'pendingConfirmation' || polygonStatus === 'confirmed';
-
-        if (!shouldPreventEdit) return;
-
-        map.on('click', preventPolygonEdit);
-        map.on('contextmenu', preventPolygonEdit);
-
-        return () => {
-            map.off('click', preventPolygonEdit);
-            map.off('contextmenu', preventPolygonEdit);
+      
+        const shouldPrevent = polygonStatus === 'pendingConfirmation' || polygonStatus === 'confirmed';
+        if (!shouldPrevent) return;
+      
+        const handler = (e: maplibregl.MapMouseEvent) => {
+          const draw = drawRef.current;
+          preventPolygonEdit(map, draw, e.point);
         };
-    }, [mapRef, polygonStatus, preventPolygonEdit]);
+      
+        map.on('click', handler);
+        map.on('contextmenu', handler);
+      
+        return () => {
+          map.off('click', handler);
+          map.off('contextmenu', handler);
+        };
+      }, [mapRef, drawRef, polygonStatus]);
+
 
     const handlePolygonConfirmed = useCallback((geojson: FeatureCollection<Geometry>) => {
         setPolygonStatus('confirmed');
