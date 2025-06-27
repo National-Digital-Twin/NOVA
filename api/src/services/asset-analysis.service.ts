@@ -86,22 +86,21 @@ export class AssetAnalysisService {
      * Exact bad layers are comprised of polygons loaded from the specific data layers files.
      */
     private getMatchedPolygonsForLayers(dataLayers: DataLayerDto[], location: Feature<Polygon>): Feature<MultiPolygon | Polygon, GeoJsonProperties>[] {
-        let goodLayerMatchedPolygons: Feature<MultiPolygon | Polygon, GeoJsonProperties>[] = [];
         let cautionLayerMatchedPolygons: Feature<MultiPolygon | Polygon, GeoJsonProperties>[] = [];
         let badLayerMatchedPolygons: Feature<MultiPolygon | Polygon, GeoJsonProperties>[] = [];
         let exactbadLayerMatchedPolygons: Feature<MultiPolygon | Polygon, GeoJsonProperties>[] = [];
 
+        const goodLayerMatchedPolygon: Feature<MultiPolygon | Polygon, GeoJsonProperties> = {
+            ...location,
+            properties: {
+                suitability: 'green',
+            },
+        };
         dataLayers.forEach((dataLayer) => {
             if (dataLayer.id === 'windSpeed') {
                 const minSpeed = dataLayer.attributes.find((attribute) => attribute.id === 'minSpeed')?.value || 4;
                 const maxSpeed = dataLayer.attributes.find((attribute) => attribute.id === 'maxSpeed')?.value || 7.5;
                 const windspeedLayer = this.dataProviderUtils.getWindspeedLayerData();
-                const windspeedGoodLayerData: FeatureCollection<MultiPolygon> = {
-                    type: 'FeatureCollection',
-                    features: windspeedLayer.features.filter(
-                        (feature) => feature.properties!.ws_spring1 >= minSpeed && feature.properties!.ws_spring1 <= maxSpeed
-                    ),
-                };
                 const windspeedBadLayerData: FeatureCollection<MultiPolygon> = {
                     type: 'FeatureCollection',
                     features: windspeedLayer.features.filter(
@@ -109,38 +108,23 @@ export class AssetAnalysisService {
                     ),
                 };
 
-                goodLayerMatchedPolygons = this.getMatchedPolygonsForLayer(windspeedGoodLayerData, location, 'green');
-
                 badLayerMatchedPolygons = badLayerMatchedPolygons.concat(
                     this.getMatchedPolygonsForLayer(windspeedBadLayerData, location, 'red', `Bad windspeed - < ${minSpeed}m/s or > ${maxSpeed}m/s`)
                 );
             } else if (dataLayer.id === 'specialAreasOfConservation') {
-                const minDistance: number = dataLayer.attributes.find((attribute) => attribute.id === 'minDistance')?.value || 1;
                 const specialAreasOfConservationLayerData = this.dataProviderUtils.getSpecialAreasOfConservationLayerData();
-                const specialAreasOfConservationBufferedFeatures: Feature<Polygon>[] = [];
-                const specialAreasOfConservationBuffered500MFeatures: Feature<Polygon>[] = [];
+                const specialAreasOfConservationBufferedLayerData: FeatureCollection<MultiPolygon> =
+                    this.dataProviderUtils.getSpecialAreasOfConservationBufferedLayerData();
 
-                specialAreasOfConservationLayerData.features.forEach((feature) => {
-                    const bufferedFeatures = this.getCircleEnvelopesForFeature(feature, minDistance);
-                    specialAreasOfConservationBufferedFeatures.push(bufferedFeatures[0]);
-                    specialAreasOfConservationBuffered500MFeatures.push(bufferedFeatures[1]);
-                });
-                const specialAreasOfConservationBufferedLayerData: FeatureCollection<MultiPolygon | Polygon, GeoJsonProperties> = {
-                    type: 'FeatureCollection',
-                    features: specialAreasOfConservationBufferedFeatures,
-                };
-
-                const specialAreasOfConservationBuffered500MLayerData: FeatureCollection<MultiPolygon | Polygon, GeoJsonProperties> = {
-                    type: 'FeatureCollection',
-                    features: specialAreasOfConservationBuffered500MFeatures,
-                };
+                const specialAreasOfConservationBuffered500MLayerData: FeatureCollection<MultiPolygon> =
+                    this.dataProviderUtils.getSpecialAreasOfConservationBuffered1_5KmLayerData();
 
                 exactbadLayerMatchedPolygons = exactbadLayerMatchedPolygons.concat(
                     this.getMatchedPolygonsForLayer(
                         specialAreasOfConservationLayerData,
                         location,
                         'darkRed',
-                        `Too close to special areas of conservation - <= ${minDistance}km`
+                        'Too close to special areas of conservation - <= 1km'
                     )
                 );
                 badLayerMatchedPolygons = badLayerMatchedPolygons.concat(
@@ -148,7 +132,7 @@ export class AssetAnalysisService {
                         specialAreasOfConservationBufferedLayerData,
                         location,
                         'red',
-                        `Too close to special areas of conservation - <= ${minDistance}km`
+                        'Too close to special areas of conservation - <= 1km'
                     )
                 );
                 cautionLayerMatchedPolygons = cautionLayerMatchedPolygons.concat(
@@ -156,7 +140,7 @@ export class AssetAnalysisService {
                         specialAreasOfConservationBuffered500MLayerData,
                         location,
                         'amber',
-                        `Close to special areas of conservation - <= ${minDistance + 0.5}km`
+                        'Close to special areas of conservation - <= 1.5km'
                     )
                 );
             } else if (dataLayer.id == 'sitesOfSpecialScientificInterest') {
@@ -282,7 +266,7 @@ export class AssetAnalysisService {
             }
         });
 
-        return [...goodLayerMatchedPolygons, ...cautionLayerMatchedPolygons, ...badLayerMatchedPolygons, ...exactbadLayerMatchedPolygons];
+        return [goodLayerMatchedPolygon, ...cautionLayerMatchedPolygons, ...badLayerMatchedPolygons, ...exactbadLayerMatchedPolygons];
     }
     /*
      * A method to analayze the location sent by the user along with the data layers they choose to include for analysis and return a number of polygons with a suitability rating for placing an asset.

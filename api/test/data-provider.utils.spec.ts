@@ -108,7 +108,7 @@ describe('DataProviderUtils', () => {
         ],
     };
 
-    const mockSpecialAreasOfConvservationLayerData = {
+    const mockSpecialAreasOfConservationLayerData = {
         type: 'FeatureCollection',
         features: [
             {
@@ -125,6 +125,84 @@ describe('DataProviderUtils', () => {
                         ],
                     ],
                     type: 'Polygon',
+                },
+            },
+        ],
+    };
+
+    const mockSpecialAreasOfConservationBufferedLayerData = {
+        type: 'FeatureCollection',
+        features: [
+            {
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                    type: 'Polygon',
+                    coordinates: [
+                        [
+                            [-1.2987515933705105, 50.70758231916396],
+                            [-1.2986071791972071, 50.7057357892586],
+                            [-1.2981776931430613, 50.70390711411757],
+                            [-1.2974673036660942, 50.70211390177117],
+                            [-1.2964828819362129, 50.700373416790185],
+                            [-1.295233934520892, 50.698702414212896],
+                            [-1.2937325108324376, 50.69711697844578],
+                            [-1.2919930862664162, 50.695632368679625],
+                            [-1.2900324221880082, 50.69426287229712],
+                            [-1.287869404137873, 50.693021667670216],
+                            [-1.2855248598298612, 50.691920697653316],
+                            [-1.2830213586979928, 50.6909705549749],
+                            [-1.2803829949181118, 50.69018038061593],
+                            [-1.2776351559792514, 50.68955777613828],
+                            [-1.2757094949156569, 50.68925231986295],
+                            [-1.27519545839354, 50.71590803611056],
+                            [-1.295658707685225, 50.71590803611056],
+                            [-1.2964913346687237, 50.71479233016628],
+                            [-1.2974739449352346, 50.713051374460214],
+                            [-1.2981822677287183, 50.71125781233352],
+                            [-1.2986095113007228, 50.70942892179886],
+                            [-1.2987515933705105, 50.70758231916396],
+                        ],
+                    ],
+                },
+            },
+        ],
+    };
+
+    const mockSpecialAreasOfConservationBuffered1_5KmLayerData = {
+        type: 'FeatureCollection',
+        features: [
+            {
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                    type: 'Polygon',
+                    coordinates: [
+                        [
+                            [-1.3058521053154952, 50.70758029665277],
+                            [-1.3056728772379862, 50.70529304228955],
+                            [-1.3051405488116887, 50.70302792540121],
+                            [-1.3042602961606604, 50.70080675552486],
+                            [-1.3030406422059784, 50.698650915998044],
+                            [-1.3014933728352642, 50.696581158323696],
+                            [-1.2996334218660228, 50.69461740272245],
+                            [-1.2974787259692626, 50.692778546777326],
+                            [-1.2950500509984886, 50.691082283995264],
+                            [-1.2923707914320768, 50.689544934011266],
+                            [-1.2894667448821406, 50.688181286047346],
+                            [-1.2863658638485238, 50.68700445710977],
+                            [-1.2830979871008095, 50.686025766266454],
+                            [-1.2796945532528958, 50.685254626192005],
+                            [-1.2761882992525042, 50.68469845300389],
+                            [-1.2757980199917305, 50.684661791355566],
+                            [-1.27519545839354, 50.71590803611056],
+                            [-1.3033940570469884, 50.71590803611056],
+                            [-1.3042704860955638, 50.714354816538496],
+                            [-1.3051475677607136, 50.71213310998187],
+                            [-1.3056764554671016, 50.709867662607465],
+                            [-1.3058521053154952, 50.70758029665277],
+                        ],
+                    ],
                 },
             },
         ],
@@ -271,7 +349,7 @@ describe('DataProviderUtils', () => {
     describe('getSpecialAreasOfConservationLayerData', () => {
         it('should read and parse the special areas of conservation layer data from file', () => {
             // Mock fs.readFileSync to return our mock data
-            (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockSpecialAreasOfConvservationLayerData));
+            (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockSpecialAreasOfConservationLayerData));
 
             // Call the method
             const result = dataProviderUtils.getSpecialAreasOfConservationLayerData();
@@ -280,7 +358,39 @@ describe('DataProviderUtils', () => {
             expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringContaining('sac.geojson'), 'utf8');
 
             // Verify the result
-            expect(result).toEqual(mockSpecialAreasOfConvservationLayerData);
+            expect(result).toEqual(mockSpecialAreasOfConservationLayerData);
+        });
+    });
+
+    describe('getSpecialAreasOfConservationBufferedLayerData', () => {
+        it('should read and parse the special areas of conservation buffered layer data from file', () => {
+            // Mock fs.readFileSync to return our mock data
+            (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockSpecialAreasOfConservationBufferedLayerData));
+
+            // Call the method
+            const result = dataProviderUtils.getSpecialAreasOfConservationBufferedLayerData();
+
+            // Verify fs.readFileSync was called with the correct path
+            expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringContaining('sac-1km.geojson'), 'utf8');
+
+            // Verify the result
+            expect(result).toEqual(mockSpecialAreasOfConservationBufferedLayerData);
+        });
+    });
+
+    describe('getSpecialAreasOfConservationBuffered1_5LayerData', () => {
+        it('should read and parse the special areas of conservation buffered 1_5 km layer data from file', () => {
+            // Mock fs.readFileSync to return our mock data
+            (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockSpecialAreasOfConservationBuffered1_5KmLayerData));
+
+            // Call the method
+            const result = dataProviderUtils.getSpecialAreasOfConservationBuffered1_5KmLayerData();
+
+            // Verify fs.readFileSync was called with the correct path
+            expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringContaining('sac-1_5km.geojson'), 'utf8');
+
+            // Verify the result
+            expect(result).toEqual(mockSpecialAreasOfConservationBuffered1_5KmLayerData);
         });
     });
 

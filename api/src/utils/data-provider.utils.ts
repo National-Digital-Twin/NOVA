@@ -19,6 +19,8 @@ export class DataProviderUtils {
     private readonly regionsDataFilePath: string;
     private readonly windspeedLayerDataFilePath: string;
     private readonly specialAreasOfConservationLayerDataFilePath: string;
+    private readonly specialAreasOfConservationBufferedLayerDataFilePath: string;
+    private readonly specialAreasOfConservationBuffered1_5KmLayerDataFilePath: string;
     private readonly sitesOfSpecialScientificInterestLayerDataFilePath: string;
     private readonly builtupAreasLayerDataFilePath: string;
     private readonly areasOfNaturalBeautyLayerDataFilePath: string;
@@ -36,6 +38,8 @@ export class DataProviderUtils {
         this.gspDataFilePath = path.join(__dirname, '../data/GSP.geojson');
         this.windspeedLayerDataFilePath = path.join(__dirname, '../data/windspeed.geojson');
         this.specialAreasOfConservationLayerDataFilePath = path.join(__dirname, '../data/sac.geojson');
+        this.specialAreasOfConservationBufferedLayerDataFilePath = path.join(__dirname, '../data/sac-1km.geojson');
+        this.specialAreasOfConservationBuffered1_5KmLayerDataFilePath = path.join(__dirname, '../data/sac-1_5km.geojson');
         this.sitesOfSpecialScientificInterestLayerDataFilePath = path.join(__dirname, '../data/sssi.geojson');
         this.builtupAreasLayerDataFilePath = path.join(__dirname, '../data/bua.geojson');
         this.areasOfNaturalBeautyLayerDataFilePath = path.join(__dirname, '../data/areanb.geojson');
@@ -120,6 +124,18 @@ export class DataProviderUtils {
 
     public getSpecialAreasOfConservationLayerData(): FeatureCollection<MultiPolygon> {
         const fileContent = fs.readFileSync(this.specialAreasOfConservationLayerDataFilePath, 'utf8');
+
+        return JSON.parse(fileContent) as FeatureCollection<MultiPolygon>;
+    }
+
+    public getSpecialAreasOfConservationBufferedLayerData(): FeatureCollection<MultiPolygon> {
+        const fileContent = fs.readFileSync(this.specialAreasOfConservationBufferedLayerDataFilePath, 'utf8');
+
+        return JSON.parse(fileContent) as FeatureCollection<MultiPolygon>;
+    }
+
+    public getSpecialAreasOfConservationBuffered1_5KmLayerData(): FeatureCollection<MultiPolygon> {
+        const fileContent = fs.readFileSync(this.specialAreasOfConservationBuffered1_5KmLayerDataFilePath, 'utf8');
 
         return JSON.parse(fileContent) as FeatureCollection<MultiPolygon>;
     }

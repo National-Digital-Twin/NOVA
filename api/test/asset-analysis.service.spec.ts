@@ -112,6 +112,84 @@ describe('analyzeLocation', () => {
         ],
     };
 
+    const mockSpecialAreasOfConservationBufferedLayerData = {
+        type: 'FeatureCollection',
+        features: [
+            {
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                    type: 'Polygon',
+                    coordinates: [
+                        [
+                            [-1.2987515933705105, 50.70758231916396],
+                            [-1.2986071791972071, 50.7057357892586],
+                            [-1.2981776931430613, 50.70390711411757],
+                            [-1.2974673036660942, 50.70211390177117],
+                            [-1.2964828819362129, 50.700373416790185],
+                            [-1.295233934520892, 50.698702414212896],
+                            [-1.2937325108324376, 50.69711697844578],
+                            [-1.2919930862664162, 50.695632368679625],
+                            [-1.2900324221880082, 50.69426287229712],
+                            [-1.287869404137873, 50.693021667670216],
+                            [-1.2855248598298612, 50.691920697653316],
+                            [-1.2830213586979928, 50.6909705549749],
+                            [-1.2803829949181118, 50.69018038061593],
+                            [-1.2776351559792514, 50.68955777613828],
+                            [-1.2757094949156569, 50.68925231986295],
+                            [-1.27519545839354, 50.71590803611056],
+                            [-1.295658707685225, 50.71590803611056],
+                            [-1.2964913346687237, 50.71479233016628],
+                            [-1.2974739449352346, 50.713051374460214],
+                            [-1.2981822677287183, 50.71125781233352],
+                            [-1.2986095113007228, 50.70942892179886],
+                            [-1.2987515933705105, 50.70758231916396],
+                        ],
+                    ],
+                },
+            },
+        ],
+    };
+
+    const mockSpecialAreasOfConservationBuffered1_5KmLayerData = {
+        type: 'FeatureCollection',
+        features: [
+            {
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                    type: 'Polygon',
+                    coordinates: [
+                        [
+                            [-1.3058521053154952, 50.70758029665277],
+                            [-1.3056728772379862, 50.70529304228955],
+                            [-1.3051405488116887, 50.70302792540121],
+                            [-1.3042602961606604, 50.70080675552486],
+                            [-1.3030406422059784, 50.698650915998044],
+                            [-1.3014933728352642, 50.696581158323696],
+                            [-1.2996334218660228, 50.69461740272245],
+                            [-1.2974787259692626, 50.692778546777326],
+                            [-1.2950500509984886, 50.691082283995264],
+                            [-1.2923707914320768, 50.689544934011266],
+                            [-1.2894667448821406, 50.688181286047346],
+                            [-1.2863658638485238, 50.68700445710977],
+                            [-1.2830979871008095, 50.686025766266454],
+                            [-1.2796945532528958, 50.685254626192005],
+                            [-1.2761882992525042, 50.68469845300389],
+                            [-1.2757980199917305, 50.684661791355566],
+                            [-1.27519545839354, 50.71590803611056],
+                            [-1.3033940570469884, 50.71590803611056],
+                            [-1.3042704860955638, 50.714354816538496],
+                            [-1.3051475677607136, 50.71213310998187],
+                            [-1.3056764554671016, 50.709867662607465],
+                            [-1.3058521053154952, 50.70758029665277],
+                        ],
+                    ],
+                },
+            },
+        ],
+    };
+
     const mockSitesOfSpecialScientificInterestLayerData = {
         type: 'FeatureCollection',
         features: [
@@ -271,12 +349,18 @@ describe('analyzeLocation', () => {
 
         (dataProviderUtils.getWindspeedLayerData as jest.Mock).mockImplementation(() => mockWindspeedLayerData);
         (dataProviderUtils.getSpecialAreasOfConservationLayerData as jest.Mock).mockImplementation(() => mockSpecialAreasOfConvservationLayerData);
+        (dataProviderUtils.getSpecialAreasOfConservationBufferedLayerData as jest.Mock).mockImplementation(
+            () => mockSpecialAreasOfConservationBufferedLayerData
+        );
+        (dataProviderUtils.getSpecialAreasOfConservationBuffered1_5KmLayerData as jest.Mock).mockImplementation(
+            () => mockSpecialAreasOfConservationBuffered1_5KmLayerData
+        );
         (dataProviderUtils.getSitesOfSpecialScientificInterestLayerData as jest.Mock).mockImplementation(() => mockSitesOfSpecialScientificInterestLayerData);
         (dataProviderUtils.getBuiltupAreasLayerData as jest.Mock).mockImplementation(() => mockBuiltupAreasLayerData);
         (dataProviderUtils.getAreasOfNaturalBeautyLayerData as jest.Mock).mockImplementation(() => mockAreasOfOutstandingNaturalBeautyLayerData);
     });
 
-    it('returns an empty feature collection when no data layers are provided for analysis', () => {
+    it('returns only the good layer when no data layers are provided for analysis', () => {
         const noDataLayersToAnalyze = dataLayers.map((dataLayer) => {
             const mappedDataLayer = { ...dataLayer, analyze: false };
             return mappedDataLayer;
@@ -287,11 +371,35 @@ describe('analyzeLocation', () => {
         };
 
         const result: FeatureCollection<Geometry, GeoJsonProperties> = assetAnalysisService.analyzeLocation(requestDto);
+        const expectedResult = {
+            type: 'FeatureCollection',
+            features: [
+                {
+                    type: 'Feature',
+                    properties: {
+                        suitability: 'green',
+                    },
+                    geometry: {
+                        type: 'Polygon',
+                        coordinates: [
+                            [
+                                [-1.3465969302374958, 50.71590803611056],
+                                [-1.3465969302374958, 50.68805808728612],
+                                [-1.3147572597099781, 50.67757048191068],
+                                [-1.275870815939669, 50.680886907570596],
+                                [-1.27519545839354, 50.71590803611056],
+                                [-1.3465969302374958, 50.71590803611056],
+                            ],
+                        ],
+                    },
+                },
+            ],
+        };
 
-        expect(result.features).toEqual([]);
+        expect(result).toEqual(expectedResult);
     });
 
-    it('returns an empty feature collection when no matched polygons are found for the provided location', () => {
+    it('returns only the good layer when no other matched polygons are found for the provided location', () => {
         const drawnLocationForNoMatches: FeatureCollection<Polygon> = {
             type: 'FeatureCollection',
             features: [
@@ -318,13 +426,36 @@ describe('analyzeLocation', () => {
             location: drawnLocationForNoMatches,
             dataLayers,
         };
+        const expectedResult = {
+            type: 'FeatureCollection',
+            features: [
+                {
+                    type: 'Feature',
+                    properties: {
+                        suitability: 'green',
+                    },
+                    geometry: {
+                        type: 'Polygon',
+                        coordinates: [
+                            [
+                                [-1.3965928986904714, 50.67335560403771],
+                                [-1.3965928986904714, 50.66525754664215],
+                                [-1.3677945231333126, 50.66525754664215],
+                                [-1.3677945231333126, 50.67335560403771],
+                                [-1.3965928986904714, 50.67335560403771],
+                            ],
+                        ],
+                    },
+                },
+            ],
+        };
 
         const result: FeatureCollection<Geometry, GeoJsonProperties> = assetAnalysisService.analyzeLocation(requestDto);
 
-        expect(result.features).toEqual([]);
+        expect(result).toEqual(expectedResult);
     });
 
-    it('returns the windspeed bad and good matched polygons when only the windspeed data layer is set to analyze', () => {
+    it('returns the good layer and the windspeed bad matched polygons when only the windspeed data layer is set to analyze', () => {
         const dataLayersWindspeedOnly = dataLayers.map((dataLayer) => {
             const mappedDataLayer = { ...dataLayer };
             if (mappedDataLayer.id !== 'windSpeed') {
@@ -350,29 +481,12 @@ describe('analyzeLocation', () => {
                         type: 'Polygon',
                         coordinates: [
                             [
-                                [-1.3353644688831992, 50.685261264837806],
-                                [-1.2757864595721549, 50.685261264837806],
-                                [-1.2753433586937066, 50.70823856465367],
-                                [-1.3353644688831992, 50.70823856465367],
-                                [-1.3353644688831992, 50.685261264837806],
-                            ],
-                        ],
-                    },
-                },
-                {
-                    type: 'Feature',
-                    properties: {
-                        suitability: 'green',
-                    },
-                    geometry: {
-                        type: 'Polygon',
-                        coordinates: [
-                            [
-                                [-1.3011395290153018, 50.67873186842811],
+                                [-1.3465969302374958, 50.71590803611056],
+                                [-1.3465969302374958, 50.68805808728612],
+                                [-1.3147572597099781, 50.67757048191068],
                                 [-1.275870815939669, 50.680886907570596],
-                                [-1.2756749032879318, 50.69104609243263],
-                                [-1.3011395290153018, 50.69104609243263],
-                                [-1.3011395290153018, 50.67873186842811],
+                                [-1.27519545839354, 50.71590803611056],
+                                [-1.3465969302374958, 50.71590803611056],
                             ],
                         ],
                     },
@@ -444,6 +558,25 @@ describe('analyzeLocation', () => {
                 {
                     type: 'Feature',
                     properties: {
+                        suitability: 'green',
+                    },
+                    geometry: {
+                        type: 'Polygon',
+                        coordinates: [
+                            [
+                                [-1.3465969302374958, 50.71590803611056],
+                                [-1.3465969302374958, 50.68805808728612],
+                                [-1.3147572597099781, 50.67757048191068],
+                                [-1.275870815939669, 50.680886907570596],
+                                [-1.27519545839354, 50.71590803611056],
+                                [-1.3465969302374958, 50.71590803611056],
+                            ],
+                        ],
+                    },
+                },
+                {
+                    type: 'Feature',
+                    properties: {
                         suitability: 'amber',
                         issue: 'Close to special areas of conservation - <= 1.5km',
                     },
@@ -466,7 +599,7 @@ describe('analyzeLocation', () => {
                                 [-1.2830979871008095, 50.686025766266454],
                                 [-1.2796945532528958, 50.685254626192005],
                                 [-1.2761882992525042, 50.68469845300389],
-                                [-1.2757980199917305, 50.684661791355566],
+                                [-1.2757980199917307, 50.684661791355566],
                                 [-1.27519545839354, 50.71590803611056],
                                 [-1.3033940570469884, 50.71590803611056],
                                 [-1.3042704860955638, 50.714354816538496],
@@ -501,7 +634,7 @@ describe('analyzeLocation', () => {
                                 [-1.2830213586979928, 50.6909705549749],
                                 [-1.2803829949181118, 50.69018038061593],
                                 [-1.2776351559792514, 50.68955777613828],
-                                [-1.2757094949156569, 50.68925231986295],
+                                [-1.275709494915657, 50.68925231986295],
                                 [-1.27519545839354, 50.71590803611056],
                                 [-1.295658707685225, 50.71590803611056],
                                 [-1.2964913346687237, 50.71479233016628],
@@ -557,6 +690,25 @@ describe('analyzeLocation', () => {
         const expectedResult: FeatureCollection<Geometry> = {
             type: 'FeatureCollection',
             features: [
+                {
+                    type: 'Feature',
+                    properties: {
+                        suitability: 'green',
+                    },
+                    geometry: {
+                        type: 'Polygon',
+                        coordinates: [
+                            [
+                                [-1.3465969302374958, 50.71590803611056],
+                                [-1.3465969302374958, 50.68805808728612],
+                                [-1.3147572597099781, 50.67757048191068],
+                                [-1.275870815939669, 50.680886907570596],
+                                [-1.27519545839354, 50.71590803611056],
+                                [-1.3465969302374958, 50.71590803611056],
+                            ],
+                        ],
+                    },
+                },
                 {
                     type: 'Feature',
                     properties: {
@@ -687,6 +839,25 @@ describe('analyzeLocation', () => {
         const expectedResult: FeatureCollection<Geometry> = {
             type: 'FeatureCollection',
             features: [
+                {
+                    type: 'Feature',
+                    properties: {
+                        suitability: 'green',
+                    },
+                    geometry: {
+                        type: 'Polygon',
+                        coordinates: [
+                            [
+                                [-1.3465969302374958, 50.71590803611056],
+                                [-1.3465969302374958, 50.68805808728612],
+                                [-1.3147572597099781, 50.67757048191068],
+                                [-1.275870815939669, 50.680886907570596],
+                                [-1.27519545839354, 50.71590803611056],
+                                [-1.3465969302374958, 50.71590803611056],
+                            ],
+                        ],
+                    },
+                },
                 {
                     type: 'Feature',
                     properties: {
@@ -865,6 +1036,25 @@ describe('analyzeLocation', () => {
                 {
                     type: 'Feature',
                     properties: {
+                        suitability: 'green',
+                    },
+                    geometry: {
+                        type: 'Polygon',
+                        coordinates: [
+                            [
+                                [-1.3465969302374958, 50.71590803611056],
+                                [-1.3465969302374958, 50.68805808728612],
+                                [-1.3147572597099781, 50.67757048191068],
+                                [-1.275870815939669, 50.680886907570596],
+                                [-1.27519545839354, 50.71590803611056],
+                                [-1.3465969302374958, 50.71590803611056],
+                            ],
+                        ],
+                    },
+                },
+                {
+                    type: 'Feature',
+                    properties: {
                         suitability: 'amber',
                         issue: 'Close to areas of outstanding natural beauty - <= 1.5km',
                     },
@@ -997,29 +1187,12 @@ describe('analyzeLocation', () => {
                         type: 'Polygon',
                         coordinates: [
                             [
-                                [-1.3353644688831992, 50.685261264837806],
-                                [-1.2757864595721549, 50.685261264837806],
-                                [-1.2753433586937066, 50.70823856465367],
-                                [-1.3353644688831992, 50.70823856465367],
-                                [-1.3353644688831992, 50.685261264837806],
-                            ],
-                        ],
-                    },
-                },
-                {
-                    type: 'Feature',
-                    properties: {
-                        suitability: 'green',
-                    },
-                    geometry: {
-                        type: 'Polygon',
-                        coordinates: [
-                            [
-                                [-1.3011395290153018, 50.67873186842811],
+                                [-1.3465969302374958, 50.71590803611056],
+                                [-1.3465969302374958, 50.68805808728612],
+                                [-1.3147572597099781, 50.67757048191068],
                                 [-1.275870815939669, 50.680886907570596],
-                                [-1.2756749032879318, 50.69104609243263],
-                                [-1.3011395290153018, 50.69104609243263],
-                                [-1.3011395290153018, 50.67873186842811],
+                                [-1.27519545839354, 50.71590803611056],
+                                [-1.3465969302374958, 50.71590803611056],
                             ],
                         ],
                     },
@@ -1049,7 +1222,7 @@ describe('analyzeLocation', () => {
                                 [-1.2830979871008095, 50.686025766266454],
                                 [-1.2796945532528958, 50.685254626192005],
                                 [-1.2761882992525042, 50.68469845300389],
-                                [-1.2757980199917305, 50.684661791355566],
+                                [-1.2757980199917307, 50.684661791355566],
                                 [-1.27519545839354, 50.71590803611056],
                                 [-1.3033940570469884, 50.71590803611056],
                                 [-1.3042704860955638, 50.714354816538496],
@@ -1265,7 +1438,7 @@ describe('analyzeLocation', () => {
                                 [-1.2830213586979928, 50.6909705549749],
                                 [-1.2803829949181118, 50.69018038061593],
                                 [-1.2776351559792514, 50.68955777613828],
-                                [-1.2757094949156569, 50.68925231986295],
+                                [-1.275709494915657, 50.68925231986295],
                                 [-1.27519545839354, 50.71590803611056],
                                 [-1.295658707685225, 50.71590803611056],
                                 [-1.2964913346687237, 50.71479233016628],
