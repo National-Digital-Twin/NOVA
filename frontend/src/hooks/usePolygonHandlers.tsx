@@ -27,6 +27,8 @@ export function usePolygonHandlers({ mapRef, drawRef }: UsePolygonHandlersProps)
     const setPopupRef = useMapStore((s) => s.setPolygonConfirmPopup);
     const preventPolygonEdit = useMapStore((s) => s.preventPolygonEdit);
     const setPolygonStatus = useMapStore((s) => s.setPolygonStatus);
+    const setCachedHeatmap = useMapStore((s) => s.setCachedHeatmap);
+    const clearMarkerValues = useMapStore((s) => s.clearMarkerValues);
 
     useEffect(() => {
         const map = mapRef.current;
@@ -163,6 +165,8 @@ export function usePolygonHandlers({ mapRef, drawRef }: UsePolygonHandlersProps)
 
     const handlePolygonDeleted = useCallback(() => {
         setPolygonStatus('none');
+        clearMarkerValues();
+        setCachedHeatmap(null);
 
         const draw = drawRef.current;
         if (draw) draw.deleteAll();

@@ -22,8 +22,10 @@ interface MapState {
 
     markerPosition: { longitude?: number; latitude?: number } | null;
     setMarkerPosition: (position: { longitude?: number; latitude?: number } | null) => void;
+
     markerBearing: number | null;
     setMarkerBearing: (bearing: number) => void;
+
     markerVariant: Variation | null;
     setMarkerVariant: (variant: Variation | null) => void;
 
@@ -35,6 +37,8 @@ interface MapState {
 
     polygonStatus: PolygonStatus;
     setPolygonStatus: (status: PolygonStatus) => void;
+
+    clearMarkerValues: () => void;
 }
 
 export const useMapStore = create<MapState>((set, get) => ({
@@ -62,6 +66,8 @@ export const useMapStore = create<MapState>((set, get) => ({
 
     polygonStatus: 'none',
     setPolygonStatus: (status) => set({ polygonStatus: status }),
+
+    clearMarkerValues: () => set({markerBearing: null, markerVariant: null, markerPosition: null}),
 
     preventPolygonEdit: (e: MouseEvent | ({ point?: { x: number; y: number } } & MouseEvent)) => {
         let x: number;
