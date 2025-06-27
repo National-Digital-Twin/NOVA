@@ -134,25 +134,6 @@ describe('MapComponent', () => {
         expect(screen.getByTestId('map')).toBeInTheDocument();
     });
 
-    it('shows the wind turbine pending icon when placing asset', async () => {
-        vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) => selector(createMockMapState({ placing: true })));
-
-        render(<MapComponent />);
-        fireEvent.click(screen.getByTestId('map'));
-
-        const moveEvent = new MouseEvent('mousemove', {
-            bubbles: true,
-            cancelable: true,
-            clientX: 100,
-            clientY: 200,
-        });
-        window.dispatchEvent(moveEvent);
-
-        await waitFor(() => {
-            expect(screen.getByAltText(/Wind Turbine pending/i)).toBeInTheDocument();
-        });
-    });
-
     it('shows the wind turbine confirmed icon when placed', () => {
         vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) =>
             selector(

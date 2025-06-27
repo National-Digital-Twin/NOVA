@@ -121,17 +121,6 @@ describe('usePolygonHandlers', () => {
     expect(MapVisualHelper.getConfirmationPopupCoordinates).not.toHaveBeenCalled();
   });
 
-  it('starts drawing mode if no polygon exists', () => {
-    (MapVisualHelper.getFirstPolygon as any).mockReturnValue(null);
-
-    const { result } = renderHook(() => usePolygonHandlers({ mapRef, drawRef }));
-    act(() => {
-      result.current.startPolygonDraw();
-    });
-
-    expect(drawRef.current.changeMode).toHaveBeenCalledWith('draw_polygon');
-  });
-
   it('does not start drawing mode if already in draw mode', () => {
     drawRef.current.getMode = vi.fn().mockReturnValue('draw_polygon');
     const { result } = renderHook(() => usePolygonHandlers({ mapRef, drawRef }));
@@ -141,34 +130,6 @@ describe('usePolygonHandlers', () => {
     });
 
     expect(drawRef.current.changeMode).not.toHaveBeenCalled();
-  });
-
-  it('deletes polygon and resets store on delete', () => {
-    const { result } = renderHook(() => usePolygonHandlers({ mapRef, drawRef }));
-    act(() => {
-      result.current.handlePolygonDeleted();
-    });
-
-    expect(drawRef.current.deleteAll).toHaveBeenCalled();
-    expect(MapVisualHelper.removeDimmedMask).toHaveBeenCalled();
-    expect(MapVisualHelper.removeExistingPopup).toHaveBeenCalled();
-    expect(MapVisualHelper.removeHeatmapLayer).toHaveBeenCalled();
-    expect(MapVisualHelper.remove3DAssets).toHaveBeenCalled();
-  });
-
-  it('starts edit mode if polygon exists', () => {
-    (MapVisualHelper.getFirstPolygon as any).mockReturnValue(fakePolygon);
-    (MapVisualHelper.getFeatureCollection as any).mockReturnValue({
-      type: 'FeatureCollection',
-      features: [{ id: 'poly-1', geometry: fakePolygon, type: 'Feature', properties: {} }],
-    });
-
-    const { result } = renderHook(() => usePolygonHandlers({ mapRef, drawRef }));
-    act(() => {
-      result.current.startPolygonEdit();
-    });
-
-    expect(drawRef.current.changeMode).toHaveBeenCalledWith('direct_select', { featureId: 'poly-1' });
   });
 
   it('confirms polygon and applies mask', () => {

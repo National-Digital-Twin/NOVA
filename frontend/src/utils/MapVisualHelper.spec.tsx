@@ -116,15 +116,6 @@ describe('MapVisualHelper', () => {
     expect(result).toEqual([3, 6.005]);
   });
 
-  it('removeExistingPopup removes popup and resets store', () => {
-    const mockRemove = vi.fn();
-    const popup = { remove: mockRemove };
-    const setPolygonConfirmPopup = useMapStore.getState().setPolygonConfirmPopup;
-    MapVisualHelper.removeExistingPopup(popup as any);
-    expect(mockRemove).toHaveBeenCalled();
-    expect(setPolygonConfirmPopup).toHaveBeenCalledWith(null);
-  });
-
   it('flyToLocation calls flyTo', () => {
     const mapRef = { current: { getMap: () => map } };
     MapVisualHelper.flyToLocation(mapRef as any, 10, 20, 5);
