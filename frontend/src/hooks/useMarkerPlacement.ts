@@ -39,6 +39,7 @@ export function useMarkerPlacement() {
 
         setPlacing(false);
         e.originalEvent.stopPropagation?.();
+        e.preventDefault();
     };
 
     return {

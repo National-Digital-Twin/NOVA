@@ -397,6 +397,8 @@ export class MapVisualHelper {
         const features = e.features ?? [];
         if (features.length === 0) return;
 
+        if (e.defaultPrevented) return;
+
         // Collect and flatten all issues from every feature, then de-duplicate.
         const allIssues = features.flatMap((feature) => MapVisualHelper._parseIssueFromFeature(feature));
         const uniqueIssues = Array.from(new Set(allIssues));
