@@ -1,20 +1,17 @@
-import { useState } from 'react';
-import type MapboxDraw from '@mapbox/mapbox-gl-draw';
-import type { MapRef } from 'react-map-gl/maplibre';
 import ControlIcon from '../../../shared/control-icon/ControlIcon';
+import { useMapStore } from '../../../stores/useMapStore';
 
 interface DrawPolygonButtonProps {
-    isVisible: boolean;
-    mapRef: React.RefObject<MapRef>;
-    drawRef: React.RefObject<MapboxDraw | null>;
     startPolygonDraw: () => void;
 }
 
-const DrawPolygonButton = ({ isVisible, startPolygonDraw }: DrawPolygonButtonProps) => {
-    const [isActive, setIsActive] = useState(false);
+const DrawPolygonButton = ({ startPolygonDraw }: DrawPolygonButtonProps) => {
+    const polygonStatus = useMapStore((s) => s.polygonStatus);
+
+    const isVisible = polygonStatus === 'none' || polygonStatus === 'drawing' || polygonStatus === 'pendingConfirmation';
+    const isActive = polygonStatus === 'drawing' || polygonStatus === 'pendingConfirmation';
 
     const handleClick = () => {
-        setIsActive(true);
         startPolygonDraw();
     };
 
