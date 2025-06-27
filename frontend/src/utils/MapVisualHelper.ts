@@ -399,6 +399,13 @@ export class MapVisualHelper {
 
         if (e.defaultPrevented) return;
 
+        // see if the DOM click started on a Marker overlay
+        const target = e.originalEvent.target as HTMLElement;
+        if (target?.tagName === 'IMG') {
+            // It's a marker click — ignore this event
+            return;
+          }
+
         // Collect and flatten all issues from every feature, then de-duplicate.
         const allIssues = features.flatMap((feature) => MapVisualHelper._parseIssueFromFeature(feature));
         const uniqueIssues = Array.from(new Set(allIssues));

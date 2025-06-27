@@ -5,7 +5,7 @@ import windTurbineSelectedIcon from '../../assets/Windturbine_blue_selected.svg'
 import AssetControls from './AssetControls';
 import { SubstationsListContainer } from '../map-substations-list';
 import { useMapStore } from '../../stores/useMapStore';
-import { preventPolygonEdit } from '../../utils/MapEditGuards';
+import { disableDrawLayerClicks } from '../../utils/MapEditGuards';
 
 interface AssetMarkerProps {
     longitude?: number;
@@ -34,24 +34,14 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({
     const setPlacing = useMapStore((s) => s.setPlacing);
     const setMarkerPosition = useMapStore((s) => s.setMarkerPosition);
 
-    const handleMarkerClick = (e: React.MouseEvent) => {
-        e.stopPropagation();       // Stops bubbling to map layer
-        e.preventDefault();        // Prevents default DOM actions
-    
-        // Tell the map this event was "internal"
-        (e.nativeEvent as any)._fromMarker = true;
-    
+    const handleMarkerClick = (e: React.MouseEvent<HTMLImageElement>) => {
+        e.preventDefault();
         const map = mapRef?.getMap();
         if (map) {
-            const rect = map.getCanvas().getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-    
-            preventPolygonEdit(map, drawRef, { x, y });
+            disableDrawLayerClicks(map, drawRef);
         }
-    
-        setShowControls((prev) => !prev);
-    };
+        setShowControls(v => !v)
+      }
 
     const handleDragEnd = (event: MarkerDragEvent) => {
         console.log('Marker dragged to:', event.lngLat);
@@ -110,10 +100,10 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({
                     </div>
                 )}
                 <img
-                    src={isSelected ? windTurbineSelectedIcon : windTurbineIcon}
-                    alt="Wind Turbine"
-                    style={{ width: '60px', height: '60px', cursor: 'pointer' }}
-                    onClick={handleMarkerClick}
+                src={isSelected ? windTurbineSelectedIcon : windTurbineIcon}
+                alt="Wind Turbine"
+                style={{ width: 60, height: 60, cursor: 'pointer', pointerEvents: 'auto' }}
+                onClick={handleMarkerClick}
                 />
             </div>
         </Marker>
