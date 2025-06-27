@@ -1,27 +1,26 @@
-import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { useCallback } from 'react';
 import ControlIcon from '../../../shared/control-icon/ControlIcon';
 import { useMapStore } from '../../../stores/useMapStore';
 
 interface DeletePolygonButtonProps {
-    drawRef: React.RefObject<MapboxDraw | null>;
     isVisible: boolean;
     onPolygonDeleted: () => void;
-    hideLayerControl: () => void;
 }
 
-const DeletePolygonButton = ({ drawRef, isVisible, onPolygonDeleted, hideLayerControl }: DeletePolygonButtonProps) => {
+const DeletePolygonButton = ({ isVisible, onPolygonDeleted }: DeletePolygonButtonProps) => {
+    const drawRef = useMapStore((s) => s.drawRef);
     const setCachedHeatmap = useMapStore((s) => s.setCachedHeatmap);
     const setMarkerPosition = useMapStore((s) => s.setMarkerPosition);
+    const setShowLayerControl = useMapStore((s) => s.setShowLayerControl);
 
     const handleClick = useCallback(() => {
-        if (!drawRef.current) return;
-        drawRef.current.deleteAll();
+        if (!drawRef) return;
+        drawRef.deleteAll();
         setCachedHeatmap(null);
         setMarkerPosition(null);
         onPolygonDeleted();
-        hideLayerControl();
-    }, [drawRef, setCachedHeatmap, setMarkerPosition, onPolygonDeleted, hideLayerControl]);
+        setShowLayerControl(false);
+    }, [drawRef, setCachedHeatmap, setMarkerPosition, onPolygonDeleted, setShowLayerControl]);
 
     if (!isVisible) return null;
 

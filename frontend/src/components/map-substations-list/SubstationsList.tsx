@@ -2,14 +2,15 @@ import React, { useState } from 'react';
 import { Box, List, ListItem, ListItemButton, ListItemText, ListItemIcon, Button, Paper, Typography, Divider } from '@mui/material';
 import BoltIcon from '@mui/icons-material/Bolt';
 
-export interface ListItem {
-    text: string;
-    distance: string;
+export interface Substation {
+    name: string;
+    distanceFromTurbine: string;
+    coordinates: number[];
 }
 
 interface SubstationsListProps {
-    items?: ListItem[];
-    onConfirm?: (selectedItem: ListItem) => void;
+    items?: Substation[];
+    onConfirm?: (selectedItem: Substation) => void;
 }
 
 /**
@@ -45,8 +46,8 @@ const SubstationsList: React.FC<SubstationsListProps> = ({ items = [], onConfirm
                         <ListItem disablePadding>
                             <ListItemButton selected={selectedIndex === index} onClick={() => handleItemClick(index)} sx={{ py: 0.5, px: 1 }}>
                                 <ListItemText
-                                    primary={item.text}
-                                    secondary={`distance: ${item.distance}`}
+                                    primary={item.name}
+                                    secondary={`distance: ${item.distanceFromTurbine}`}
                                     sx={{
                                         my: 0,
                                         ml: 0,

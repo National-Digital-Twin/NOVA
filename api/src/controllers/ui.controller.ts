@@ -219,6 +219,16 @@ export class UIController {
         }
     }
 
+    public getSubstationGeoJSON(req: Request, res:Response): void {
+        const geoJsonData = dataProviderUtils.readGridSupplyPointData();
+        res.status(200).json(geoJsonData);
+    }
+
+    public getPowerLineGeoJSON(req: Request, res:Response): void {
+        const geoJsonData = dataProviderUtils.readPowerLineData();
+        res.status(200).json(geoJsonData);
+    }
+
     /**
      * @swagger
      * /api/ui/location/analyse:

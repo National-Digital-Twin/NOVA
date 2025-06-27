@@ -1,10 +1,12 @@
 import { useRef, useState } from 'react';
 import { Marker, type MapRef, type MarkerDragEvent } from 'react-map-gl/maplibre';
-import windTurbineIcon from '../../assets/Windturbine_blue_unselected.svg';
-import windTurbineSelectedIcon from '../../assets/Windturbine_blue_selected.svg';
+import unselected_turbine_icon from '../../assets/Windturbine_blue_unselected.svg';
+import selected_turbine_icon from '../../assets/Windturbine_blue_selected.svg';
+import white_turbine_icon from '../../assets/white_turbine.svg';
 import AssetControls from './AssetControls';
 import { SubstationsListContainer } from '../map-substations-list';
 import { useMapStore } from '../../stores/useMapStore';
+import { MapVisualHelper } from '../../utils/MapVisualHelper';
 
 interface AssetMarkerProps {
     longitude?: number;
@@ -12,22 +14,31 @@ interface AssetMarkerProps {
     mapRef?: React.RefObject<MapRef>;
     onClick?: () => void;
     onBoltClick?: () => void;
-    isSelected?: boolean;
     onDragEnd?: (longitude: number, latitude: number) => void;
     setIsPanelOpen?: (isPanelOpen: boolean) => void;
     setPlacing?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+export enum MarkerStatus {
+    Draft,
+    Connecting,
+    Final
+}
+
 /**
  * A reusable component for displaying a wind turbine marker on the map
  */
-const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltClick, isSelected = false, onDragEnd, setIsPanelOpen }) => {
+const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltClick, onDragEnd, setIsPanelOpen }) => {
     const markerRef = useRef<HTMLDivElement>(null);
     const [showControls, setShowControls] = useState(false);
     const [showSubstationsList, setShowSubstationsList] = useState(false);
     const setPlacing = useMapStore((s) => s.setPlacing);
     const setMarkerPosition = useMapStore((s) => s.setMarkerPosition);
+    const setMaskLayerId = useMapStore((s) => s.setMaskLayerId);
+    const setMaskLayerSourceId = useMapStore((s) => s.setMaskLayerSourceId);
     const preventPolygonEdit = useMapStore((s) => s.preventPolygonEdit);
+    const gridConnectViewActive = useMapStore((s) => s.gridConnectViewActive);
+    const markerStatus = useMapStore((s) => s.markerStatus);
 
     const handleMarkerClick = (e: React.MouseEvent) => {
         // handle event propogation
@@ -47,9 +58,23 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
         }
     };
 
+    setMaskLayerId(MapVisualHelper.maskLayerId);
+    setMaskLayerSourceId(MapVisualHelper.maskLayerSourceId);
+
     // Only render the marker if both longitude and latitude are provided
     if (longitude === undefined || latitude === undefined) {
         return null;
+    }
+
+    const getMarkerImg = () => {
+        switch (markerStatus) {
+            case MarkerStatus.Draft:
+                return unselected_turbine_icon
+            case MarkerStatus.Connecting:
+                return white_turbine_icon
+            default:
+                return selected_turbine_icon
+        }
     }
 
     return (
@@ -86,20 +111,16 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
                         }}
                     >
                         <SubstationsListContainer
-                            longitude={longitude}
-                            latitude={latitude}
-                            onConfirm={(selected) => {
-                                console.log(`Selected substation: ${selected.text}`);
-                                setShowSubstationsList(false);
-                            }}
+                            setShowSubstationsList={setShowSubstationsList}
+                            setShowControls={setShowControls}
                         />
                     </div>
                 )}
                 <img
-                    src={isSelected ? windTurbineSelectedIcon : windTurbineIcon}
+                    src={ getMarkerImg() }
                     alt="Wind Turbine"
-                    style={{ width: '60px', height: '60px', cursor: 'pointer' }}
-                    onClick={handleMarkerClick}
+                    style={{ width: '100px', height: '100px', cursor: 'pointer' }}
+                    onClick={ handleMarkerClick }
                 />
             </div>
         </Marker>

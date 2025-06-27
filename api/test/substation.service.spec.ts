@@ -88,7 +88,7 @@ describe('SubstationService', () => {
 
     beforeEach(() => {
         service = new SubstationService();
-        (dataProviderUtils.readGSPData as jest.Mock).mockReturnValue(sharedGSPData);
+        (dataProviderUtils.readGridSupplyPointData as jest.Mock).mockReturnValue(sharedGSPData);
     });
 
     describe('extractPointFromGeoJSON', () => {
@@ -240,7 +240,7 @@ describe('SubstationService', () => {
                     },
                 ],
             };
-            (dataProviderUtils.readGSPData as jest.Mock).mockReturnValue(mockGSPData);
+            (dataProviderUtils.readGridSupplyPointData as jest.Mock).mockReturnValue(mockGSPData);
 
             const result = service.findNearestSubstations(point);
 

@@ -1,5 +1,5 @@
 import type { SubstationResponse } from '../../types/substationResponse';
-import type { ListItem } from './SubstationsList';
+import type { Substation } from './SubstationsList';
 
 /**
  * Fetches substations data from API based on coordinates
@@ -11,11 +11,11 @@ export const fetchSubstations = async (
     longitude: number,
     latitude: number
 ): Promise<{
-    items: ListItem[];
+    items: Substation[];
     error: string | null;
 }> => {
     let error = null;
-    let items: ListItem[] = [];
+    let items: Substation[] = [];
 
     try {
         // Create GeoJSON point for current marker location
@@ -40,8 +40,9 @@ export const fetchSubstations = async (
 
         const data: SubstationResponse[] = await response.json();
         items = data.map((item) => ({
-            text: item.name,
-            distance: item.distance,
+            name: item.name,
+            distanceFromTurbine: item.distance,
+            coordinates: item.location.geometry.coordinates
         }));
     } catch (err) {
         console.error('Error fetching substations:', err);

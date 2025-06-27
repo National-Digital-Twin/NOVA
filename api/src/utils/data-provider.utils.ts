@@ -15,7 +15,8 @@ export class DataProviderUtils {
     private readonly assetsDataFilePath: string;
     private readonly sampleGeoJsonFilePath: string;
     private readonly substationsDataFilePath: string;
-    private readonly gspDataFilePath: string;
+    private readonly gridSupplyPointDataFilePath: string;
+    private readonly powerLineDataFilePath: string;
     private readonly regionsDataFilePath: string;
     private readonly windspeedBadLayerDataFilePath: string;
     private readonly windspeedGoodLayerDataFilePath: string;
@@ -38,7 +39,8 @@ export class DataProviderUtils {
         this.assetsDataFilePath = path.join(__dirname, '../data/assets.json');
         this.sampleGeoJsonFilePath = path.join(__dirname, '../data/sampleGeoJson.json');
         this.substationsDataFilePath = path.join(__dirname, '../data/substations.json');
-        this.gspDataFilePath = path.join(__dirname, '../data/GSP.geojson');
+        this.gridSupplyPointDataFilePath = path.join(__dirname, '../data/grid-supply-points.geojson');
+        this.powerLineDataFilePath = path.join(__dirname, '../data/main-power-lines.geojson');
         this.windspeedBadLayerDataFilePath = path.join(__dirname, '../data/windspeed-bad.geojson');
         this.windspeedGoodLayerDataFilePath = path.join(__dirname, '../data/windspeed-good.geojson');
         this.specialAreasOfConservationLayerDataFilePath = path.join(__dirname, '../data/sac.geojson');
@@ -92,8 +94,17 @@ export class DataProviderUtils {
      * Read GSP data from the GeoJSON file
      * @returns GeoJSON object containing the GSP data
      */
-    public readGSPData(): FeatureCollection {
-        const fileContent = fs.readFileSync(this.gspDataFilePath, 'utf8');
+    public readGridSupplyPointData(): FeatureCollection {
+        const fileContent = fs.readFileSync(this.gridSupplyPointDataFilePath, 'utf8');
+        return JSON.parse(fileContent) as FeatureCollection;
+    }
+
+    /**
+     * Read power line data from the GeoJSON file
+     * @returns GeoJSON object containing the GSP data
+     */
+    public readPowerLineData(): FeatureCollection {
+        const fileContent = fs.readFileSync(this.powerLineDataFilePath, 'utf8');
         return JSON.parse(fileContent) as FeatureCollection;
     }
 

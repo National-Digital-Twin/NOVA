@@ -5,16 +5,17 @@ import maplibregl from 'maplibre-gl';
 import { createRoot } from 'react-dom/client';
 import { MapVisualHelper } from '../utils/MapVisualHelper';
 import ConfirmPolygonButton from '../components/map-controls/confirm-polygon/ConfirmPolygonButton';
+import { useMapStore } from '../stores/useMapStore';
 
 interface UsePolygonHandlersProps {
     mapRef: React.RefObject<MapRef>;
     popupRef: React.RefObject<maplibregl.Popup | null>;
     setPolygonDrawn: (val: boolean) => void;
     setPolygonConfirmed: (val: boolean) => void;
-    showLayerControl: () => void;
 }
 
-export function usePolygonHandlers({ mapRef, popupRef, setPolygonDrawn, setPolygonConfirmed, showLayerControl }: UsePolygonHandlersProps) {
+export function usePolygonHandlers({ mapRef, popupRef, setPolygonDrawn, setPolygonConfirmed }: UsePolygonHandlersProps) {
+    const setShowLayerControl = useMapStore((s) => s.setShowLayerControl);
     const showConfirmationPopup = useCallback(
         (polygon: Polygon, onConfirm: () => void) => {
             const popupNode = document.createElement('div');
@@ -56,10 +57,10 @@ export function usePolygonHandlers({ mapRef, popupRef, setPolygonDrawn, setPolyg
             showConfirmationPopup(polygon, () => {
                 MapVisualHelper.removeExistingPopup(popupRef);
                 handlePolygonConfirmed(geojson);
-                showLayerControl();
+                setShowLayerControl(true);
             });
         },
-        [setPolygonDrawn, setPolygonConfirmed, showConfirmationPopup, handlePolygonConfirmed, popupRef, showLayerControl]
+        [setPolygonDrawn, setPolygonConfirmed, showConfirmationPopup, handlePolygonConfirmed, popupRef, setShowLayerControl]
     );
 
     const handlePolygonEdited = useCallback(
@@ -72,9 +73,9 @@ export function usePolygonHandlers({ mapRef, popupRef, setPolygonDrawn, setPolyg
             }
 
             MapVisualHelper.remove3DAssets(mapRef.current.getMap());
-            showLayerControl();
+            setShowLayerControl(true);
         },
-        [setPolygonDrawn, mapRef, showLayerControl]
+        [setPolygonDrawn, mapRef, setShowLayerControl]
     );
 
     const handlePolygonDeleted = useCallback(() => {

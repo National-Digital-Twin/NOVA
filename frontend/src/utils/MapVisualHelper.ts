@@ -26,10 +26,13 @@ interface ThreeJsCustomLayer extends maplibregl.CustomLayerInterface {
  */
 export class MapVisualHelper {
     // Unique ID for the source and layer used for masking
-    private static readonly maskLayerSourceId = 'mask';
-    private static readonly maskLayerId = 'mask-layer';
+    public static readonly maskLayerSourceId = 'mask';
+    public static readonly maskLayerId = 'mask-layer';
     private static readonly heatmapLayerId = 'heatmap-layer';
     private static readonly threeDimensionalAssetsLayer = '3d-assets-layer';
+    public static readonly substationLayerId = 'substation-layer';
+    public static readonly powerLineLayerId = 'power-line-layer';
+    public static readonly connectionLineLayerId = 'connection-line-layer';
 
     /**
      * Applies a dimmed mask over the entire map except inside the given polygon and centers the map on that polygon.
@@ -132,21 +135,6 @@ export class MapVisualHelper {
     static removeExistingPopup(popupRef: React.RefObject<Popup | null>) {
         popupRef.current?.remove();
         popupRef.current = null;
-    }
-
-    /**
-     * Flies the map to a specific location with a smooth animation.
-     *
-     * @param mapRef - A React ref to the MapLibre map instance
-     * @param lat - Latitude of the target location
-     * @param lng - Longitude of the target location
-     * @param zoom - Zoom level for the target location
-     * @param duration - Duration of the flyTo animation in milliseconds (default is 2000ms)
-     */
-    static flyToLocation(mapRef: React.RefObject<MapRef>, lat: number, lng: number, zoom: number, duration = 2000) {
-        const map = mapRef.current?.getMap();
-        if (!map) return;
-        map.flyTo({ center: [lng, lat], zoom, duration });
     }
 
     /**

@@ -11,16 +11,16 @@ import { useMapStore } from '../../../stores/useMapStore';
 
 interface EditPolygonButtonProps {
     onPolygonEdited: (geojson: FeatureCollection<Geometry>) => void;
-    hideLayerControl: () => void;
     mapRef: React.RefObject<MapRef>;
     drawRef: React.RefObject<MapboxDraw | null>;
     polygonConfirmationPopUpRef: React.RefObject<maplibregl.Popup | null>;
     isVisible: boolean;
 }
 
-const EditPolygonButton = ({ onPolygonEdited, hideLayerControl, mapRef, drawRef, polygonConfirmationPopUpRef, isVisible }: EditPolygonButtonProps) => {
+const EditPolygonButton = ({ onPolygonEdited, mapRef, drawRef, polygonConfirmationPopUpRef, isVisible }: EditPolygonButtonProps) => {
     const [isActive, setIsActive] = useState(false);
     const setCachedHeatmap = useMapStore((s) => s.setCachedHeatmap);
+    const setShowLayerControl = useMapStore((s) => s.setShowLayerControl);
 
     const handleClick = () => {
         if (isActive) return;
@@ -30,12 +30,12 @@ const EditPolygonButton = ({ onPolygonEdited, hideLayerControl, mapRef, drawRef,
         if (!map || !draw) return;
 
         setIsActive(true);
-        hideLayerControl();
+        setShowLayerControl(false);
         MapVisualHelper.removeDimmedMask(map);
         MapVisualHelper.removeExistingPopup(polygonConfirmationPopUpRef);
 
         MapVisualHelper.removeHeatmapLayer(mapRef);
-        setCachedHeatmap(null); // ✅ now a normal function call
+        setCachedHeatmap(null);
 
         map.getCanvas().style.cursor = 'grab';
 

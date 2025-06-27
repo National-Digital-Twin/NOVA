@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
 import maplibregl from 'maplibre-gl';
+import { MapVisualHelper } from '../../utils/MapVisualHelper';
 
 interface SubstationConnectionComponentProps {
   mapRef: React.RefObject<MapRef>;
@@ -26,19 +27,17 @@ const SubstationConnectionComponent: React.FC<SubstationConnectionComponentProps
     if (!map) return;
 
     // Create a GeoJSON source with the path coordinates
-    const sourceId = 'path-source';
-    const layerId = 'path-layer';
 
     // Remove existing source and layer if they exist
-    if (map.getSource(sourceId)) {
-      if (map.getLayer(layerId)) {
-        map.removeLayer(layerId);
+    if (map.getSource(MapVisualHelper.connectionLineLayerId)) {
+      if (map.getLayer(MapVisualHelper.connectionLineLayerId)) {
+        map.removeLayer(MapVisualHelper.connectionLineLayerId);
       }
-      map.removeSource(sourceId);
+      map.removeSource(MapVisualHelper.connectionLineLayerId);
     }
 
     // Add the source with the path data
-    map.addSource(sourceId, {
+    map.addSource(MapVisualHelper.connectionLineLayerId, {
       type: 'geojson',
       data: {
         type: 'Feature',
@@ -55,9 +54,9 @@ const SubstationConnectionComponent: React.FC<SubstationConnectionComponentProps
 
     // Add a layer to display the path
     map.addLayer({
-      id: layerId,
+      id: MapVisualHelper.connectionLineLayerId,
       type: 'line',
-      source: sourceId,
+      source: MapVisualHelper.connectionLineLayerId,
       layout: {
         'line-join': 'round',
         'line-cap': 'round'
@@ -69,28 +68,18 @@ const SubstationConnectionComponent: React.FC<SubstationConnectionComponentProps
       }
     });
 
-    // Fit the map to show the entire path
-    const bounds = new maplibregl.LngLatBounds()
-      .extend([sourceLng, sourceLat])
-      .extend([destLng, destLat]);
-
-    map.fitBounds(bounds, {
-      padding: 50,
-      maxZoom: 15
-    });
-
     // Cleanup function to remove the source and layer when the component unmounts
     return () => {
-      if (map.getLayer(layerId)) {
-        map.removeLayer(layerId);
+      if (map.getLayer(MapVisualHelper.connectionLineLayerId)) {
+        map.removeLayer(MapVisualHelper.connectionLineLayerId);
       }
-      if (map.getSource(sourceId)) {
-        map.removeSource(sourceId);
+      if (map.getSource(MapVisualHelper.connectionLineLayerId)) {
+        map.removeSource(MapVisualHelper.connectionLineLayerId);
       }
     };
   }, [mapRef, sourceLng, sourceLat, destLng, destLat]);
 
-  return null; // This component doesn't render any UI elements
+  return null;
 };
 
 export default SubstationConnectionComponent;

@@ -227,7 +227,7 @@ describe('UIController', () => {
                 },
             ],
         };
-        (dataProviderUtils.readGSPData as jest.Mock).mockReturnValue(mockGSPData);
+        (dataProviderUtils.readGridSupplyPointData as jest.Mock).mockReturnValue(mockGSPData);
 
         // Mock the substationService.getNearestSubstations method
         const mockNearestSubstations: LocationsDTO = [

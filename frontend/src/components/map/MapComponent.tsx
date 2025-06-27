@@ -7,10 +7,12 @@ import MapControls from '../map-controls/MapControls';
 import SearchPanel from '../search/SearchPanel';
 import LayerControlPanel from '../layer-selection/LayerControlPanel';
 import AssetMarker from '../asset-marker/AssetMarker';
-import windTurbineIcon from '../../assets/Windturbine_white.svg';
+import windTurbineIcon from '../../assets/pending_turbine.svg';
 import useMapboxDraw from '../../hooks/useMapboxDraw';
 import { MapVisualHelper } from '../../utils/MapVisualHelper';
 import { useMapStore } from '../../stores/useMapStore';
+import TurbineOutputPanel from '../grid-connect/output-panel/TurbineOutputPanel';
+import GridConnectPanel from '../grid-connect/GridConnectPanel';
 
 const MAP_VIEW_BOUNDS: [[number, number], [number, number]] = [
     [-25.0, 42.0],
@@ -23,10 +25,11 @@ const MapComponent = () => {
     const [viewState, setViewState] = useState({ longitude: -1.611, latitude: 54.5, pitch: 0, bearing: 0 });
     const [mapStyle, setMapStyle] = useState<MapStyle>('hybrid');
     const [isMapInitialized, setIsMapInitialized] = useState(false);
-    const [showLayerControl, setShowLayerControl] = useState(false);
+    const showLayerControl = useMapStore((s) => s.showLayerControl);
     const markerPosition = useMapStore((s) => s.markerPosition);
     const setMarkerPosition = useMapStore((s) => s.setMarkerPosition);
     const placing = useMapStore((s) => s.placing);
+    const gridConnectViewActive = useMapStore((s) => s.gridConnectViewActive);
 
     const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -105,12 +108,11 @@ const MapComponent = () => {
                     <>
                         <SearchPanel
                             drawRef={drawRef}
-                            hideLayerControl={() => setShowLayerControl(false)}
                             isPanelOpen={isPanelOpen}
                             mapRef={mapRef}
                             setIsPanelOpen={setIsPanelOpen}
-                            showLayerControl={() => setShowLayerControl(true)}
                         />
+                        {gridConnectViewActive && <GridConnectPanel />}
                         <MapControls mapRef={mapRef} onStyleChange={handleStyleChange} currentStyle={mapStyle} is3D={is3D} setIs3D={setIs3D} />
                         {placing && mousePos && (
                             <div
@@ -136,6 +138,7 @@ const MapComponent = () => {
                             />
                         )}
                         {showLayerControl && <LayerControlPanel mapRef={mapRef} drawRef={drawRef} />}
+                        {gridConnectViewActive && <TurbineOutputPanel />}
                     </>
                 )}
             </Map>
