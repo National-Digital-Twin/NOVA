@@ -1,4 +1,4 @@
 export interface DataLayerAttribute {
-    name: string;
-    value: string | number | boolean;
+    id: string;
+    value: number;
 }
