@@ -71,6 +71,7 @@ export function usePolygonHandlers({ mapRef, popupRef, setPolygonDrawn, setPolyg
                 MapVisualHelper.applyDimmedMaskAndPanToPolygon(mapRef.current!.getMap(), polygon);
             }
 
+            MapVisualHelper.remove3DAssets(mapRef.current.getMap());
             showLayerControl();
         },
         [setPolygonDrawn, mapRef, showLayerControl]
@@ -85,6 +86,7 @@ export function usePolygonHandlers({ mapRef, popupRef, setPolygonDrawn, setPolyg
             MapVisualHelper.removeDimmedMask(map);
             MapVisualHelper.removeExistingPopup(popupRef);
             MapVisualHelper.removeHeatmapLayer(mapRef);
+            MapVisualHelper.remove3DAssets(mapRef.current.getMap());
         }
     }, [mapRef, popupRef, setPolygonDrawn, setPolygonConfirmed]);
 

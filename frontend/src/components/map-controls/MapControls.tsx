@@ -7,7 +7,6 @@ import MapStylePanel from './map-style/MapStylePanel';
 import ViewToggleButton from './view-toggle/ViewToggleButton';
 import ZoomInButton from './zoom-in/ZoomInButton';
 import ZoomOutButton from './zoom-out/ZoomOutButton';
-import { useState } from 'react';
 
 const ControlsContainer = styled(Box)({
     display: 'flex',
@@ -35,13 +34,13 @@ const ControlDivider = styled(Box)(({ theme }) => ({
 
 interface MapControlsProps {
     mapRef: React.RefObject<MapRef>;
-    onStyleChange: (style: MapStyle) => void;
     currentStyle: MapStyle;
+    is3D: boolean;
+    onStyleChange: (style: MapStyle) => void;
+    setIs3D: (is3d: boolean) => void;
 }
 
-const MapControls = ({ mapRef, onStyleChange, currentStyle }: MapControlsProps) => {
-    const [is3D, setIs3D] = useState(false);
-
+const MapControls = ({ mapRef, onStyleChange, currentStyle, is3D, setIs3D }: MapControlsProps) => {
     return (
         <ControlsContainer>
             <ControlGroup role="group" aria-label="View controls">
@@ -56,11 +55,9 @@ const MapControls = ({ mapRef, onStyleChange, currentStyle }: MapControlsProps) 
                 <ZoomOutButton mapRef={mapRef} />
             </ControlGroup>
 
-            {!is3D && (
-                <ControlGroup role="group" aria-label="Map style controls">
-                    <MapStylePanel currentStyle={currentStyle} onStyleChange={onStyleChange} />
-                </ControlGroup>
-            )}
+            <ControlGroup role="group" aria-label="Map style controls">
+                <MapStylePanel currentStyle={currentStyle} onStyleChange={onStyleChange} />
+            </ControlGroup>
 
             <ControlGroup role="group" aria-label="Map legend controls">
                 <MapLegendPanel mapRef={mapRef} />

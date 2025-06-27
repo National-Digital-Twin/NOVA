@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react';
-import { Marker } from 'react-map-gl/maplibre';
-import type { MapRef, MarkerDragEvent } from 'react-map-gl/maplibre';
+import { Marker, type MapRef, type MarkerDragEvent } from 'react-map-gl/maplibre';
 import windTurbineIcon from '../../assets/Windturbine_blue_unselected.svg';
 import windTurbineSelectedIcon from '../../assets/Windturbine_blue_selected.svg';
 import AssetControls from './AssetControls';
 import { SubstationsListContainer } from '../map-substations-list';
+import { useMapStore } from '../../stores/useMapStore';
 
 interface AssetMarkerProps {
     longitude?: number;
@@ -15,47 +15,27 @@ interface AssetMarkerProps {
     isSelected?: boolean;
     onDragEnd?: (longitude: number, latitude: number) => void;
     setIsPanelOpen?: (isPanelOpen: boolean) => void;
-    setMarkerPosition?: React.Dispatch<
-        React.SetStateAction<{
-            longitude?: number;
-            latitude?: number;
-        } | null>
-    >;
     setPlacing?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 /**
  * A reusable component for displaying a wind turbine marker on the map
  */
-const AssetMarker: React.FC<AssetMarkerProps> = ({
-    longitude,
-    latitude,
-    onClick,
-    onBoltClick,
-    isSelected = false,
-    onDragEnd,
-    setMarkerPosition,
-    setIsPanelOpen,
-    setPlacing,
-}) => {
+const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltClick, isSelected = false, onDragEnd, setIsPanelOpen }) => {
     const markerRef = useRef<HTMLDivElement>(null);
     const [showControls, setShowControls] = useState(false);
     const [showSubstationsList, setShowSubstationsList] = useState(false);
+    const setPlacing = useMapStore((s) => s.setPlacing);
+    const setMarkerPosition = useMapStore((s) => s.setMarkerPosition);
+    const preventPolygonEdit = useMapStore((s) => s.preventPolygonEdit);
 
     const handleMarkerClick = (e: React.MouseEvent) => {
-        // Prevent event from bubbling up to the map
+        // handle event propogation
         e.stopPropagation();
-
-        // Log marker click
-        console.log('Marker clicked');
+        preventPolygonEdit(e.nativeEvent);
 
         // Toggle controls visibility
         setShowControls((prev) => !prev);
-
-        // Call the onClick prop if provided
-        if (onClick) {
-            onClick();
-        }
     };
 
     const handleDragEnd = (event: MarkerDragEvent) => {
@@ -74,7 +54,7 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({
 
     return (
         <Marker longitude={longitude} latitude={latitude} anchor="bottom" draggable={true} onDragEnd={handleDragEnd}>
-            <div ref={markerRef} style={{ position: 'relative' }} onClick={(e) => e.stopPropagation()}>
+            <div ref={markerRef} style={{ position: 'relative' }}>
                 {showControls && (
                     <AssetControls
                         onBoltClick={() => {

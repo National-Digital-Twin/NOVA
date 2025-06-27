@@ -57,7 +57,15 @@ describe('MapControls', () => {
     };
 
     it('renders all control groups', () => {
-        render(<MapControls {...defaultProps} />);
+        render(
+            <MapControls
+                is3D={false}
+                setIs3D={function (_is3d: boolean): void {
+                    throw new Error('Function not implemented.');
+                }}
+                {...defaultProps}
+            />
+        );
         expect(screen.getByLabelText('View controls')).toBeInTheDocument();
         expect(screen.getByLabelText('Zoom controls')).toBeInTheDocument();
         expect(screen.getByLabelText('Map style controls')).toBeInTheDocument();
@@ -65,7 +73,15 @@ describe('MapControls', () => {
     });
 
     it('renders all control buttons', () => {
-        render(<MapControls {...defaultProps} />);
+        render(
+            <MapControls
+                is3D={false}
+                setIs3D={function (_is3d: boolean): void {
+                    throw new Error('Function not implemented.');
+                }}
+                {...defaultProps}
+            />
+        );
         expect(screen.getByLabelText('Reset View')).toBeInTheDocument();
         expect(screen.getByLabelText('Switch to 2D')).toBeInTheDocument();
         expect(screen.getByLabelText('Zoom In')).toBeInTheDocument();
@@ -75,7 +91,15 @@ describe('MapControls', () => {
     });
 
     it('handles style change', () => {
-        render(<MapControls {...defaultProps} />);
+        render(
+            <MapControls
+                is3D={false}
+                setIs3D={function (_is3d: boolean): void {
+                    throw new Error('Function not implemented.');
+                }}
+                {...defaultProps}
+            />
+        );
         fireEvent.click(screen.getByLabelText('Change map style'));
         expect(screen.getByText('Satellite')).toBeInTheDocument();
         fireEvent.click(screen.getByText('Satellite'));

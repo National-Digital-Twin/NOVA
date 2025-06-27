@@ -5,6 +5,7 @@ import type { Asset, Variation } from './AddAsset';
 import AssetDetails from './AssetDetails';
 import AssetTypeSelector from './AssetTypeSelector';
 import AssetVariantSelector from './AssetVariantSelector';
+import { useMapStore } from '../../../stores/useMapStore';
 
 const AddAssetPanelContainer = styled(Box)(({ theme }) => ({
     backgroundColor: theme.palette.background.paper,
@@ -15,22 +16,22 @@ const AddAssetPanelContainer = styled(Box)(({ theme }) => ({
     left: 0,
     position: 'absolute',
     top: 'calc(100% + 16px)',
-    width: 320,
+    width: 280,
     zIndex: 1000,
 }));
 
 const PanelContent = styled(Box)(({ theme }) => ({
     display: 'flex',
     flexDirection: 'column',
-    gap: theme.spacing(2),
-    padding: theme.spacing(3),
+    gap: theme.spacing(1),
+    padding: theme.spacing(2),
 }));
 
 const PanelFooter = styled(Box)(({ theme }) => ({
     display: 'flex',
     gap: theme.spacing(2),
     justifyContent: 'center',
-    padding: theme.spacing(0, 0, 3),
+    paddingBottom: theme.spacing(2),
 }));
 
 interface AddAssetPanelProps {
@@ -41,7 +42,8 @@ interface AddAssetPanelProps {
 const AddAssetPanel = ({ onClose, onSelect }: AddAssetPanelProps) => {
     const [assets, setAssets] = useState<Asset[]>([]);
     const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
-    const [selectedVariant, setSelectedVariant] = useState<Variation | null>(null);
+    const setSelectedVariant = useMapStore((s) => s.setMarkerVariant);
+    const selectedVariant = useMapStore((s) => s.markerVariant);
 
     useEffect(() => {
         fetch('/data/assets.json')
@@ -55,7 +57,7 @@ const AddAssetPanel = ({ onClose, onSelect }: AddAssetPanelProps) => {
                     }
                 }
             });
-    }, []);
+    }, [setSelectedVariant]);
 
     const handleAssetChange = (assetId: string) => {
         const asset = assets.find((a) => a.id === assetId);

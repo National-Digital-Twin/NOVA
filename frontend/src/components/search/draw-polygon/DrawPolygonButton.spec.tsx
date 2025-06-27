@@ -1,7 +1,7 @@
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
-import type { MapRef } from 'react-map-gl/maplibre';
+import type { MapLayerMouseEvent, MapRef } from 'react-map-gl/maplibre';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import DrawPolygonButton from './DrawPolygonButton';
 
@@ -19,6 +19,50 @@ vi.mock('../../../shared/control-icon/ControlIcon', () => ({
         </button>
     ),
 }));
+
+import * as mapStore from '../../../stores/useMapStore';
+import type { Variation } from '../add-asset/AddAsset';
+
+// Before each test, stub useMapStore to provide preventPolygonEdit
+beforeEach(() => {
+    vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) =>
+        selector({
+            preventPolygonEdit: vi.fn(),
+            mapRef: null,
+            setMapRef: function (_ref: MapRef): void {
+                throw new Error('Function not implemented.');
+            },
+            drawRef: null,
+            setDrawRef: function (_ref: MapboxDraw): void {
+                throw new Error('Function not implemented.');
+            },
+            placing: false,
+            setPlacing: function (_placing: boolean): void {
+                throw new Error('Function not implemented.');
+            },
+            markerPosition: null,
+            setMarkerPosition: function (_position: { longitude?: number; latitude?: number } | null): void {
+                throw new Error('Function not implemented.');
+            },
+            markerBearing: null,
+            setMarkerBearing: function (_bearing: number): void {
+                throw new Error('Function not implemented.');
+            },
+            markerVariant: null,
+            setMarkerVariant: function (_variant: Variation | null): void {
+                throw new Error('Function not implemented.');
+            },
+            handleMapClick: function (_e: MapLayerMouseEvent): void {
+                throw new Error('Function not implemented.');
+            },
+            cachedHeatmap: null,
+            setCachedHeatmap: function (_featureCollection: FeatureCollection | null): void {
+                throw new Error('Function not implemented.');
+            },
+        })
+    );
+    vi.clearAllMocks();
+});
 
 describe('DrawPolygonButton', () => {
     const mockOnPolygonDrawn = vi.fn();
@@ -58,13 +102,13 @@ describe('DrawPolygonButton', () => {
     it('does not render if isVisible is false', () => {
         render(<DrawPolygonButton mapRef={mockMapRef} drawRef={mockDrawRef} onPolygonDrawn={mockOnPolygonDrawn} isVisible={false} polygonDrawn={false} />);
 
-        expect(screen.queryByLabelText('Draw Polygon')).not.toBeInTheDocument();
+        expect(screen.queryByLabelText('Draw polygon')).not.toBeInTheDocument();
     });
 
     it('renders and activates when clicked, triggering draw_polygon mode', async () => {
         render(<DrawPolygonButton mapRef={mockMapRef} drawRef={mockDrawRef} onPolygonDrawn={mockOnPolygonDrawn} isVisible={true} polygonDrawn={false} />);
 
-        const button = screen.getByLabelText('Draw Polygon');
+        const button = screen.getByLabelText('Draw polygon');
 
         await act(() => fireEvent.click(button));
 
@@ -76,7 +120,7 @@ describe('DrawPolygonButton', () => {
     it('does not activate if polygonDrawn is true', async () => {
         render(<DrawPolygonButton mapRef={mockMapRef} drawRef={mockDrawRef} onPolygonDrawn={mockOnPolygonDrawn} isVisible={true} polygonDrawn={true} />);
 
-        const button = screen.getByLabelText('Draw Polygon');
+        const button = screen.getByLabelText('Draw polygon');
 
         await act(() => fireEvent.click(button));
 
@@ -88,7 +132,7 @@ describe('DrawPolygonButton', () => {
 
         render(<DrawPolygonButton mapRef={mockMapRef} drawRef={mockDrawRef} onPolygonDrawn={mockOnPolygonDrawn} isVisible={true} polygonDrawn={false} />);
 
-        const button = screen.getByLabelText('Draw Polygon');
+        const button = screen.getByLabelText('Draw polygon');
 
         await act(() => fireEvent.click(button));
 
@@ -100,7 +144,7 @@ describe('DrawPolygonButton', () => {
 
         render(<DrawPolygonButton mapRef={mockMapRef} drawRef={nullDrawRef} onPolygonDrawn={mockOnPolygonDrawn} isVisible={true} polygonDrawn={false} />);
 
-        const button = screen.getByLabelText('Draw Polygon');
+        const button = screen.getByLabelText('Draw polygon');
 
         await act(() => fireEvent.click(button));
 
@@ -112,7 +156,7 @@ describe('DrawPolygonButton', () => {
 
         render(<DrawPolygonButton mapRef={nullMapRef} drawRef={mockDrawRef} onPolygonDrawn={mockOnPolygonDrawn} isVisible={true} polygonDrawn={false} />);
 
-        const button = screen.getByLabelText('Draw Polygon');
+        const button = screen.getByLabelText('Draw polygon');
 
         await act(() => fireEvent.click(button));
 
@@ -146,7 +190,7 @@ describe('DrawPolygonButton', () => {
 
         render(<DrawPolygonButton mapRef={mockMapRef} drawRef={mockDrawRef} onPolygonDrawn={mockOnPolygonDrawn} isVisible={true} polygonDrawn={false} />);
 
-        const button = screen.getByLabelText('Draw Polygon');
+        const button = screen.getByLabelText('Draw polygon');
 
         await act(() => fireEvent.click(button));
         expect(mockDrawRef.current.changeMode).toHaveBeenCalledWith('draw_polygon');
@@ -163,6 +207,24 @@ describe('DrawPolygonButton', () => {
         const mockChangeMode = vi.fn();
         const mockQueryRenderedFeatures = vi.fn().mockReturnValue([{}]);
         const mockMode = vi.fn().mockReturnValue('simple_select');
+
+        vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) =>
+            selector({
+                preventPolygonEdit: (e: MouseEvent) => {
+                    const mode = draw.getMode();
+                    if (mode.startsWith('draw')) return;
+
+                    const features = map.queryRenderedFeatures([10, 10], {
+                        layers: ['gl-draw-polygon-fill.cold'],
+                    });
+
+                    if (features.length > 0) {
+                        draw.changeMode('simple_select', { featureIds: [] });
+                        e.preventDefault();
+                    }
+                },
+            } as any)
+        );
 
         const map = {
             on: vi.fn(),

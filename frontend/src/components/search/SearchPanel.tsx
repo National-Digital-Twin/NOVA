@@ -42,11 +42,10 @@ interface SearchPanelProps {
     mapRef: React.RefObject<MapRef>;
     isPanelOpen: boolean;
     setIsPanelOpen: (isPanelOpen: boolean) => void;
-    setPlacing: (placing: boolean) => void;
     showLayerControl: () => void;
 }
 
-const SearchPanel = ({ drawRef, hideLayerControl, mapRef, isPanelOpen, setIsPanelOpen, setPlacing, showLayerControl }: SearchPanelProps) => {
+const SearchPanel = ({ drawRef, hideLayerControl, mapRef, isPanelOpen, setIsPanelOpen, showLayerControl }: SearchPanelProps) => {
     const popupRef = useRef<maplibregl.Popup | null>(null);
     const [polygonDrawn, setPolygonDrawn] = useState(false);
     const [polygonConfirmed, setPolygonConfirmed] = useState(false);
@@ -73,21 +72,26 @@ const SearchPanel = ({ drawRef, hideLayerControl, mapRef, isPanelOpen, setIsPane
             </SearchGroup>
 
             <SearchGroup role="group" aria-label="Drawing controls">
-                <DeletePolygonButton
-                    drawRef={drawRef}
-                    isVisible={polygonDrawn && polygonConfirmed}
-                    onPolygonDeleted={handlePolygonDeleted}
-                    hideLayerControl={hideLayerControl}
-                />
-                <StyledDivider orientation="vertical" flexItem />
-                <EditPolygonButton
-                    mapRef={mapRef}
-                    drawRef={drawRef}
-                    polygonConfirmationPopUpRef={popupRef}
-                    isVisible={polygonDrawn && polygonConfirmed}
-                    onPolygonEdited={handlePolygonEdited}
-                    hideLayerControl={hideLayerControl}
-                />
+                {polygonConfirmed && (
+                    <>
+                        <DeletePolygonButton
+                            drawRef={drawRef}
+                            isVisible={polygonDrawn && polygonConfirmed}
+                            onPolygonDeleted={handlePolygonDeleted}
+                            hideLayerControl={hideLayerControl}
+                        />
+                        <StyledDivider orientation="vertical" flexItem />
+                        <EditPolygonButton
+                            mapRef={mapRef}
+                            drawRef={drawRef}
+                            polygonConfirmationPopUpRef={popupRef}
+                            isVisible={polygonDrawn && polygonConfirmed}
+                            onPolygonEdited={handlePolygonEdited}
+                            hideLayerControl={hideLayerControl}
+                        />
+                    </>
+                )}
+
                 <DrawPolygonButton
                     mapRef={mapRef}
                     drawRef={drawRef}
@@ -95,12 +99,12 @@ const SearchPanel = ({ drawRef, hideLayerControl, mapRef, isPanelOpen, setIsPane
                     onPolygonDrawn={handlePolygonDrawn}
                     polygonDrawn={polygonDrawn}
                 />
-                <StyledDivider orientation="vertical" flexItem />
+
                 <HideLayersButton mapRef={mapRef} />
             </SearchGroup>
 
             <SearchGroup>
-                <AddAssetButton onAssetSelect={setPlacing} isPanelOpen={isPanelOpen} setIsPanelOpen={setIsPanelOpen} />
+                <AddAssetButton isPanelOpen={isPanelOpen} setIsPanelOpen={setIsPanelOpen} />
             </SearchGroup>
         </SearchContainer>
     );
