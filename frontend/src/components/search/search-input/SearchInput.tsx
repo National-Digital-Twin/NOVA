@@ -85,11 +85,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ onSearchResultClick }) => {
             onChange={handleChange}
             clearIcon={<ClearIcon />}
             disableClearable={false}
-            slotProps={{
-                popper: {
-                    modifiers: [{ name: 'offset', options: { offset: [0, 8] } }],
-                },
-            }}
+            slotProps={{ popper: { modifiers: [{ name: 'offset', options: { offset: [0, 8] } }] } }}
             renderInput={(params) => (
                 <StyledTextField
                     {...params}

@@ -1,16 +1,19 @@
+import { Box } from '@mui/material';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { Map } from 'react-map-gl/maplibre';
-import { MAP_STYLES, type MapStyle } from '../../types/map';
-import MapControls from '../map-controls/MapControls';
-import SearchPanel from '../search/SearchPanel';
-import LayerControlPanel from '../layer-selection/LayerControlPanel';
-import AssetMarker from '../asset-marker/AssetMarker';
 import windTurbineIcon from '../../assets/Windturbine_white.svg';
 import useMapboxDraw from '../../hooks/useMapboxDraw';
-import { MapVisualHelper } from '../../utils/MapVisualHelper';
 import { useMapStore } from '../../stores/useMapStore';
+import { MAP_STYLES, type MapStyle } from '../../types/map';
+import { MapVisualHelper } from '../../utils/MapVisualHelper';
+import AssetMarker from '../asset-marker/AssetMarker';
+import GridConnectFooterPanel from '../grid-connect/GridConnectFooterPanel';
+import GridConnectMenuPanel from '../grid-connect/GridConnectMenuPanel';
+import LayerControlPanel from '../layer-selection/LayerControlPanel';
+import MapControls from '../map-controls/MapControls';
+import SearchPanel from '../search/SearchPanel';
 
 const MAP_VIEW_BOUNDS: [[number, number], [number, number]] = [
     [-25.0, 42.0],
@@ -35,6 +38,8 @@ const MapComponent = () => {
     const [is3D, setIs3D] = useState(false);
     const cachedHeatMap = useMapStore((s) => s.cachedHeatmap);
 
+    const [selectedSubstation, setSelectedSubstation] = useState<string>('');
+
     const handleStyleChange = (newStyle: MapStyle) => {
         setMapStyle(newStyle);
         const userDrawnPolygon = drawRef.current ? MapVisualHelper.getFirstPolygon(drawRef.current) : null;
@@ -50,7 +55,6 @@ const MapComponent = () => {
         setIsMapInitialized(true);
     };
 
-    // Handle marker drag end to update marker position
     const handleMarkerDragEnd = useCallback(
         (longitude: number, latitude: number) => {
             console.log('Marker position updated:', { longitude, latitude });
@@ -89,8 +93,15 @@ const MapComponent = () => {
         };
     }, [placing]);
 
+    const handleSelectSubstation = (sub: string) => setSelectedSubstation(sub);
+    const handleExitGridConnect = () => setSelectedSubstation('');
+
+    const handleSubstationConfirmed = (selectedSubstationObj: { text: string }) => {
+        setSelectedSubstation(selectedSubstationObj.text);
+    };
+
     return (
-        <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+        <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
             <Map
                 ref={mapRef}
                 maxBounds={MAP_VIEW_BOUNDS}
@@ -133,13 +144,20 @@ const MapComponent = () => {
                                 mapRef={mapRef}
                                 onDragEnd={handleMarkerDragEnd}
                                 setIsPanelOpen={setIsPanelOpen}
+                                onSubstationConfirmed={handleSubstationConfirmed}
                             />
                         )}
                         {showLayerControl && <LayerControlPanel mapRef={mapRef} drawRef={drawRef} />}
                     </>
                 )}
             </Map>
-        </div>
+            {selectedSubstation && (
+                <>
+                    <GridConnectMenuPanel selected={selectedSubstation} onSelect={handleSelectSubstation} onExit={handleExitGridConnect} />
+                    <GridConnectFooterPanel selectedSubstation={selectedSubstation} />
+                </>
+            )}
+        </Box>
     );
 };
 
