@@ -1,4 +1,4 @@
-import { FeatureCollection, Geometry, Feature, Polygon, MultiPolygon, GeoJsonProperties } from 'geojson';
+import { FeatureCollection, Feature, Polygon, MultiPolygon, GeoJsonProperties, Point, Position, Geometry } from 'geojson';
 import { AssetLocationRequestDto } from '../models/asset-location-request.model';
 import { DataProviderUtils } from '../utils/data-provider.utils';
 import * as turf from '@turf/turf';
@@ -10,16 +10,59 @@ import { DataLayerDto } from '../models/data-layer.model';
 export class AssetAnalysisService {
     constructor(private readonly dataProviderUtils: DataProviderUtils) {}
 
+    /*
+     * A helper method to get the maximum distance for a multipolygon from the provided centroid. The provided centroid should be the centroid of the multipolygon
+     */
+    private getMaxDistanceFromCentroid(geometry: MultiPolygon, centroid: Feature<Point>): number {
+        let maxDistanceFromCentroid = 0;
+        geometry.coordinates.forEach((innerCoordinates: Position[][]) => {
+            innerCoordinates[0].forEach((polygonCoordinates) => {
+                const point = turf.point(polygonCoordinates);
+                const distance = turf.distance(centroid, point, { units: 'kilometers' });
+                maxDistanceFromCentroid = Math.max(maxDistanceFromCentroid, distance);
+            });
+        });
+
+        return maxDistanceFromCentroid;
+    }
+
+    /*
+     * A helped method to create two circles that envelope the provided multipolygon one have a radius of the maximum distance from the centoid + the minimum distance provided and the other having a redius of the maximum distance from the centroid + the minimum distance provided + 0.5km
+     */
+    private getCircleEnvelopesForFeature(feature: Feature<MultiPolygon>, minDistance: number): Feature<Polygon>[] {
+        const centroid = turf.centroid(feature);
+        const maxDistanceFromCentroid = this.getMaxDistanceFromCentroid(feature.geometry, centroid);
+        return [
+            turf.circle(centroid, maxDistanceFromCentroid + minDistance, { units: 'kilometers' }),
+            turf.circle(centroid, maxDistanceFromCentroid + minDistance + 0.5, { units: 'kilometers' }),
+        ];
+    }
+
+    /*
+     * A helped method to get the matched polygons for the provided layer based on the provided location. The matched polygons are provided a the passed in suitability rating and the issue description.
+     */
     private getMatchedPolygonsForLayer(
-        layer: FeatureCollection<MultiPolygon>,
+        layer: FeatureCollection<MultiPolygon | Polygon>,
         location: Feature<Polygon>,
         suitability: string,
         issue?: string
     ): Feature<Polygon | MultiPolygon, GeoJsonProperties>[] {
         const matchedPolygons: Feature<Polygon | MultiPolygon, GeoJsonProperties>[] = [];
         layer.features.forEach((layerFeature) => {
-            layerFeature.geometry.coordinates.forEach((position) => {
-                const polygon = turf.polygon(position);
+            if (layerFeature.geometry.type === 'MultiPolygon') {
+                layerFeature.geometry.coordinates.forEach((position) => {
+                    const polygon = turf.polygon(position);
+                    const combinedFeatureCollection = { type: 'FeatureCollection', features: [location, polygon] } as FeatureCollection<Polygon>;
+                    const intersection = turf.intersect(combinedFeatureCollection);
+
+                    if (intersection) {
+                        intersection.properties!.suitability = suitability;
+                        if (issue) intersection.properties!.issue = issue;
+                        matchedPolygons.push(intersection);
+                    }
+                });
+            } else {
+                const polygon = turf.polygon(layerFeature.geometry.coordinates);
                 const combinedFeatureCollection = { type: 'FeatureCollection', features: [location, polygon] } as FeatureCollection<Polygon>;
                 const intersection = turf.intersect(combinedFeatureCollection);
 
@@ -28,81 +71,202 @@ export class AssetAnalysisService {
                     if (issue) intersection.properties!.issue = issue;
                     matchedPolygons.push(intersection);
                 }
-            });
+            }
         });
 
         return matchedPolygons;
     }
 
+    /*
+     * A helper method to get the matched polygons based on the data layers and location provided. These polygons are order with the good layers (suitability rating of green) -> caution layers (suitability rating of amber) -> bad layers (suitability of red) -> exact bad layers (suitability rating of darkRed)
+     *
+     * Good layers are comprised of polygons where the ws_spring1 property matches the provided user attribute range
+     * Caution layers are comprised of polygons where the minimum distance from a bad layer is 0.5 km.
+     * Bad layers are comprised of polygons which envelope the polygons in the exact bad layer and account for the provided minimum distance attribute
+     * Exact bad layers are comprised of polygons loaded from the specific data layers files.
+     */
     private getMatchedPolygonsForLayers(dataLayers: DataLayerDto[], location: Feature<Polygon>): Feature<MultiPolygon | Polygon, GeoJsonProperties>[] {
-        let matchedPolygons: Feature<MultiPolygon | Polygon, GeoJsonProperties>[] = [];
+        let cautionLayerMatchedPolygons: Feature<MultiPolygon | Polygon, GeoJsonProperties>[] = [];
+        let badLayerMatchedPolygons: Feature<MultiPolygon | Polygon, GeoJsonProperties>[] = [];
+        let exactbadLayerMatchedPolygons: Feature<MultiPolygon | Polygon, GeoJsonProperties>[] = [];
 
+        const goodLayerMatchedPolygon: Feature<MultiPolygon | Polygon, GeoJsonProperties> = {
+            ...location,
+            properties: {
+                suitability: 'green',
+            },
+        };
         dataLayers.forEach((dataLayer) => {
             if (dataLayer.id === 'windSpeed') {
-                const windspeedGoodLayer = this.dataProviderUtils.getWindspeedGoodLayerData();
-                matchedPolygons = matchedPolygons.concat(this.getMatchedPolygonsForLayer(windspeedGoodLayer, location, 'green'));
+                const minSpeed = dataLayer.attributes.find((attribute) => attribute.id === 'minSpeed')?.value || 4;
+                const maxSpeed = dataLayer.attributes.find((attribute) => attribute.id === 'maxSpeed')?.value || 7.5;
+                const windspeedLayer = this.dataProviderUtils.getWindspeedLayerData();
+                const windspeedBadLayerData: FeatureCollection<MultiPolygon> = {
+                    type: 'FeatureCollection',
+                    features: windspeedLayer.features.filter(
+                        (feature) => feature.properties!.ws_spring1 < minSpeed || feature.properties!.ws_spring1 > maxSpeed
+                    ),
+                };
 
-                const windspeedBadLayerData = this.dataProviderUtils.getWindspeedBadLayerData();
-                matchedPolygons = matchedPolygons.concat(this.getMatchedPolygonsForLayer(windspeedBadLayerData, location, 'red', 'Bad windspeed - < 4m/s'));
+                badLayerMatchedPolygons = badLayerMatchedPolygons.concat(
+                    this.getMatchedPolygonsForLayer(windspeedBadLayerData, location, 'red', `Bad windspeed - < ${minSpeed}m/s or > ${maxSpeed}m/s`)
+                );
             } else if (dataLayer.id === 'specialAreasOfConservation') {
                 const specialAreasOfConservationLayerData = this.dataProviderUtils.getSpecialAreasOfConservationLayerData();
-                matchedPolygons = matchedPolygons.concat(
-                    this.getMatchedPolygonsForLayer(specialAreasOfConservationLayerData, location, 'red', 'Too close to special areas of conservation - < 1km')
-                );
+                const specialAreasOfConservationBufferedLayerData: FeatureCollection<MultiPolygon> =
+                    this.dataProviderUtils.getSpecialAreasOfConservationBufferedLayerData();
 
-                const specialAreasOfConservation2KmLayer = this.dataProviderUtils.getSpecialAreasOfConservation2KmLayerData();
-                matchedPolygons = matchedPolygons.concat(
-                    this.getMatchedPolygonsForLayer(specialAreasOfConservation2KmLayer, location, 'amber', 'Close to special areas of conservation - <= 2km')
+                const specialAreasOfConservationBuffered500MLayerData: FeatureCollection<MultiPolygon> =
+                    this.dataProviderUtils.getSpecialAreasOfConservationBuffered1_5KmLayerData();
+
+                exactbadLayerMatchedPolygons = exactbadLayerMatchedPolygons.concat(
+                    this.getMatchedPolygonsForLayer(
+                        specialAreasOfConservationLayerData,
+                        location,
+                        'darkRed',
+                        'Too close to special areas of conservation - <= 1km'
+                    )
+                );
+                badLayerMatchedPolygons = badLayerMatchedPolygons.concat(
+                    this.getMatchedPolygonsForLayer(
+                        specialAreasOfConservationBufferedLayerData,
+                        location,
+                        'red',
+                        'Too close to special areas of conservation - <= 1km'
+                    )
+                );
+                cautionLayerMatchedPolygons = cautionLayerMatchedPolygons.concat(
+                    this.getMatchedPolygonsForLayer(
+                        specialAreasOfConservationBuffered500MLayerData,
+                        location,
+                        'amber',
+                        'Close to special areas of conservation - <= 1.5km'
+                    )
                 );
             } else if (dataLayer.id == 'sitesOfSpecialScientificInterest') {
+                const minDistance: number = dataLayer.attributes.find((attribute) => attribute.id === 'minDistance')?.value || 1;
                 const sitesOfSpecialScientificInterestLayerData = this.dataProviderUtils.getSitesOfSpecialScientificInterestLayerData();
-                matchedPolygons = matchedPolygons.concat(
+                const sitesOfSpecialScientificInterestBufferedFeatures: Feature<Polygon>[] = [];
+                const sitesOfSpecialScientificInterestBuffered500MFeatures: Feature<Polygon>[] = [];
+
+                sitesOfSpecialScientificInterestLayerData.features.forEach((feature) => {
+                    const bufferedFeatures = this.getCircleEnvelopesForFeature(feature, minDistance);
+                    sitesOfSpecialScientificInterestBufferedFeatures.push(bufferedFeatures[0]);
+                    sitesOfSpecialScientificInterestBuffered500MFeatures.push(bufferedFeatures[1]);
+                });
+
+                const sitesOfSpecialScientificInterestBufferLayerData: FeatureCollection<MultiPolygon | Polygon, GeoJsonProperties> = {
+                    type: 'FeatureCollection',
+                    features: sitesOfSpecialScientificInterestBufferedFeatures,
+                };
+                const sitesOfSpecialScientifiInterestBuffer500MLayerData: FeatureCollection<MultiPolygon | Polygon, GeoJsonProperties> = {
+                    type: 'FeatureCollection',
+                    features: sitesOfSpecialScientificInterestBuffered500MFeatures,
+                };
+
+                exactbadLayerMatchedPolygons = exactbadLayerMatchedPolygons.concat(
                     this.getMatchedPolygonsForLayer(
                         sitesOfSpecialScientificInterestLayerData,
                         location,
-                        'red',
-                        'Too close to sites of special scientific interest - < 1km'
+                        'darkRed',
+                        `Too close to sites of special scientific interest - <= ${minDistance}km`
                     )
                 );
-
-                const sitesOfSpecialScientificInterest2KmLayer = this.dataProviderUtils.getSitesOfSpecialScientificInterest2KmLayerData();
-                matchedPolygons = matchedPolygons.concat(
+                badLayerMatchedPolygons = badLayerMatchedPolygons.concat(
                     this.getMatchedPolygonsForLayer(
-                        sitesOfSpecialScientificInterest2KmLayer,
+                        sitesOfSpecialScientificInterestBufferLayerData,
+                        location,
+                        'red',
+                        `Too close to sites of special scientific interest - <= ${minDistance}km`
+                    )
+                );
+                cautionLayerMatchedPolygons = cautionLayerMatchedPolygons.concat(
+                    this.getMatchedPolygonsForLayer(
+                        sitesOfSpecialScientifiInterestBuffer500MLayerData,
                         location,
                         'amber',
-                        'Close to sites of special scientific interest - <= 2km'
+                        `Close to sites of special scientific interest - <= ${minDistance + 0.5}km`
                     )
                 );
             } else if (dataLayer.id === 'builtUpAreas') {
+                const minDistance: number = dataLayer.attributes.find((attribute) => attribute.id === 'minDistance')?.value || 1;
                 const builtupAreasLayerData = this.dataProviderUtils.getBuiltupAreasLayerData();
-                matchedPolygons = matchedPolygons.concat(
-                    this.getMatchedPolygonsForLayer(builtupAreasLayerData, location, 'red', 'Too close to built up areas - < 1km')
-                );
+                const builtupAreasBufferedFeatures: Feature<Polygon>[] = [];
+                const builtupAreasBuffered500MFeatures: Feature<Polygon>[] = [];
 
-                const builtupAreas2KmLayerData = this.dataProviderUtils.getBuiltupAreas2KmLayerData();
-                matchedPolygons = matchedPolygons.concat(
-                    this.getMatchedPolygonsForLayer(builtupAreas2KmLayerData, location, 'amber', 'Close to built up areas - <= 2km')
+                builtupAreasLayerData.features.forEach((feature) => {
+                    const bufferedFeatures = this.getCircleEnvelopesForFeature(feature, minDistance);
+                    builtupAreasBufferedFeatures.push(bufferedFeatures[0]);
+                    builtupAreasBuffered500MFeatures.push(bufferedFeatures[1]);
+                });
+
+                const builtupAreasBufferLayerData: FeatureCollection<MultiPolygon | Polygon, GeoJsonProperties> = {
+                    type: 'FeatureCollection',
+                    features: builtupAreasBufferedFeatures,
+                };
+                const builtupAreasBuffer500MLayerData: FeatureCollection<MultiPolygon | Polygon, GeoJsonProperties> = {
+                    type: 'FeatureCollection',
+                    features: builtupAreasBuffered500MFeatures,
+                };
+
+                exactbadLayerMatchedPolygons = exactbadLayerMatchedPolygons.concat(
+                    this.getMatchedPolygonsForLayer(builtupAreasLayerData, location, 'darkRed', `Too close to built up areas - <= ${minDistance}km`)
+                );
+                badLayerMatchedPolygons = badLayerMatchedPolygons.concat(
+                    this.getMatchedPolygonsForLayer(builtupAreasBufferLayerData, location, 'red', `Too close to built up areas - <= ${minDistance}km`)
+                );
+                cautionLayerMatchedPolygons = cautionLayerMatchedPolygons.concat(
+                    this.getMatchedPolygonsForLayer(builtupAreasBuffer500MLayerData, location, 'amber', `Close to built up areas - <= ${minDistance + 0.5}km`)
                 );
             } else if (dataLayer.id == 'areasOfOutstandingNaturalBeauty') {
+                const minDistance: number = dataLayer.attributes.find((attribute) => attribute.id === 'minDistance')?.value || 1;
                 const areasOfNaturalBeautyLayerData = this.dataProviderUtils.getAreasOfNaturalBeautyLayerData();
-                matchedPolygons = matchedPolygons.concat(
-                    this.getMatchedPolygonsForLayer(areasOfNaturalBeautyLayerData, location, 'red', 'Too close to areas of outstanding natural beauty - < 1km')
-                );
+                const areasOfNaturalBeautyBufferedFeatures: Feature<Polygon>[] = [];
+                const areasOfNaturalBeautyBuffered500MFeatures: Feature<Polygon>[] = [];
 
-                const areasOfNaturalBeauty2KmLayerData = this.dataProviderUtils.getAreasOfNaturalBeauty2KmLayerData();
-                matchedPolygons = matchedPolygons.concat(
+                areasOfNaturalBeautyLayerData.features.forEach((feature) => {
+                    const bufferedFeatures = this.getCircleEnvelopesForFeature(feature, minDistance);
+                    areasOfNaturalBeautyBufferedFeatures.push(bufferedFeatures[0]);
+                    areasOfNaturalBeautyBuffered500MFeatures.push(bufferedFeatures[1]);
+                });
+
+                const areasOfNaturalBeautyBufferLayerData: FeatureCollection<MultiPolygon | Polygon, GeoJsonProperties> = {
+                    type: 'FeatureCollection',
+                    features: areasOfNaturalBeautyBufferedFeatures,
+                };
+                const areasOfNaturalBeautyBufferLayer500MData: FeatureCollection<MultiPolygon | Polygon, GeoJsonProperties> = {
+                    type: 'FeatureCollection',
+                    features: areasOfNaturalBeautyBuffered500MFeatures,
+                };
+
+                exactbadLayerMatchedPolygons = exactbadLayerMatchedPolygons.concat(
                     this.getMatchedPolygonsForLayer(
-                        areasOfNaturalBeauty2KmLayerData,
+                        areasOfNaturalBeautyLayerData,
+                        location,
+                        'darkRed',
+                        `Too close to areas of outstanding natural beauty - <= ${minDistance}km`
+                    )
+                );
+                badLayerMatchedPolygons = badLayerMatchedPolygons.concat(
+                    this.getMatchedPolygonsForLayer(
+                        areasOfNaturalBeautyBufferLayerData,
+                        location,
+                        'red',
+                        `Too close to areas of outstanding natural beauty - <= ${minDistance}km`
+                    )
+                );
+                cautionLayerMatchedPolygons = cautionLayerMatchedPolygons.concat(
+                    this.getMatchedPolygonsForLayer(
+                        areasOfNaturalBeautyBufferLayer500MData,
                         location,
                         'amber',
-                        'Close to areas of outstanding natural beauty - <= 2km'
+                        `Close to areas of outstanding natural beauty - <= ${minDistance + 0.5}km`
                     )
                 );
             }
         });
 
-        return matchedPolygons;
+        return [goodLayerMatchedPolygon, ...cautionLayerMatchedPolygons, ...badLayerMatchedPolygons, ...exactbadLayerMatchedPolygons];
     }
     /*
      * A method to analayze the location sent by the user along with the data layers they choose to include for analysis and return a number of polygons with a suitability rating for placing an asset.

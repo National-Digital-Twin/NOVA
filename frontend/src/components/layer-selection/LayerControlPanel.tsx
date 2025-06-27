@@ -62,7 +62,7 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
     const [open, setOpen] = useState(true);
     const [loading, setLoading] = useState(false);
     const [checkedLayers, setCheckedLayers] = useState<Record<string, boolean>>({});
-    const [layerSettings, setLayerSettings] = useState<Record<string, Record<string, string>>>({});
+    const [layerSettings, setLayerSettings] = useState<Record<string, Record<string, number>>>({});
     const [expandedPanels, setExpandedPanels] = useState<string[]>([]);
     const [propOpen, setPropOpen] = useState(false);
     const [currentLayer, setCurrentLayer] = useState<string | null>(null);
@@ -79,7 +79,7 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
 
             const transformed: Record<string, LayerItem[]> = {};
             const checks: Record<string, boolean> = {};
-            const defaults: Record<string, Record<string, string>> = {};
+            const defaults: Record<string, Record<string, number>> = {};
 
             data.categories.forEach((category) => {
                 if (!category.items?.length) return;
@@ -90,7 +90,7 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
                     checks[item.name] = true;
                     defaults[item.name] = {};
                     attributes.forEach((a) => {
-                        defaults[item.name][a.description] = String(a.defaultValue);
+                        defaults[item.name][a.description] = Number(a.defaultValue);
                     });
 
                     return {
@@ -168,7 +168,7 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
             ...prev,
             [currentLayer]: {
                 ...prev[currentLayer],
-                [label]: raw,
+                [label]: Number(raw),
             },
         }));
     };
@@ -182,7 +182,7 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
             ...prev,
             [currentLayer]: {
                 ...prev[currentLayer],
-                [label]: final,
+                [label]: Number(final),
             },
         }));
     };
