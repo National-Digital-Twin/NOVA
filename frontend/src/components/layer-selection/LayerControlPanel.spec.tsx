@@ -13,231 +13,231 @@ const mockMapRef = { current: {} } as unknown as React.RefObject<MapRef>;
 const mockDrawRef = { current: {} } as unknown as React.RefObject<MapboxDraw>;
 
 const mockApiResponse = {
-  categories: [
-    {
-      name: 'Environmental protected sites',
-      items: [
+    categories: [
         {
-          id: 'aonb',
-          name: 'Areas of outstanding natural beauty',
-          attributes: [
-            {
-              id: 'distance',
-              description: 'Distance from layer',
-              defaultValue: 2,
-              valueType: 'number',
-            },
-          ],
+            name: 'Environmental protected sites',
+            items: [
+                {
+                    id: 'aonb',
+                    name: 'Areas of outstanding natural beauty',
+                    attributes: [
+                        {
+                            id: 'distance',
+                            description: 'Distance from layer',
+                            defaultValue: 2,
+                            valueType: 'number',
+                        },
+                    ],
+                },
+            ],
         },
-      ],
-    },
-    {
-      name: 'Weather',
-      items: [
         {
-          id: 'windSpeed',
-          name: 'Wind speed',
-          attributes: [],
+            name: 'Weather',
+            items: [
+                {
+                    id: 'windSpeed',
+                    name: 'Wind speed',
+                    attributes: [],
+                },
+            ],
         },
-      ],
-    },
-    {
-      name: 'Residential',
-      items: [
         {
-          id: 'residentialBuiltUp',
-          name: 'Built up areas',
-          attributes: [],
+            name: 'Residential',
+            items: [
+                {
+                    id: 'residentialBuiltUp',
+                    name: 'Built up areas',
+                    attributes: [],
+                },
+            ],
         },
-      ],
-    },
-  ],
+    ],
 };
 
 const fakeGeoJSON = {
-  type: 'FeatureCollection',
-  features: [],
+    type: 'FeatureCollection',
+    features: [],
 };
 
 describe('LayerControlPanel', () => {
-  let fetchSpy: MockInstance;
+    let fetchSpy: MockInstance;
 
-  beforeEach(() => {
-    vi.clearAllMocks();
+    beforeEach(() => {
+        vi.clearAllMocks();
 
-    vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) =>
-      selector({
-          polygonStatus: 'confirmed',
-          setCachedHeatmap: vi.fn(),
-          mapRef: null,
-          setMapRef: function (_ref: MapRef): void {
-              throw new Error('Function not implemented.');
-          },
-          drawRef: null,
-          setDrawRef: function (_ref: MapboxDraw): void {
-              throw new Error('Function not implemented.');
-          },
-          polygonConfirmPopup: null,
-          setPolygonConfirmPopup: function (_ref: Popup | null): void {
-              throw new Error('Function not implemented.');
-          },
-          placing: false,
-          setPlacing: function (_placing: boolean): void {
-              throw new Error('Function not implemented.');
-          },
-          markerPosition: null,
-          setMarkerPosition: function (_position: { longitude?: number; latitude?: number; } | null): void {
-              throw new Error('Function not implemented.');
-          },
-          markerBearing: null,
-          setMarkerBearing: function (_bearing: number): void {
-              throw new Error('Function not implemented.');
-          },
-          markerVariant: null,
-          setMarkerVariant: function (_variant: Variation | null): void {
-              throw new Error('Function not implemented.');
-          },
-          cachedHeatmap: null,
-          setPolygonStatus: function (_status: mapStore.PolygonStatus): void {
-              throw new Error('Function not implemented.');
-          },
-          clearMarkerValues: function (): void {
-              throw new Error('Function not implemented.');
-          }
-      })
-    );
+        vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) =>
+            selector({
+                polygonStatus: 'confirmed',
+                setCachedHeatmap: vi.fn(),
+                mapRef: null,
+                setMapRef: function (_ref: MapRef): void {
+                    throw new Error('Function not implemented.');
+                },
+                drawRef: null,
+                setDrawRef: function (_ref: MapboxDraw): void {
+                    throw new Error('Function not implemented.');
+                },
+                polygonConfirmPopup: null,
+                setPolygonConfirmPopup: function (_ref: Popup | null): void {
+                    throw new Error('Function not implemented.');
+                },
+                placing: false,
+                setPlacing: function (_placing: boolean): void {
+                    throw new Error('Function not implemented.');
+                },
+                markerPosition: null,
+                setMarkerPosition: function (_position: { longitude?: number; latitude?: number } | null): void {
+                    throw new Error('Function not implemented.');
+                },
+                markerBearing: null,
+                setMarkerBearing: function (_bearing: number): void {
+                    throw new Error('Function not implemented.');
+                },
+                markerVariant: null,
+                setMarkerVariant: function (_variant: Variation | null): void {
+                    throw new Error('Function not implemented.');
+                },
+                cachedHeatmap: null,
+                setPolygonStatus: function (_status: mapStore.PolygonStatus): void {
+                    throw new Error('Function not implemented.');
+                },
+                clearMarkerValues: function (): void {
+                    throw new Error('Function not implemented.');
+                },
+            })
+        );
 
-    (mapStore.useMapStore as any).getState = () => ({
-      polygonStatus: 'confirmed',
-      setCachedHeatmap: vi.fn(),
+        (mapStore.useMapStore as any).getState = () => ({
+            polygonStatus: 'confirmed',
+            setCachedHeatmap: vi.fn(),
+        });
+
+        fetchSpy = vi.spyOn(global, 'fetch' as any).mockImplementation((...args: unknown[]) => {
+            const url = args[0] as string;
+            if (url === '/api/ui/layers') {
+                return Promise.resolve({
+                    ok: true,
+                    json: async () => mockApiResponse,
+                }) as unknown as Promise<Response>;
+            }
+            return Promise.resolve({
+                ok: true,
+                json: async () => fakeGeoJSON,
+            }) as unknown as Promise<Response>;
+        });
+
+        vi.spyOn(MapVisualHelper, 'addOrUpdateHeatmapLayer').mockImplementation(() => {});
     });
 
-    fetchSpy = vi.spyOn(global, 'fetch' as any).mockImplementation((...args: unknown[]) => {
-      const url = args[0] as string;
-      if (url === '/api/ui/layers') {
-        return Promise.resolve({
-          ok: true,
-          json: async () => mockApiResponse,
-        }) as unknown as Promise<Response>;
-      }
-      return Promise.resolve({
-        ok: true,
-        json: async () => fakeGeoJSON,
-      }) as unknown as Promise<Response>;
+    afterEach(() => {
+        fetchSpy.mockRestore();
     });
 
-    vi.spyOn(MapVisualHelper, 'addOrUpdateHeatmapLayer').mockImplementation(() => {});
-  });
+    it('renders panel with header and apply button', async () => {
+        render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
+        expect(await screen.findByText('Layers')).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /apply/i })).toBeInTheDocument();
+    });
 
-  afterEach(() => {
-    fetchSpy.mockRestore();
-  });
+    it('renders some layer names and their checkboxes', async () => {
+        render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
+        expect(await screen.findByText('Areas of outstanding natural beauty')).toBeInTheDocument();
+        expect(await screen.findByText('Wind speed')).toBeInTheDocument();
+        expect(screen.getAllByRole('checkbox').length).toBeGreaterThan(0);
+    });
 
-  it('renders panel with header and apply button', async () => {
-    render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
-    expect(await screen.findByText('Layers')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /apply/i })).toBeInTheDocument();
-  });
+    it('toggles checkbox state when clicked', async () => {
+        render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
+        const checkbox = await screen.findByLabelText('Wind speed');
+        expect((checkbox as HTMLInputElement).checked).toBe(true);
+        await userEvent.click(checkbox);
+        expect((checkbox as HTMLInputElement).checked).toBe(false);
+    });
 
-  it('renders some layer names and their checkboxes', async () => {
-    render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
-    expect(await screen.findByText('Areas of outstanding natural beauty')).toBeInTheDocument();
-    expect(await screen.findByText('Wind speed')).toBeInTheDocument();
-    expect(screen.getAllByRole('checkbox').length).toBeGreaterThan(0);
-  });
+    it('filters layers by search input', async () => {
+        render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
+        const searchInput = await screen.findByPlaceholderText('Search for layers');
+        await userEvent.type(searchInput, 'built up');
+        expect(await screen.findByText('Built up areas')).toBeInTheDocument();
+        expect(screen.queryByText('Wind speed')).not.toBeInTheDocument();
+    });
 
-  it('toggles checkbox state when clicked', async () => {
-    render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
-    const checkbox = await screen.findByLabelText('Wind speed');
-    expect((checkbox as HTMLInputElement).checked).toBe(true);
-    await userEvent.click(checkbox);
-    expect((checkbox as HTMLInputElement).checked).toBe(false);
-  });
+    it('shows "No results" for unmatched search', async () => {
+        render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
+        const searchInput = await screen.findByPlaceholderText('Search for layers');
+        await userEvent.type(searchInput, 'nonexistent');
+        expect(await screen.findByText('No results')).toBeInTheDocument();
+    });
 
-  it('filters layers by search input', async () => {
-    render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
-    const searchInput = await screen.findByPlaceholderText('Search for layers');
-    await userEvent.type(searchInput, 'built up');
-    expect(await screen.findByText('Built up areas')).toBeInTheDocument();
-    expect(screen.queryByText('Wind speed')).not.toBeInTheDocument();
-  });
+    it('clears search when clear button is clicked', async () => {
+        render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
+        const searchInput = await screen.findByPlaceholderText('Search for layers');
+        await userEvent.type(searchInput, 'Wind');
 
-  it('shows "No results" for unmatched search', async () => {
-    render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
-    const searchInput = await screen.findByPlaceholderText('Search for layers');
-    await userEvent.type(searchInput, 'nonexistent');
-    expect(await screen.findByText('No results')).toBeInTheDocument();
-  });
+        const clearBtn = await screen.findByLabelText('Clear search');
+        await userEvent.click(clearBtn);
 
-  it('clears search when clear button is clicked', async () => {
-    render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
-    const searchInput = await screen.findByPlaceholderText('Search for layers');
-    await userEvent.type(searchInput, 'Wind');
+        expect(searchInput).toHaveValue('');
+        expect(await screen.findByText('Wind speed')).toBeInTheDocument();
+    });
 
-    const clearBtn = await screen.findByLabelText('Clear search');
-    await userEvent.click(clearBtn);
+    it('shows no results when search is only spaces', async () => {
+        render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
+        const searchInput = await screen.findByPlaceholderText('Search for layers');
+        await userEvent.type(searchInput, '   ');
+        expect(await screen.findByText('No results')).toBeInTheDocument();
+    });
 
-    expect(searchInput).toHaveValue('');
-    expect(await screen.findByText('Wind speed')).toBeInTheDocument();
-  });
+    it('does not render accordion for categories with no matching layers', async () => {
+        render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
+        const searchInput = await screen.findByPlaceholderText('Search for layers');
+        await userEvent.type(searchInput, 'wind');
 
-  it('shows no results when search is only spaces', async () => {
-    render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
-    const searchInput = await screen.findByPlaceholderText('Search for layers');
-    await userEvent.type(searchInput, '   ');
-    expect(await screen.findByText('No results')).toBeInTheDocument();
-  });
+        expect(screen.queryByText('Residential')).not.toBeInTheDocument();
+        expect(await screen.findByText('Wind speed')).toBeInTheDocument();
+    });
 
-  it('does not render accordion for categories with no matching layers', async () => {
-    render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
-    const searchInput = await screen.findByPlaceholderText('Search for layers');
-    await userEvent.type(searchInput, 'wind');
+    it('toggles accordion expansion', async () => {
+        render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
+        const summary = await screen.findByText('Environmental protected sites');
+        await userEvent.click(summary);
+        await userEvent.click(summary);
+        expect(await screen.findByText('Areas of outstanding natural beauty')).toBeInTheDocument();
+    });
 
-    expect(screen.queryByText('Residential')).not.toBeInTheDocument();
-    expect(await screen.findByText('Wind speed')).toBeInTheDocument();
-  });
+    it('collapses and expands the panel with toggle button', async () => {
+        render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
+        await screen.findByText('Layers');
 
-  it('toggles accordion expansion', async () => {
-    render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
-    const summary = await screen.findByText('Environmental protected sites');
-    await userEvent.click(summary);
-    await userEvent.click(summary);
-    expect(await screen.findByText('Areas of outstanding natural beauty')).toBeInTheDocument();
-  });
+        const toggleBtn = screen.getAllByRole('button').find((btn) => btn.querySelector('svg'));
+        await userEvent.click(toggleBtn!);
+        expect(screen.queryByText('Layers')).not.toBeInTheDocument();
 
-  it('collapses and expands the panel with toggle button', async () => {
-    render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
-    await screen.findByText('Layers');
+        await userEvent.click(toggleBtn!);
+        expect(await screen.findByText('Layers')).toBeInTheDocument();
+    });
 
-    const toggleBtn = screen.getAllByRole('button').find((btn) => btn.querySelector('svg'));
-    await userEvent.click(toggleBtn!);
-    expect(screen.queryByText('Layers')).not.toBeInTheDocument();
+    it('rotates toggle icon when collapsed', async () => {
+        render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
+        await screen.findByText('Layers');
 
-    await userEvent.click(toggleBtn!);
-    expect(await screen.findByText('Layers')).toBeInTheDocument();
-  });
+        const toggleBtn = screen.getAllByRole('button').find((btn) => btn.querySelector('svg'));
+        await userEvent.click(toggleBtn!);
 
-  it('rotates toggle icon when collapsed', async () => {
-    render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
-    await screen.findByText('Layers');
+        const icon = toggleBtn!.querySelector('svg');
+        const styles = window.getComputedStyle(icon as Element);
+        expect(styles.transform).toMatch(/rotate\(180deg\)/);
+    });
 
-    const toggleBtn = screen.getAllByRole('button').find((btn) => btn.querySelector('svg'));
-    await userEvent.click(toggleBtn!);
+    it('renders all userAdjustableParameters in the drawer', async () => {
+        render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
+        await screen.findByText('Areas of outstanding natural beauty');
 
-    const icon = toggleBtn!.querySelector('svg');
-    const styles = window.getComputedStyle(icon as Element);
-    expect(styles.transform).toMatch(/rotate\(180deg\)/);
-  });
+        const targetBtn = screen.getAllByRole('button').find((btn) => btn.parentElement?.textContent?.includes('Areas of outstanding natural beauty'));
+        await userEvent.click(targetBtn!);
 
-  it('renders all userAdjustableParameters in the drawer', async () => {
-    render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
-    await screen.findByText('Areas of outstanding natural beauty');
-
-    const targetBtn = screen.getAllByRole('button').find((btn) => btn.parentElement?.textContent?.includes('Areas of outstanding natural beauty'));
-    await userEvent.click(targetBtn!);
-
-    const input = await screen.findByLabelText('Distance from layer');
-    expect(input).toBeInTheDocument();
-    expect((input as HTMLInputElement).value).toBe('2');
-  });
+        const input = await screen.findByLabelText('Distance from layer');
+        expect(input).toBeInTheDocument();
+        expect((input as HTMLInputElement).value).toBe('2');
+    });
 });
