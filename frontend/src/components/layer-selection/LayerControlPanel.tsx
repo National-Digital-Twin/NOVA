@@ -274,9 +274,15 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
                                         <Typography variant="body2">{item.name}</Typography>
                                         <Checkbox id={checkboxId} checked={checkedLayers[item.name]} onChange={() => handleCheckboxChange(item.name)} />
                                     </label>
-                                    <IconButton size="small" onClick={() => openProps(item.name)}>
-                                        <MoreVertIcon fontSize="small" />
-                                    </IconButton>
+                                    {item.attributes.length > 0 ? (
+                                        <IconButton size="small" onClick={() => openProps(item.name)}>
+                                            <MoreVertIcon fontSize="small" />
+                                        </IconButton>
+                                    ) : (
+                                        <Box sx={{ fontSize: 'small', padding: '5px' }}>
+                                            <MoreVertIcon fontSize="small" sx={{ opacity: 0 }} />
+                                        </Box>
+                                    )}
                                 </Box>
                             );
                         })}
@@ -413,6 +419,7 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
                                         key={attr.id}
                                         label={attr.description}
                                         type={attr.valueType === 'number' ? 'number' : 'text'}
+                                        InputProps={attr.valueType === 'number' ? { inputProps: { min: 0 } } : {}}
                                         select={(attr.options?.length ?? 0) > 0}
                                         fullWidth
                                         value={layerSettings[currentLayer][attr.description]}

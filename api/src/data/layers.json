@@ -31,14 +31,7 @@
                     "active": true,
                     "id": "specialAreasOfConservation",
                     "name": "Special Areas of Conservation (SAC)",
-                    "attributes": [
-                        {
-                            "id": "minDistance",
-                            "description": "Set distance from SAC (km)",
-                            "defaultValue": 2,
-                            "valueType": "number"
-                        }
-                    ]
+                    "attributes": []
                 }
             ]
         },

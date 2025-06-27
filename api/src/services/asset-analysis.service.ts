@@ -78,9 +78,9 @@ export class AssetAnalysisService {
     }
 
     /*
-     * A helper method to get the matched polygons based on the data layers and location provided. These polygons are order with the good layers (suitability rating of green) -> caution layers (suitability rating of amber) -> bad layers (suitability of red) -> exact bad layers (suitability rating of darkRed)
+     * A helper method to get the matched polygons based on the data layers and location provided. These polygons are ordered with the good layer (suitability rating of green) -> caution layers (suitability rating of amber) -> bad layers (suitability of red) -> exact bad layers (suitability rating of darkRed)
      *
-     * Good layers are comprised of polygons where the ws_spring1 property matches the provided user attribute range
+     * The good layer is a polygon with the dimensions of the provided location.
      * Caution layers are comprised of polygons where the minimum distance from a bad layer is 0.5 km.
      * Bad layers are comprised of polygons which envelope the polygons in the exact bad layer and account for the provided minimum distance attribute
      * Exact bad layers are comprised of polygons loaded from the specific data layers files.
@@ -98,8 +98,9 @@ export class AssetAnalysisService {
         };
         dataLayers.forEach((dataLayer) => {
             if (dataLayer.id === 'windSpeed') {
-                const minSpeed = dataLayer.attributes.find((attribute) => attribute.id === 'minSpeed')?.value || 4;
-                const maxSpeed = dataLayer.attributes.find((attribute) => attribute.id === 'maxSpeed')?.value || 7.5;
+                const minSpeed = dataLayer.attributes.filter((attribute) => attribute.value >= 0).find((attribute) => attribute.id === 'minSpeed')?.value || 4;
+                const maxSpeed =
+                    dataLayer.attributes.filter((attribute) => attribute.value >= 0).find((attribute) => attribute.id === 'maxSpeed')?.value || 7.5;
                 const windspeedLayer = this.dataProviderUtils.getWindspeedLayerData();
                 const windspeedBadLayerData: FeatureCollection<MultiPolygon> = {
                     type: 'FeatureCollection',
@@ -144,7 +145,8 @@ export class AssetAnalysisService {
                     )
                 );
             } else if (dataLayer.id == 'sitesOfSpecialScientificInterest') {
-                const minDistance: number = dataLayer.attributes.find((attribute) => attribute.id === 'minDistance')?.value || 1;
+                const minDistance: number =
+                    dataLayer.attributes.filter((attribute) => attribute.value >= 0).find((attribute) => attribute.id === 'minDistance')?.value || 1;
                 const sitesOfSpecialScientificInterestLayerData = this.dataProviderUtils.getSitesOfSpecialScientificInterestLayerData();
                 const sitesOfSpecialScientificInterestBufferedFeatures: Feature<Polygon>[] = [];
                 const sitesOfSpecialScientificInterestBuffered500MFeatures: Feature<Polygon>[] = [];
@@ -189,7 +191,8 @@ export class AssetAnalysisService {
                     )
                 );
             } else if (dataLayer.id === 'builtUpAreas') {
-                const minDistance: number = dataLayer.attributes.find((attribute) => attribute.id === 'minDistance')?.value || 1;
+                const minDistance: number =
+                    dataLayer.attributes.filter((attribute) => attribute.value >= 0).find((attribute) => attribute.id === 'minDistance')?.value || 1;
                 const builtupAreasLayerData = this.dataProviderUtils.getBuiltupAreasLayerData();
                 const builtupAreasBufferedFeatures: Feature<Polygon>[] = [];
                 const builtupAreasBuffered500MFeatures: Feature<Polygon>[] = [];
@@ -219,7 +222,8 @@ export class AssetAnalysisService {
                     this.getMatchedPolygonsForLayer(builtupAreasBuffer500MLayerData, location, 'amber', `Close to built up areas - <= ${minDistance + 0.5}km`)
                 );
             } else if (dataLayer.id == 'areasOfOutstandingNaturalBeauty') {
-                const minDistance: number = dataLayer.attributes.find((attribute) => attribute.id === 'minDistance')?.value || 1;
+                const minDistance: number =
+                    dataLayer.attributes.filter((attribute) => attribute.value >= 0).find((attribute) => attribute.id === 'minDistance')?.value || 1;
                 const areasOfNaturalBeautyLayerData = this.dataProviderUtils.getAreasOfNaturalBeautyLayerData();
                 const areasOfNaturalBeautyBufferedFeatures: Feature<Polygon>[] = [];
                 const areasOfNaturalBeautyBuffered500MFeatures: Feature<Polygon>[] = [];
