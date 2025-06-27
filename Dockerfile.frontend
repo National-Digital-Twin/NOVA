@@ -1,5 +1,5 @@
 FROM nginx:1.29
 
-RUN sudo apt install --only-upgrade libicu72
+RUN apt install --only-upgrade libicu72
 
 COPY frontend/dist /usr/share/nginx/html
