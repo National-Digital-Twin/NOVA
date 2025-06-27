@@ -240,6 +240,7 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
 
             setCachedHeatmap(geojson);
             MapVisualHelper.addOrUpdateHeatmapLayer(mapRef, geojson);
+            setOpen(false);
         } catch (err) {
             console.error('Analysis request failed', err);
         } finally {

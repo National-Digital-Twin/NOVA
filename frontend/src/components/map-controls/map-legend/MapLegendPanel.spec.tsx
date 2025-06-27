@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import MapLegendPanel from './MapLegendPanel';
+import { useState } from 'react';
 
 const createMockMap = () => {
     const listeners: Record<string, Function[]> = {};
@@ -32,18 +33,25 @@ describe('MapLegendPanel', () => {
         mapRef = { current: { getMap: () => map } };
     });
 
+    const MapLegendPanelWrapper = () => {
+        const [isOpen, setIsOpen] = useState(false);
+        return <MapLegendPanel mapRef={mapRef} isOpen={isOpen} onToggle={() => setIsOpen(!isOpen)} />;
+    };
+
     it('does not render button if heatmap layer is not present', async () => {
         map.getLayer = vi.fn(() => false);
 
-        await act(() => {
-            render(<MapLegendPanel mapRef={mapRef} />);
+        await act(async () => {
+            render(<MapLegendPanelWrapper />);
         });
 
         expect(screen.queryByLabelText('Show map legend')).not.toBeInTheDocument();
     });
 
     it('renders button if heatmap layer is present after styledata', async () => {
-        render(<MapLegendPanel mapRef={mapRef} />);
+        await act(async () => {
+            render(<MapLegendPanelWrapper />);
+        });
 
         await act(() => {
             map.fire('styledata');
@@ -53,7 +61,9 @@ describe('MapLegendPanel', () => {
     });
 
     it('shows panel when button is clicked', async () => {
-        render(<MapLegendPanel mapRef={mapRef} />);
+        await act(async () => {
+            render(<MapLegendPanelWrapper />);
+        });
 
         await act(() => {
             map.fire('styledata');
@@ -62,11 +72,13 @@ describe('MapLegendPanel', () => {
         fireEvent.click(screen.getByLabelText('Show map legend'));
 
         expect(screen.getByText('Legend')).toBeInTheDocument();
-        expect(screen.getByText('Location Suitability')).toBeInTheDocument();
+        expect(screen.getByText('Location suitability')).toBeInTheDocument();
     });
 
     it('hides panel when button is clicked again', async () => {
-        render(<MapLegendPanel mapRef={mapRef} />);
+        await act(async () => {
+            render(<MapLegendPanelWrapper />);
+        });
 
         await act(() => {
             map.fire('styledata');
@@ -82,7 +94,9 @@ describe('MapLegendPanel', () => {
     });
 
     it('displays all legend items with correct colours', async () => {
-        render(<MapLegendPanel mapRef={mapRef} />);
+        await act(async () => {
+            render(<MapLegendPanelWrapper />);
+        });
 
         await act(() => {
             map.fire('styledata');
@@ -90,9 +104,9 @@ describe('MapLegendPanel', () => {
 
         fireEvent.click(screen.getByLabelText('Show map legend'));
 
-        expect(screen.getByText('Most Suitable')).toBeInTheDocument();
-        expect(screen.getByText('Moderate Suitability')).toBeInTheDocument();
-        expect(screen.getByText('Least Suitable')).toBeInTheDocument();
+        expect(screen.getByText('Most suitable')).toBeInTheDocument();
+        expect(screen.getByText('Moderate suitability')).toBeInTheDocument();
+        expect(screen.getByText('Least suitable')).toBeInTheDocument();
 
         const colorLines = screen.getAllByTestId('color-line');
         expect(colorLines).toHaveLength(3);
