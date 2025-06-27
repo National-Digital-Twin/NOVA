@@ -5,6 +5,8 @@ import { create } from 'zustand';
 import type { Variation } from '../components/search/add-asset/AddAsset';
 import type { FeatureCollection } from 'geojson';
 
+export type PolygonStatus = 'none' | 'drawing' | 'editing' | 'pendingConfirmation' | 'confirmed';
+
 interface MapState {
     mapRef: MapRef | null;
     setMapRef: (ref: MapRef) => void;
@@ -27,6 +29,9 @@ interface MapState {
 
     cachedHeatmap: FeatureCollection | null;
     setCachedHeatmap: (featureCollection: FeatureCollection | null) => void;
+
+    polygonStatus: PolygonStatus;
+    setPolygonStatus: (status: PolygonStatus) => void;
 }
 
 export const useMapStore = create<MapState>((set, get) => ({
@@ -48,6 +53,9 @@ export const useMapStore = create<MapState>((set, get) => ({
 
     cachedHeatmap: null,
     setCachedHeatmap: (featureCollection) => set({ cachedHeatmap: featureCollection }),
+
+    polygonStatus: 'none',
+    setPolygonStatus: (status) => set({ polygonStatus: status }),
 
     preventPolygonEdit: (e: MouseEvent | ({ point?: { x: number; y: number } } & MouseEvent)) => {
         let x: number;

@@ -50,13 +50,11 @@ const SearchPanel = ({ drawRef, hideLayerControl, mapRef, isPanelOpen, setIsPane
     const [polygonDrawn, setPolygonDrawn] = useState(false);
     const [polygonConfirmed, setPolygonConfirmed] = useState(false);
 
-    const { handlePolygonDrawn, handlePolygonEdited, handlePolygonDeleted } = usePolygonHandlers({
-        mapRef,
-        popupRef,
-        setPolygonDrawn,
-        setPolygonConfirmed,
-        showLayerControl,
-    });
+    const {
+        handlePolygonEdited,
+        handlePolygonDeleted,
+        startPolygonDraw,
+    } = usePolygonHandlers({ mapRef, popupRef, drawRef, showLayerControl });
 
     const handleLocationSelect = useCallback(
         (lat: number, long: number, zoom: number) => {
@@ -96,8 +94,7 @@ const SearchPanel = ({ drawRef, hideLayerControl, mapRef, isPanelOpen, setIsPane
                     mapRef={mapRef}
                     drawRef={drawRef}
                     isVisible={!polygonConfirmed}
-                    onPolygonDrawn={handlePolygonDrawn}
-                    polygonDrawn={polygonDrawn}
+                    startPolygonDraw={startPolygonDraw}
                 />
 
                 <HideLayersButton mapRef={mapRef} />
