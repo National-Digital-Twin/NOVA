@@ -11,6 +11,7 @@ import SearchInput from './search-input/SearchInput';
 import { MapVisualHelper } from '../../utils/MapVisualHelper';
 import { usePolygonHandlers } from '../../hooks/usePolygonHandlers';
 import AddAssetButton from './add-asset/AddAssetButton';
+import { useMapStore } from '../../stores/useMapStore';
 
 const SearchContainer = styled(Box)({
     display: 'flex',
@@ -50,6 +51,8 @@ const SearchPanel = ({ drawRef, hideLayerControl, mapRef, isPanelOpen, setIsPane
     const [polygonDrawn, setPolygonDrawn] = useState(false);
     const [polygonConfirmed, setPolygonConfirmed] = useState(false);
 
+    const cachedHeatmap = useMapStore((s) => s.cachedHeatmap);
+
     const { handlePolygonDrawn, handlePolygonEdited, handlePolygonDeleted } = usePolygonHandlers({
         mapRef,
         popupRef,
@@ -74,19 +77,19 @@ const SearchPanel = ({ drawRef, hideLayerControl, mapRef, isPanelOpen, setIsPane
             <SearchGroup role="group" aria-label="Drawing controls">
                 {polygonConfirmed && (
                     <>
-                        <DeletePolygonButton
-                            drawRef={drawRef}
-                            isVisible={polygonDrawn && polygonConfirmed}
-                            onPolygonDeleted={handlePolygonDeleted}
-                            hideLayerControl={hideLayerControl}
-                        />
-                        <StyledDivider orientation="vertical" flexItem />
                         <EditPolygonButton
                             mapRef={mapRef}
                             drawRef={drawRef}
                             polygonConfirmationPopUpRef={popupRef}
                             isVisible={polygonDrawn && polygonConfirmed}
                             onPolygonEdited={handlePolygonEdited}
+                            hideLayerControl={hideLayerControl}
+                        />
+                        <StyledDivider orientation="vertical" flexItem />
+                        <DeletePolygonButton
+                            drawRef={drawRef}
+                            isVisible={polygonDrawn && polygonConfirmed}
+                            onPolygonDeleted={handlePolygonDeleted}
                             hideLayerControl={hideLayerControl}
                         />
                     </>
@@ -100,7 +103,12 @@ const SearchPanel = ({ drawRef, hideLayerControl, mapRef, isPanelOpen, setIsPane
                     polygonDrawn={polygonDrawn}
                 />
 
-                <HideLayersButton mapRef={mapRef} />
+                {cachedHeatmap != null && (
+                    <>
+                        <StyledDivider orientation="vertical" flexItem />
+                        <HideLayersButton mapRef={mapRef} cachedHeatmap={cachedHeatmap} />
+                    </>
+                )}
             </SearchGroup>
 
             <SearchGroup>
