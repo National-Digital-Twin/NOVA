@@ -7,7 +7,7 @@ interface DeletePolygonButtonProps {
 
 const DeletePolygonButton = ({ deletePolygon }: DeletePolygonButtonProps) => {
     const polygonStatus = useMapStore((s) => s.polygonStatus);
-    const isVisible = polygonStatus === 'confirmed';
+    const isVisible = polygonStatus === 'editing' || polygonStatus === 'confirmed';
 
     if (!isVisible) return null;
 

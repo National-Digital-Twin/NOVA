@@ -1,5 +1,5 @@
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
-import type { MapLayerMouseEvent } from 'maplibre-gl';
+import type { MapLayerMouseEvent, Popup } from 'maplibre-gl';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { create } from 'zustand';
 import type { Variation } from '../components/search/add-asset/AddAsset';
@@ -13,6 +13,9 @@ interface MapState {
 
     drawRef: MapboxDraw | null;
     setDrawRef: (ref: MapboxDraw) => void;
+
+    polygonConfirmPopup: Popup | null;
+    setPolygonConfirmPopup: (ref: Popup | null) => void;
 
     placing: boolean;
     setPlacing: (placing: boolean) => void;
@@ -40,6 +43,9 @@ export const useMapStore = create<MapState>((set, get) => ({
 
     drawRef: null,
     setDrawRef: (ref) => set({ drawRef: ref }),
+
+    polygonConfirmPopup: null,
+    setPolygonConfirmPopup: (popup) => set({ polygonConfirmPopup: popup }),
 
     placing: false,
     setPlacing: (placing) => set({ placing: placing }),

@@ -135,7 +135,7 @@ const MapComponent = () => {
                                 setIsPanelOpen={setIsPanelOpen}
                             />
                         )}
-                        {showLayerControl && <LayerControlPanel mapRef={mapRef} drawRef={drawRef} />}
+                        <LayerControlPanel mapRef={mapRef} drawRef={drawRef} />
                     </>
                 )}
             </Map>

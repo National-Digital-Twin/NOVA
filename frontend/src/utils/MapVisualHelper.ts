@@ -6,6 +6,7 @@ import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type { Variation } from '../components/search/add-asset/AddAsset';
+import { useMapStore } from '../stores/useMapStore';
 
 // Used to ensure mouse events include feature information. any type is used as property could be of any object.
 type FeatureEvent = MapMouseEvent & {
@@ -115,7 +116,7 @@ export class MapVisualHelper {
      * @param map - The React MapLibre map reference
      * @returns A [lng, lat] tuple of the suggested popup position
      */
-    static getConfirmationPopupCoordinates(polygon: Polygon, map: MapRef): [number, number] {
+    static getConfirmationPopupCoordinates(polygon: Polygon, map: Map): [number, number] {
         const coords = polygon.coordinates[0];
         const topLat = Math.max(...coords.map(([, lat]) => lat));
         const avgLng = coords.reduce((sum, [lng]) => sum + lng, 0) / coords.length;
@@ -131,9 +132,9 @@ export class MapVisualHelper {
      *
      * @param popupRef - A React ref to the popup instance
      */
-    static removeExistingPopup(popupRef: React.RefObject<Popup | null>) {
-        popupRef.current?.remove();
-        popupRef.current = null;
+    static removeExistingPopup(popup: Popup | null) {
+        if (popup) popup.remove();
+        useMapStore.getState().setPolygonConfirmPopup(null);
     }
 
     /**

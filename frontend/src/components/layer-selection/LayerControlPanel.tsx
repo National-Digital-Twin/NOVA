@@ -56,14 +56,7 @@ interface LayerApiResponse {
 
 const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
     const polygonStatus = useMapStore((s) => s.polygonStatus);
-    const isVisible = polygonStatus === 'confirmed';
-    
-    if (!isVisible) {
-        return null;
-    }
-
     const idPrefix = useId();
-
     const [layers, setLayers] = useState<Record<string, LayerItem[]>>({});
     const [searchTerm, setSearchTerm] = useState('');
     const [open, setOpen] = useState(true);
@@ -324,6 +317,9 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
             </Box>
         );
     }
+
+    const isVisible = polygonStatus === 'confirmed';
+    if (!isVisible) return null;
 
     return (
         <>

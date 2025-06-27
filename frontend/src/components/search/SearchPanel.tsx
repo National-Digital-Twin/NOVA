@@ -42,14 +42,12 @@ interface SearchPanelProps {
     showLayerControl: () => void;
 }
 
-const SearchPanel = ({ drawRef, mapRef, isPanelOpen, setIsPanelOpen, showLayerControl }: SearchPanelProps) => {
-    const popupRef = useRef<maplibregl.Popup | null>(null);
-
+const SearchPanel = ({ drawRef, mapRef, isPanelOpen, setIsPanelOpen }: SearchPanelProps) => {
     const {
         handlePolygonDeleted,
         startPolygonDraw,
         startPolygonEdit
-    } = usePolygonHandlers({ mapRef, popupRef, drawRef, showLayerControl });
+    } = usePolygonHandlers({ mapRef, drawRef });
 
     const handleLocationSelect = useCallback(
         (lat: number, long: number, zoom: number) => {
