@@ -26,6 +26,11 @@ const theme = createTheme({
                 color: 'secondary',
             },
         },
+        MuiRadio: {
+            defaultProps: {
+                color: 'secondary',
+            },
+        },
     },
 });
 

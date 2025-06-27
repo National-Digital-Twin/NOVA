@@ -105,8 +105,8 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
             setCheckedLayers(checks);
             setLayerSettings(defaults);
 
-            const firstCategory = Object.keys(transformed)[0];
-            if (firstCategory) setExpandedPanels([firstCategory]);
+            const allCategories = Object.keys(transformed);
+            setExpandedPanels(allCategories);
 
             setLayersLoaded(true);
         } catch (err) {
