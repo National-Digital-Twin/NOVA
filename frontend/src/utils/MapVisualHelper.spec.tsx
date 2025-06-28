@@ -197,7 +197,7 @@ describe('MapVisualHelper', () => {
         expect(result).toEqual([]);
     });
 
-    it('_handleClick creates popup with issue text', () => {
+    it('_handleHeatmapLayerClick creates popup with issue text', () => {
         const addTo = vi.fn().mockReturnThis();
         const setHTML = vi.fn().mockReturnValue({ addTo });
         const setLngLat = vi.fn().mockReturnValue({ setHTML });
@@ -208,12 +208,19 @@ describe('MapVisualHelper', () => {
 
         const event = {
             lngLat: { lng: 0, lat: 0 },
-            features: [{ properties: { issue: 'Test issue' } }],
+            features: [
+                {
+                    properties: { issue: 'Test issue' },
+                    // Include layer.id to simulate heatmap feature
+                    layer: { id: 'heatmap-layer' },
+                },
+            ],
             target: map,
+            defaultPrevented: false,
             originalEvent: { target: { tagName: 'DIV' } },
         };
 
-        (MapVisualHelper as any)._handleClick(event);
+        (MapVisualHelper as any)._handleHeatmapLayerClick(event);
         expect(setLngLat).toHaveBeenCalled();
         expect(setHTML).toHaveBeenCalledWith(expect.stringContaining('Test issue'));
         expect(addTo).toHaveBeenCalledWith(map);

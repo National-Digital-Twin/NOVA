@@ -1,13 +1,13 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { ViewState } from 'react-map-gl/maplibre';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { act } from 'react'; //  use react's act
 import MapComponent from '../../components/map/MapComponent';
 import * as mapStore from '../../stores/useMapStore';
 import type { MapState, PolygonStatus } from '../../stores/useMapStore';
 
-// --- Helper to create a complete mock Zustand state ---
 const createMockMapState = (overrides: Partial<MapState> = {}): MapState => ({
-    mapRef: null,
+    mapRef: null, // simulate map is loaded or use a valid MapRef mock if needed
     setMapRef: vi.fn(),
 
     drawRef: null,
@@ -41,8 +41,20 @@ const createMockMapState = (overrides: Partial<MapState> = {}): MapState => ({
 
 // --- Mocks ---
 
+vi.stubGlobal(
+    'fetch',
+    vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => [], //  return array to avoid .forEach crash
+    })
+);
+
 vi.mock('../../components/search/SearchPanel', () => ({
     default: () => <div data-testid="search-panel" />,
+}));
+
+vi.mock('../../components/layer-selection/LayerControlPanel', () => ({
+    default: () => <div data-testid="layer-panel" />,
 }));
 
 vi.mock('react-map-gl/maplibre', () => ({
@@ -102,39 +114,48 @@ describe('MapComponent', () => {
     });
 
     it('does not render controls before map is initialized', () => {
-        vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) => selector(createMockMapState()));
+        vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) => selector(createMockMapState({ mapRef: null })));
 
         render(<MapComponent />);
         expect(screen.getByTestId('map')).toBeInTheDocument();
         expect(screen.queryByTestId('map-controls')).not.toBeInTheDocument();
     });
 
-    it('renders controls after map is initialized', () => {
+    it('renders controls after map is initialized', async () => {
         vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) => selector(createMockMapState()));
 
         render(<MapComponent />);
-        fireEvent.click(screen.getByTestId('map'));
+        await act(async () => {
+            fireEvent.click(screen.getByTestId('map'));
+        });
         expect(screen.getByTestId('map-controls')).toBeInTheDocument();
     });
 
-    it('handles map style changes', () => {
+    it('handles map style changes', async () => {
         vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) => selector(createMockMapState()));
 
         render(<MapComponent />);
-        fireEvent.click(screen.getByTestId('map')); // triggers onLoad
-        fireEvent.click(screen.getByText('Change Style'));
+        await act(async () => {
+            fireEvent.click(screen.getByTestId('map')); // triggers onLoad
+        });
+
+        const styleButton = await screen.findByText('Change Style'); //  wait for it
+        fireEvent.click(styleButton);
+
         expect(screen.getByTestId('map')).toBeInTheDocument();
     });
 
-    it('handles map movement', () => {
+    it('handles map movement', async () => {
         vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) => selector(createMockMapState()));
 
         render(<MapComponent />);
-        fireEvent.click(screen.getByTestId('map'));
+        await act(async () => {
+            fireEvent.click(screen.getByTestId('map'));
+        });
         expect(screen.getByTestId('map')).toBeInTheDocument();
     });
 
-    it('shows the wind turbine confirmed icon when placed', () => {
+    it('shows the wind turbine confirmed icon when placed', async () => {
         vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) =>
             selector(
                 createMockMapState({
@@ -145,7 +166,9 @@ describe('MapComponent', () => {
         );
 
         render(<MapComponent />);
-        fireEvent.click(screen.getByTestId('map'));
+        await act(async () => {
+            fireEvent.click(screen.getByTestId('map'));
+        });
         expect(screen.getByAltText('Wind Turbine')).toBeInTheDocument();
     });
 });

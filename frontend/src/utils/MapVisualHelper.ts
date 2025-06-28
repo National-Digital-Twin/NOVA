@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type { Variation } from '../components/search/add-asset/AddAsset';
 import { useMapStore } from '../stores/useMapStore';
+import type { MapGeoJSONFeature } from 'maplibre-gl';
 
 // Used to ensure mouse events include feature information. any type is used as property could be of any object.
 type FeatureEvent = MapMouseEvent & {
@@ -218,10 +219,10 @@ export class MapVisualHelper {
         }
 
         // Remove any previously bound events
-        map.off('click', id, this._handleClick);
+        map.off('click', id, this._handleHeatmapLayerClick);
 
         // Add only click interaction
-        map.on('click', id, this._handleClick);
+        map.on('click', id, this._handleHeatmapLayerClick);
 
         map.getCanvas().style.cursor = 'default';
     }
@@ -388,30 +389,39 @@ export class MapVisualHelper {
     }
 
     /**
-     * Shows a popup when a polygon is clicked, listing all issues.
+     * Shows a popup when a polygon on the heatmap is clicked, listing all issues.
      *
      * @param e - Click event with feature context
      */
-    private static _handleClick(e: FeatureEvent) {
+    private static _handleHeatmapLayerClick(e: FeatureEvent) {
         const map = e.target as Map;
         const features = e.features ?? [];
         if (features.length === 0) return;
 
         if (e.defaultPrevented) return;
 
-        // see if the DOM click started on a Marker overlay
         const target = e.originalEvent.target as HTMLElement;
         if (target?.tagName === 'IMG') {
             // It's a marker click — ignore this event
             return;
         }
 
-        // Collect and flatten all issues from every feature, then de-duplicate.
-        const allIssues = features.flatMap((feature) => MapVisualHelper._parseIssueFromFeature(feature));
+        // Only respond to clicks on the heatmap layer
+        const clickedFeatureInHeatmap = features.some((feature) => (feature as MapGeoJSONFeature).layer?.id === MapVisualHelper.heatmapLayerId);
+
+        if (!clickedFeatureInHeatmap) {
+            // Ignore clicks on markers or unrelated layers
+            return;
+        }
+
+        // Collect and flatten all issues from every relevant feature, then de-duplicate.
+        const allIssues = features
+            .filter((feature) => (feature as MapGeoJSONFeature).layer?.id === MapVisualHelper.heatmapLayerId)
+            .flatMap((feature) => MapVisualHelper._parseIssueFromFeature(feature));
+
         const uniqueIssues = Array.from(new Set(allIssues));
         const count = uniqueIssues.length;
 
-        // Build the HTML
         const html = `
             <div style="max-width: 250px;">
                 <div style="font-weight: bold;">
