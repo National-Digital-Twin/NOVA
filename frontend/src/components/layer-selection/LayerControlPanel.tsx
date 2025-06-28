@@ -274,15 +274,9 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
                                         <Typography variant="body2">{item.name}</Typography>
                                         <Checkbox id={checkboxId} checked={checkedLayers[item.name]} onChange={() => handleCheckboxChange(item.name)} />
                                     </label>
-                                    {item.attributes.length > 0 ? (
-                                        <IconButton size="small" onClick={() => openProps(item.name)}>
-                                            <MoreVertIcon fontSize="small" />
-                                        </IconButton>
-                                    ) : (
-                                        <Box sx={{ fontSize: 'small', padding: '5px' }}>
-                                            <MoreVertIcon fontSize="small" sx={{ opacity: 0 }} />
-                                        </Box>
-                                    )}
+                                    <IconButton size="small" onClick={() => openProps(item.name)}>
+                                        <MoreVertIcon fontSize="small" />
+                                    </IconButton>
                                 </Box>
                             );
                         })}
