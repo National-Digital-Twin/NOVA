@@ -385,7 +385,7 @@ export class MapVisualHelper {
     static isPointInsideUserDrawnPolygon(draw: MapboxDraw, lng: number, lat: number): boolean {
         const polygon = MapVisualHelper.getFirstPolygon(draw);
         if (!polygon) return true;
-    
+
         const pt = point([lng, lat]);
         return booleanPointInPolygon(pt, polygon);
     }

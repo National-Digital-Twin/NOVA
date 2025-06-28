@@ -21,14 +21,14 @@ export function useMarkerPlacement() {
             setMousePos({ x: e.clientX, y: e.clientY });
 
             if (!mapRef || !drawRef) return;
-        
+
             const map = mapRef.getMap?.();
             if (!map) return;
-        
+
             const rect = map.getCanvas().getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-    
+
             const { lng, lat } = map.unproject([x, y]);
             const inside = MapVisualHelper.isPointInsideUserDrawnPolygon(drawRef, lng, lat);
             setIsInsidePolygon(inside);

@@ -31,6 +31,7 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
 
     const handleDragEnd = (event: MarkerDragEvent) => {
         console.log('Marker dragged to:', event.lngLat);
+        // TODO - check if dragging is still needed recognising cannot be placed outside polygon
         if (onDragEnd) {
             onDragEnd(event.lngLat.lng, event.lngLat.lat);
         }
@@ -40,7 +41,7 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
     if (longitude === undefined || latitude === undefined) return null;
 
     return (
-        <Marker longitude={longitude} latitude={latitude} anchor="bottom" draggable={true} onDragEnd={handleDragEnd}>
+        <Marker longitude={longitude} latitude={latitude} anchor="bottom" draggable={false} onDragEnd={handleDragEnd}>
             <div ref={markerRef} style={{ position: 'relative' }}>
                 {showControls && (
                     <div

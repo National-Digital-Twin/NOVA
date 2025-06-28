@@ -48,6 +48,7 @@ const MapComponent = () => {
         if (drawRef.current) {
             setDrawRef(drawRef.current);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [drawRef.current, setDrawRef]);
 
     const handleMapLoad = () => {
