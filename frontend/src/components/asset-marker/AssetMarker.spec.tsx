@@ -149,4 +149,23 @@ describe('AssetMarker', () => {
         const { container } = render(<AssetMarker />);
         expect(container.firstChild).toBeNull();
     });
+
+    it('calls setIsPanelOpen(true) on edit click', () => {
+        const setPanelOpenMock = vi.fn();
+        render(<AssetMarker longitude={lng} latitude={lat} setIsPanelOpen={setPanelOpenMock} />);
+        fireEvent.click(screen.getByAltText('Wind Turbine'));
+        fireEvent.click(screen.getByLabelText('Edit'));
+        expect(setMarkerPositionMock).toHaveBeenCalledWith(null);
+        expect(setPanelOpenMock).toHaveBeenCalledWith(true);
+    });
+
+    it('toggles controls visibility when marker is clicked multiple times', () => {
+        render(<AssetMarker longitude={lng} latitude={lat} />);
+        const marker = screen.getByAltText('Wind Turbine');
+        fireEvent.click(marker);
+        expect(screen.getByLabelText('Edit')).toBeInTheDocument();
+
+        fireEvent.click(marker); // hide again
+        expect(screen.queryByLabelText('Edit')).not.toBeInTheDocument();
+    });
 });

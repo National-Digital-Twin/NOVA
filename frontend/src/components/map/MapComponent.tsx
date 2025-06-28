@@ -6,12 +6,12 @@ import { MAP_STYLES, type MapStyle } from '../../types/map';
 import MapControls from '../map-controls/MapControls';
 import SearchPanel from '../search/SearchPanel';
 import LayerControlPanel from '../layer-selection/LayerControlPanel';
-import windTurbineIcon from '../../assets/Windturbine_white.svg';
 import useMapboxDraw from '../../hooks/useMapboxDraw';
 import { MapVisualHelper } from '../../utils/MapVisualHelper';
 import { useMapStore } from '../../stores/useMapStore';
 import AssetMarkerContainer from '../asset-marker/AssetMarkerContainer';
 import { useMarkerPlacement } from '../../hooks/useMarkerPlacement';
+import PlacingMarkerOverlay from '../asset-marker/PlacingMarkerOverlay';
 
 const MAP_VIEW_BOUNDS: [[number, number], [number, number]] = [
     [-25.0, 42.0],
@@ -31,7 +31,7 @@ const MapComponent = () => {
     const setDrawRef = useMapStore((s) => s.setDrawRef);
     const [is3D, setIs3D] = useState(false);
     const cachedHeatMap = useMapStore((s) => s.cachedHeatmap);
-    const { handleMapClick, mousePos, isInsidePolygon } = useMarkerPlacement();
+    const { handleMapClick, mousePos, isInsidePolygon, suitability } = useMarkerPlacement();
 
     const handleStyleChange = (newStyle: MapStyle) => {
         setMapStyle(newStyle);
@@ -72,51 +72,7 @@ const MapComponent = () => {
                     <>
                         <SearchPanel drawRef={drawRef} isPanelOpen={isPanelOpen} mapRef={mapRef} setIsPanelOpen={setIsPanelOpen} />
                         <MapControls mapRef={mapRef} onStyleChange={handleStyleChange} currentStyle={mapStyle} is3D={is3D} setIs3D={setIs3D} />
-                        {placing && mousePos && (
-                            <div
-                                style={{
-                                    position: 'fixed',
-                                    left: mousePos.x,
-                                    top: mousePos.y,
-                                    transform: 'translate(-50%, -100%)',
-                                    pointerEvents: 'none',
-                                    zIndex: 1000,
-                                }}
-                            >
-                                <div style={{ position: 'relative' }}>
-                                    <img
-                                        src={windTurbineIcon}
-                                        alt="Wind Turbine pending"
-                                        style={{
-                                            width: '60px',
-                                            height: '60px',
-                                            cursor: 'pointer',
-                                            opacity: isInsidePolygon ? 1 : 0.4,
-                                        }}
-                                    />
-                                    {!isInsidePolygon && (
-                                        <div
-                                            style={{
-                                                position: 'absolute',
-                                                top: 2,
-                                                right: 2,
-                                                width: 18,
-                                                height: 18,
-                                                borderRadius: '50%',
-                                                backgroundColor: 'red',
-                                                color: 'white',
-                                                fontSize: 14,
-                                                textAlign: 'center',
-                                                lineHeight: '18px',
-                                                fontWeight: 'bold',
-                                            }}
-                                        >
-                                            x
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
+                        {placing && mousePos && <PlacingMarkerOverlay mousePos={mousePos} isInsidePolygon={isInsidePolygon} suitability={suitability} />}
                         <AssetMarkerContainer is3D={is3D} setIsPanelOpen={setIsPanelOpen} />
                         <LayerControlPanel mapRef={mapRef} drawRef={drawRef} />
                     </>

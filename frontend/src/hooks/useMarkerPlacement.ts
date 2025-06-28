@@ -13,25 +13,39 @@ export function useMarkerPlacement() {
 
     const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
     const [isInsidePolygon, setIsInsidePolygon] = useState(true);
+    const [suitability, setSuitability] = useState<'red' | 'amber' | 'green' | null>(null);
 
     useEffect(() => {
         if (!placing || !mapRef?.getMap) return;
 
+        const map = mapRef.getMap();
+        const rect = map.getCanvas().getBoundingClientRect();
+
         const handleMouseMove = (e: MouseEvent) => {
-            setMousePos({ x: e.clientX, y: e.clientY });
-
-            if (!mapRef || !drawRef) return;
-
-            const map = mapRef.getMap?.();
-            if (!map) return;
-
-            const rect = map.getCanvas().getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
+            setMousePos({ x: e.clientX, y: e.clientY });
 
             const { lng, lat } = map.unproject([x, y]);
-            const inside = MapVisualHelper.isPointInsideUserDrawnPolygon(drawRef, lng, lat);
+            const inside = drawRef ? MapVisualHelper.isPointInsideUserDrawnPolygon(drawRef, lng, lat) : true;
             setIsInsidePolygon(inside);
+
+            if (inside) {
+                const features = map.queryRenderedFeatures([x, y], { layers: ['heatmap-layer'] });
+                const suitabilityValues = features.map((f) => f.properties?.suitability).filter(Boolean);
+
+                if (suitabilityValues.includes('red')) {
+                    setSuitability('red');
+                } else if (suitabilityValues.includes('amber')) {
+                    setSuitability('amber');
+                } else if (suitabilityValues.includes('green')) {
+                    setSuitability('green');
+                } else {
+                    setSuitability(null);
+                }
+            } else {
+                setSuitability(null);
+            }
         };
 
         window.addEventListener('mousemove', handleMouseMove);
@@ -58,5 +72,6 @@ export function useMarkerPlacement() {
         mousePos,
         handleMapClick,
         isInsidePolygon,
+        suitability,
     };
 }

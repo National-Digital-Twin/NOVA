@@ -116,6 +116,7 @@ export function usePolygonHandlers({ mapRef, drawRef }: UsePolygonHandlersProps)
     const handlePolygonEdited = useCallback(
         (geojson: FeatureCollection<Geometry>) => {
             setPolygonStatus('confirmed');
+            setCachedHeatmap(null);
 
             const polygon = MapVisualHelper.extractFirstPolygon(geojson);
             if (polygon) {
@@ -124,7 +125,7 @@ export function usePolygonHandlers({ mapRef, drawRef }: UsePolygonHandlersProps)
 
             MapVisualHelper.remove3DAssets(mapRef.current.getMap());
         },
-        [setPolygonStatus, mapRef]
+        [setPolygonStatus, setCachedHeatmap, mapRef]
     );
 
     const startPolygonEdit = useCallback(() => {
