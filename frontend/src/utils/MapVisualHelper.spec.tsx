@@ -3,7 +3,6 @@ import { MapVisualHelper } from './MapVisualHelper';
 import type { FeatureCollection, Polygon } from 'geojson';
 import { Popup } from 'maplibre-gl';
 
-// Mock Zustand store
 vi.mock('../stores/useMapStore', () => ({
     useMapStore: {
         getState: () => ({
@@ -12,7 +11,6 @@ vi.mock('../stores/useMapStore', () => ({
     },
 }));
 
-// Mock GLTFLoader for visualiseAssetsIn3d
 vi.mock('three/examples/jsm/loaders/GLTFLoader.js', () => ({
     GLTFLoader: class {
         loadAsync = vi.fn().mockResolvedValue({

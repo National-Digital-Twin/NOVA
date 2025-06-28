@@ -1,10 +1,8 @@
-// src/utils/MapEditGuards.ts
-
 import type maplibregl from 'maplibre-gl';
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 
 /**
- * Stops any editing if the user clicked on an existing polygon.
+ * Stops any editing if the user clicked on an existing mapbox draw polygon.
  */
 export function preventPolygonEdit(map: maplibregl.Map, draw: MapboxDraw | null, point: { x: number; y: number }) {
     if (!map || !draw) return;

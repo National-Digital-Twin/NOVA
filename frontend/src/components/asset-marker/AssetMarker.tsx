@@ -16,14 +16,7 @@ interface AssetMarkerProps {
     setIsPanelOpen?: (isPanelOpen: boolean) => void;
 }
 
-const AssetMarker: React.FC<AssetMarkerProps> = ({
-    longitude,
-    latitude,
-    onBoltClick,
-    isSelected = false,
-    onDragEnd,
-    setIsPanelOpen,
-}) => {
+const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltClick, isSelected = false, onDragEnd, setIsPanelOpen }) => {
     const markerRef = useRef<HTMLDivElement>(null);
     const [showControls, setShowControls] = useState(false);
     const [showSubstationsList, setShowSubstationsList] = useState(false);
@@ -47,13 +40,7 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({
     if (longitude === undefined || latitude === undefined) return null;
 
     return (
-        <Marker
-            longitude={longitude}
-            latitude={latitude}
-            anchor="bottom"
-            draggable={true}
-            onDragEnd={handleDragEnd}
-        >
+        <Marker longitude={longitude} latitude={latitude} anchor="bottom" draggable={true} onDragEnd={handleDragEnd}>
             <div ref={markerRef} style={{ position: 'relative' }}>
                 {showControls && (
                     <div

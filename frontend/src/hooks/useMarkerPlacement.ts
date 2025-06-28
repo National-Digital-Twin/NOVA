@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useMapStore } from '../stores/useMapStore';
 import type { MapMouseEvent } from 'maplibre-gl';
-import { preventPolygonEdit } from '../utils/MapEditGuards';
 
 export function useMarkerPlacement() {
     const placing = useMapStore((s) => s.placing);
@@ -9,7 +8,6 @@ export function useMarkerPlacement() {
     const setMarkerPosition = useMapStore((s) => s.setMarkerPosition);
     const setMarkerBearing = useMapStore((s) => s.setMarkerBearing);
     const mapRef = useMapStore((s) => s.mapRef);
-    const drawRef = useMapStore((s) => s.drawRef);
 
     const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
 
@@ -37,7 +35,6 @@ export function useMarkerPlacement() {
         const map = mapRef?.getMap?.();
         if (map) {
             setMarkerBearing(map.getBearing());
-            preventPolygonEdit(map, drawRef, e.point);
         }
 
         setPlacing(false);
