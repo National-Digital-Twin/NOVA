@@ -96,7 +96,12 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
                 <img
                     src={isSelected ? windTurbineSelectedIcon : windTurbineIcon}
                     alt="Wind Turbine"
-                    style={{ width: 60, height: 60, cursor: 'pointer', pointerEvents: 'auto' }}
+                    style={{
+                        width: 60,
+                        height: 60,
+                        cursor: 'pointer',
+                        pointerEvents: 'auto',
+                    }}
                     onClick={handleMarkerClick}
                 />
             </div>

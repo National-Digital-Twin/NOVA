@@ -1,5 +1,5 @@
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { Map } from 'react-map-gl/maplibre';
 import { MAP_STYLES, type MapStyle } from '../../types/map';
@@ -28,9 +28,10 @@ const MapComponent = () => {
 
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const drawRef = useMapboxDraw(mapRef, isMapInitialized);
+    const setDrawRef = useMapStore((s) => s.setDrawRef);
     const [is3D, setIs3D] = useState(false);
     const cachedHeatMap = useMapStore((s) => s.cachedHeatmap);
-    const { mousePos, handleMapClick } = useMarkerPlacement();
+    const { handleMapClick, mousePos, isInsidePolygon } = useMarkerPlacement();
 
     const handleStyleChange = (newStyle: MapStyle) => {
         setMapStyle(newStyle);
@@ -42,6 +43,12 @@ const MapComponent = () => {
             });
         }
     };
+
+    useEffect(() => {
+        if (drawRef.current) {
+            setDrawRef(drawRef.current);
+        }
+    }, [drawRef.current, setDrawRef]);
 
     const handleMapLoad = () => {
         setIsMapInitialized(true);
@@ -75,7 +82,38 @@ const MapComponent = () => {
                                     zIndex: 1000,
                                 }}
                             >
-                                <img src={windTurbineIcon} alt="Wind Turbine pending" style={{ width: '60px', height: '60px', cursor: 'pointer' }} />
+                                <div style={{ position: 'relative' }}>
+                                    <img
+                                        src={windTurbineIcon}
+                                        alt="Wind Turbine pending"
+                                        style={{
+                                            width: '60px',
+                                            height: '60px',
+                                            cursor: 'pointer',
+                                            opacity: isInsidePolygon ? 1 : 0.4,
+                                        }}
+                                    />
+                                    {!isInsidePolygon && (
+                                        <div
+                                            style={{
+                                                position: 'absolute',
+                                                top: 2,
+                                                right: 2,
+                                                width: 18,
+                                                height: 18,
+                                                borderRadius: '50%',
+                                                backgroundColor: 'red',
+                                                color: 'white',
+                                                fontSize: 14,
+                                                textAlign: 'center',
+                                                lineHeight: '18px',
+                                                fontWeight: 'bold',
+                                            }}
+                                        >
+                                            x
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         )}
                         <AssetMarkerContainer is3D={is3D} setIsPanelOpen={setIsPanelOpen} />

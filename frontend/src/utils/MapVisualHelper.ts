@@ -8,6 +8,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type { Variation } from '../components/search/add-asset/AddAsset';
 import { useMapStore } from '../stores/useMapStore';
 import type { MapGeoJSONFeature } from 'maplibre-gl';
+import { point } from '@turf/helpers';
+import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 
 // Used to ensure mouse events include feature information. any type is used as property could be of any object.
 type FeatureEvent = MapMouseEvent & {
@@ -375,6 +377,17 @@ export class MapVisualHelper {
      */
     static remove3DAssets(map: Map) {
         if (map.getLayer(MapVisualHelper.threeDimensionalAssetsLayer)) map.removeLayer(MapVisualHelper.threeDimensionalAssetsLayer);
+    }
+
+    /**
+     * Determines whether long/lat coordinates fall inside a user drawn polygon.
+     */
+    static isPointInsideUserDrawnPolygon(draw: MapboxDraw, lng: number, lat: number): boolean {
+        const polygon = MapVisualHelper.getFirstPolygon(draw);
+        if (!polygon) return true;
+    
+        const pt = point([lng, lat]);
+        return booleanPointInPolygon(pt, polygon);
     }
 
     /**
