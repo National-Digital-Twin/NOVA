@@ -20,6 +20,7 @@ const MAP_VIEW_BOUNDS: [[number, number], [number, number]] = [
 
 const MapComponent = () => {
     const mapRef = useRef<MapRef>(null!);
+    const setMapRef = useMapStore((s) => s.setMapRef);
     const [viewState, setViewState] = useState({ longitude: -1.611, latitude: 54.5, pitch: 0, bearing: 0 });
     const [mapStyle, setMapStyle] = useState<MapStyle>('hybrid');
     const [isMapInitialized, setIsMapInitialized] = useState(false);
@@ -44,6 +45,7 @@ const MapComponent = () => {
 
     const handleMapLoad = () => {
         setIsMapInitialized(true);
+        setMapRef(mapRef.current);
     };
 
     return (

@@ -5,7 +5,6 @@ import windTurbineSelectedIcon from '../../assets/Windturbine_blue_selected.svg'
 import AssetControls from './AssetControls';
 import { SubstationsListContainer } from '../map-substations-list';
 import { useMapStore } from '../../stores/useMapStore';
-import { disableDrawLayerClicks } from '../../utils/MapEditGuards';
 
 interface AssetMarkerProps {
     longitude?: number;
@@ -17,22 +16,23 @@ interface AssetMarkerProps {
     setIsPanelOpen?: (isPanelOpen: boolean) => void;
 }
 
-const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltClick, isSelected = false, onDragEnd, setIsPanelOpen }) => {
+const AssetMarker: React.FC<AssetMarkerProps> = ({
+    longitude,
+    latitude,
+    onBoltClick,
+    isSelected = false,
+    onDragEnd,
+    setIsPanelOpen,
+}) => {
     const markerRef = useRef<HTMLDivElement>(null);
     const [showControls, setShowControls] = useState(false);
     const [showSubstationsList, setShowSubstationsList] = useState(false);
 
-    const mapRef = useMapStore((s) => s.mapRef);
-    const drawRef = useMapStore((s) => s.drawRef);
     const setPlacing = useMapStore((s) => s.setPlacing);
     const setMarkerPosition = useMapStore((s) => s.setMarkerPosition);
 
     const handleMarkerClick = (e: React.MouseEvent<HTMLImageElement>) => {
         e.preventDefault();
-        const map = mapRef?.getMap();
-        if (map) {
-            disableDrawLayerClicks(map, drawRef);
-        }
         setShowControls((v) => !v);
     };
 
@@ -47,26 +47,39 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
     if (longitude === undefined || latitude === undefined) return null;
 
     return (
-        <Marker longitude={longitude} latitude={latitude} anchor="bottom" draggable={true} onDragEnd={handleDragEnd}>
+        <Marker
+            longitude={longitude}
+            latitude={latitude}
+            anchor="bottom"
+            draggable={true}
+            onDragEnd={handleDragEnd}
+        >
             <div ref={markerRef} style={{ position: 'relative' }}>
                 {showControls && (
-                    <AssetControls
-                        onBoltClick={() => {
-                            setShowSubstationsList((prev) => !prev);
-                            if (onBoltClick) onBoltClick();
-                        }}
-                        onDeleteClick={() => {
-                            if (setMarkerPosition) setMarkerPosition(null);
-                        }}
-                        onEditClick={() => {
-                            if (setMarkerPosition) setMarkerPosition(null);
-                            if (setIsPanelOpen) setIsPanelOpen(true);
-                        }}
-                        onMoveClick={() => {
-                            if (setMarkerPosition) setMarkerPosition(null);
-                            if (setPlacing) setPlacing(true);
-                        }}
-                    />
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onMouseUp={(e) => e.stopPropagation()}
+                        onPointerDown={(e) => e.stopPropagation()}
+                    >
+                        <AssetControls
+                            onBoltClick={() => {
+                                setShowSubstationsList((prev) => !prev);
+                                if (onBoltClick) onBoltClick();
+                            }}
+                            onDeleteClick={() => {
+                                if (setMarkerPosition) setMarkerPosition(null);
+                            }}
+                            onEditClick={() => {
+                                if (setMarkerPosition) setMarkerPosition(null);
+                                if (setIsPanelOpen) setIsPanelOpen(true);
+                            }}
+                            onMoveClick={() => {
+                                if (setMarkerPosition) setMarkerPosition(null);
+                                if (setPlacing) setPlacing(true);
+                            }}
+                        />
+                    </div>
                 )}
                 {showSubstationsList && (
                     <div
@@ -78,6 +91,10 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
                             zIndex: 1000,
                             width: '250px',
                         }}
+                        onClick={(e) => e.stopPropagation()}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onMouseUp={(e) => e.stopPropagation()}
+                        onPointerDown={(e) => e.stopPropagation()}
                     >
                         <SubstationsListContainer
                             longitude={longitude}

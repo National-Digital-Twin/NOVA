@@ -19,29 +19,3 @@ export function preventPolygonEdit(map: maplibregl.Map, draw: MapboxDraw | null,
         map.getCanvas().style.cursor = 'default';
     }
 }
-
-/**
- * Disables *all* interaction (click, mouse, touch) on every Mapbox-Draw layer.
- * Call once after map + draw are initialized.
- */
-export function disableDrawLayerClicks(map: maplibregl.Map, draw: MapboxDraw | null) {
-    if (!map || !draw) return;
-
-    // events that Mapbox-Draw listens for
-    const EVENTS = ['click', 'mousedown', 'mouseup', 'touchstart', 'touchend'] as const;
-
-    const swallow = (e: maplibregl.MapLayerMouseEvent | maplibregl.MapLayerTouchEvent) => {
-        // prevent Mapbox-Draw from ever handling this click
-        e.preventDefault();
-        e.originalEvent.stopImmediatePropagation?.();
-    };
-
-    // attach to every draw layer
-    map.getStyle().layers?.forEach((layer) => {
-        if (layer.id.startsWith('gl-draw-')) {
-            for (const ev of EVENTS) {
-                map.on(ev, layer.id, swallow);
-            }
-        }
-    });
-}
