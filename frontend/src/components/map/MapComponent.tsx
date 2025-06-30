@@ -1,19 +1,20 @@
 import { Box } from '@mui/material';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { Map } from 'react-map-gl/maplibre';
-import windTurbineIcon from '../../assets/pending_turbine.svg';
-import useMapboxDraw from '../../hooks/useMapboxDraw';
-import { useMapStore } from '../../stores/useMapStore';
 import GridConnectPanel from '../grid-connect/GridConnectPanel';
 import { MAP_STYLES, type MapStyle } from '../../types/map';
-import { MapVisualHelper } from '../../utils/MapVisualHelper';
-import AssetMarker from '../asset-marker/AssetMarker';
 import GridConnectFooterPanel from '../grid-connect/GridConnectFooterPanel';
-import LayerControlPanel from '../layer-selection/LayerControlPanel';
 import MapControls from '../map-controls/MapControls';
 import SearchPanel from '../search/SearchPanel';
+import LayerControlPanel from '../layer-selection/LayerControlPanel';
+import useMapboxDraw from '../../hooks/useMapboxDraw';
+import { MapVisualHelper } from '../../utils/MapVisualHelper';
+import { useMapStore } from '../../stores/useMapStore';
+import AssetMarkerContainer from '../asset-marker/AssetMarkerContainer';
+import { useMarkerPlacement } from '../../hooks/useMarkerPlacement';
+import PlacingMarkerOverlay from '../asset-marker/PlacingMarkerOverlay';
 
 const MAP_VIEW_BOUNDS: [[number, number], [number, number]] = [
     [-25.0, 42.0],
@@ -26,19 +27,16 @@ const MapComponent = () => {
     const [viewState, setViewState] = useState({ longitude: -1.611, latitude: 54.5, pitch: 0, bearing: 0 });
     const [mapStyle, setMapStyle] = useState<MapStyle>('hybrid');
     const [isMapInitialized, setIsMapInitialized] = useState(false);
-    const showLayerControl = useMapStore((s) => s.showLayerControl);
-    const markerPosition = useMapStore((s) => s.markerPosition);
-    const setMarkerPosition = useMapStore((s) => s.setMarkerPosition);
     const placing = useMapStore((s) => s.placing);
     const gridConnectViewActive = useMapStore((s) => s.gridConnectViewActive);
     const selectedSubstation = useMapStore((s) => s.selectedSubstation);
 
-    const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const drawRef = useMapboxDraw(mapRef, isMapInitialized);
     const setDrawRef = useMapStore((s) => s.setDrawRef);
     const [is3D, setIs3D] = useState(false);
     const cachedHeatMap = useMapStore((s) => s.cachedHeatmap);
+    const { handleMapClick, mousePos, isInsidePolygon, suitability } = useMarkerPlacement();
 
     const handleStyleChange = (newStyle: MapStyle) => {
         setMapStyle(newStyle);
@@ -51,47 +49,17 @@ const MapComponent = () => {
         }
     };
 
-    const handleMapLoad = () => {
-        setIsMapInitialized(true);
-    };
-
-    const handleMarkerDragEnd = useCallback(
-        (longitude: number, latitude: number) => {
-            console.log('Marker position updated:', { longitude, latitude });
-            setMarkerPosition({ longitude, latitude });
-        },
-        [setMarkerPosition]
-    );
-
-    useEffect(() => {
-        if (mapRef.current) {
-            setMapRef(mapRef.current);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [mapRef.current]);
-
     useEffect(() => {
         if (drawRef.current) {
             setDrawRef(drawRef.current);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [drawRef.current]);
+    }, [drawRef.current, setDrawRef]);
 
-    useEffect(() => {
-        const handleMouseMove = (e: MouseEvent) => {
-            setMousePos({ x: e.clientX, y: e.clientY });
-        };
-
-        if (placing) {
-            window.addEventListener('mousemove', handleMouseMove);
-        } else {
-            setMousePos(null);
-        }
-
-        return () => {
-            window.removeEventListener('mousemove', handleMouseMove);
-        };
-    }, [placing]);
+    const handleMapLoad = () => {
+        setIsMapInitialized(true);
+        setMapRef(mapRef.current);
+    };
 
     return (
         <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -100,45 +68,19 @@ const MapComponent = () => {
                 maxBounds={MAP_VIEW_BOUNDS}
                 {...viewState}
                 onMove={(evt) => setViewState(evt.viewState)}
+                onClick={handleMapClick}
                 onLoad={handleMapLoad}
-                onClick={useMapStore((s) => s.handleMapClick)}
                 mapStyle={MAP_STYLES[mapStyle]}
                 style={{ width: '100%', height: '100%' }}
             >
                 {isMapInitialized && (
                     <>
-                        <SearchPanel
-                            drawRef={drawRef}
-                            isPanelOpen={isPanelOpen}
-                            mapRef={mapRef}
-                            setIsPanelOpen={setIsPanelOpen}
-                        />
+                        <SearchPanel drawRef={drawRef} isPanelOpen={isPanelOpen} mapRef={mapRef} setIsPanelOpen={setIsPanelOpen} />
                         {gridConnectViewActive && <GridConnectPanel />}
                         <MapControls mapRef={mapRef} onStyleChange={handleStyleChange} currentStyle={mapStyle} is3D={is3D} setIs3D={setIs3D} />
-                        {placing && mousePos && (
-                            <div
-                                style={{
-                                    position: 'fixed',
-                                    left: mousePos.x,
-                                    top: mousePos.y,
-                                    transform: 'translate(-50%, -100%)',
-                                    pointerEvents: 'none',
-                                    zIndex: 1000,
-                                }}
-                            >
-                                <img src={windTurbineIcon} alt="Wind Turbine pending" style={{ width: '60px', height: '60px', cursor: 'pointer' }} />
-                            </div>
-                        )}
-                        {markerPosition && !is3D && (
-                            <AssetMarker
-                                longitude={markerPosition.longitude}
-                                latitude={markerPosition.latitude}
-                                mapRef={mapRef}
-                                onDragEnd={handleMarkerDragEnd}
-                                setIsPanelOpen={setIsPanelOpen}
-                            />
-                        )}
-                        {showLayerControl && <LayerControlPanel mapRef={mapRef} drawRef={drawRef} />}
+                        {placing && mousePos && <PlacingMarkerOverlay mousePos={mousePos} isInsidePolygon={isInsidePolygon} suitability={suitability} />}
+                        <AssetMarkerContainer is3D={is3D} setIsPanelOpen={setIsPanelOpen} />
+                        <LayerControlPanel mapRef={mapRef} drawRef={drawRef} />
                     </>
                 )}
             </Map>

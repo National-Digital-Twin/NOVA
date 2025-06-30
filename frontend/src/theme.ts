@@ -10,6 +10,28 @@ const theme = createTheme({
         },
         divider: '#1c1c1c',
     },
+    components: {
+        MuiButton: {
+            defaultProps: {
+                color: 'secondary',
+            },
+        },
+        MuiCheckbox: {
+            defaultProps: {
+                color: 'secondary',
+            },
+        },
+        MuiIconButton: {
+            defaultProps: {
+                color: 'secondary',
+            },
+        },
+        MuiRadio: {
+            defaultProps: {
+                color: 'secondary',
+            },
+        },
+    },
 });
 
 export default theme;

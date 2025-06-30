@@ -1,5 +1,6 @@
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import type { GeoJSONSource, MapLayerMouseEvent } from 'maplibre-gl';
+import type { Popup } from 'maplibre-gl';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { create } from 'zustand';
 import type { Variation } from '../components/search/add-asset/AddAsset';
@@ -7,7 +8,9 @@ import type { Feature, FeatureCollection, Polygon } from 'geojson';
 import type { Substation } from '../components/map-substations-list/SubstationsList';
 import { MarkerStatus } from '../components/asset-marker/AssetMarker';
 
-interface MapState {
+export type PolygonStatus = 'none' | 'drawing' | 'editing' | 'pendingConfirmation' | 'confirmed';
+
+export interface MapState {
     mapRef: MapRef | null;
     setMapRef: (ref: MapRef) => void;
 
@@ -17,20 +20,22 @@ interface MapState {
     showLayerControl: boolean;
     setShowLayerControl: (layerControl: boolean) => void;
 
+    polygonConfirmPopup: Popup | null;
+    setPolygonConfirmPopup: (ref: Popup | null) => void;
+
     placing: boolean;
     setPlacing: (placing: boolean) => void;
 
     markerPosition: { longitude?: number; latitude?: number } | null;
     setMarkerPosition: (position: { longitude?: number; latitude?: number } | null) => void;
+
     markerBearing: number | null;
     setMarkerBearing: (bearing: number) => void;
+
     markerVariant: Variation | null;
     setMarkerVariant: (variant: Variation | null) => void;
     markerStatus: MarkerStatus;
     setMarkerStatus: (status: MarkerStatus) => void;
-
-    preventPolygonEdit: (e: MouseEvent) => void;
-    handleMapClick: (e: MapLayerMouseEvent) => void;
 
     cachedHeatmap: FeatureCollection | null;
     setCachedHeatmap: (featureCollection: FeatureCollection | null) => void;
@@ -54,6 +59,10 @@ interface MapState {
     setSubstations: (substations: Substation[]) => void;
 
     renderGridConnectionLine: (connectionLineLayerId: string, lineColor: string) => void;
+    polygonStatus: PolygonStatus;
+    setPolygonStatus: (status: PolygonStatus) => void;
+
+    clearMarkerValues: () => void;
 }
 
 export const useMapStore = create<MapState>((set, get) => ({
@@ -65,6 +74,9 @@ export const useMapStore = create<MapState>((set, get) => ({
 
     showLayerControl: false,
     setShowLayerControl: (layerControl) => set({showLayerControl: layerControl}),
+    
+    polygonConfirmPopup: null,
+    setPolygonConfirmPopup: (popup) => set({ polygonConfirmPopup: popup }),
 
     placing: false,
     setPlacing: (placing) => set({ placing: placing }),
@@ -99,6 +111,11 @@ export const useMapStore = create<MapState>((set, get) => ({
     setMaskLayerId: (id) => set({maskLayerId: id}),
     maskLayerSourceId: null,
     setMaskLayerSourceId: (id) => set({maskLayerSourceId: id}),
+
+    polygonStatus: 'none',
+    setPolygonStatus: (status) => set({ polygonStatus: status }),
+
+    clearMarkerValues: () => set({ markerBearing: null, markerVariant: null, markerPosition: null }),
     
 
     renderGridConnectionLine: (connectionLineLayerId: string, lineColor: string) => {
@@ -256,5 +273,5 @@ export const useMapStore = create<MapState>((set, get) => ({
 
             get().setPlacing(false);
         }
-    },
+    }
 }));

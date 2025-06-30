@@ -1,17 +1,19 @@
 import type { MapRef } from 'react-map-gl/maplibre';
+import type { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
 import ControlIcon from '../../../shared/control-icon/ControlIcon';
 import { MapVisualHelper } from '../../../utils/MapVisualHelper';
-import { useMapStore } from '../../../stores/useMapStore';
 import { useState } from 'react';
 
 interface HideLayersButtonProps {
     mapRef: React.RefObject<MapRef>;
+    cachedHeatmap: FeatureCollection<Geometry, GeoJsonProperties> | null;
 }
 
-const HideLayersButton = ({ mapRef }: HideLayersButtonProps) => {
+const HideLayersButton = ({ mapRef, cachedHeatmap }: HideLayersButtonProps) => {
     const [hiddenLayerIds, setHiddenLayerIds] = useState<string[] | null>(null);
     const [isActive, setIsActive] = useState(true);
-    const cachedHeatmap = useMapStore((s) => s.cachedHeatmap);
+
+    if (!cachedHeatmap) return null;
 
     const handleClick = () => {
         const map = mapRef.current?.getMap();
@@ -28,8 +30,6 @@ const HideLayersButton = ({ mapRef }: HideLayersButtonProps) => {
             }
         }
     };
-
-    if (!cachedHeatmap) return null;
 
     return (
         <ControlIcon onClick={handleClick} isActive={isActive} aria-label="Toggle polygon" showTooltip={true}>

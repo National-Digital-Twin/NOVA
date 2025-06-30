@@ -55,14 +55,14 @@ interface LayerApiResponse {
 }
 
 const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
+    const polygonStatus = useMapStore((s) => s.polygonStatus);
     const idPrefix = useId();
-
     const [layers, setLayers] = useState<Record<string, LayerItem[]>>({});
     const [searchTerm, setSearchTerm] = useState('');
     const [open, setOpen] = useState(true);
     const [loading, setLoading] = useState(false);
     const [checkedLayers, setCheckedLayers] = useState<Record<string, boolean>>({});
-    const [layerSettings, setLayerSettings] = useState<Record<string, Record<string, string>>>({});
+    const [layerSettings, setLayerSettings] = useState<Record<string, Record<string, number>>>({});
     const [expandedPanels, setExpandedPanels] = useState<string[]>([]);
     const [propOpen, setPropOpen] = useState(false);
     const [currentLayer, setCurrentLayer] = useState<string | null>(null);
@@ -79,7 +79,7 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
 
             const transformed: Record<string, LayerItem[]> = {};
             const checks: Record<string, boolean> = {};
-            const defaults: Record<string, Record<string, string>> = {};
+            const defaults: Record<string, Record<string, number>> = {};
 
             data.categories.forEach((category) => {
                 if (!category.items?.length) return;
@@ -90,7 +90,7 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
                     checks[item.name] = true;
                     defaults[item.name] = {};
                     attributes.forEach((a) => {
-                        defaults[item.name][a.description] = String(a.defaultValue);
+                        defaults[item.name][a.description] = Number(a.defaultValue);
                     });
 
                     return {
@@ -105,8 +105,8 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
             setCheckedLayers(checks);
             setLayerSettings(defaults);
 
-            const firstCategory = Object.keys(transformed)[0];
-            if (firstCategory) setExpandedPanels([firstCategory]);
+            const allCategories = Object.keys(transformed);
+            setExpandedPanels(allCategories);
 
             setLayersLoaded(true);
         } catch (err) {
@@ -168,7 +168,7 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
             ...prev,
             [currentLayer]: {
                 ...prev[currentLayer],
-                [label]: raw,
+                [label]: Number(raw),
             },
         }));
     };
@@ -182,7 +182,7 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
             ...prev,
             [currentLayer]: {
                 ...prev[currentLayer],
-                [label]: final,
+                [label]: Number(final),
             },
         }));
     };
@@ -240,6 +240,7 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
 
             setCachedHeatmap(geojson);
             MapVisualHelper.addOrUpdateHeatmapLayer(mapRef, geojson);
+            setOpen(false);
         } catch (err) {
             console.error('Analysis request failed', err);
         } finally {
@@ -317,6 +318,9 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
             </Box>
         );
     }
+
+    const isVisible = polygonStatus === 'confirmed';
+    if (!isVisible) return null;
 
     return (
         <>
@@ -412,6 +416,7 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
                                         key={attr.id}
                                         label={attr.description}
                                         type={attr.valueType === 'number' ? 'number' : 'text'}
+                                        InputProps={attr.valueType === 'number' ? { inputProps: { min: 0 } } : {}}
                                         select={(attr.options?.length ?? 0) > 0}
                                         fullWidth
                                         value={layerSettings[currentLayer][attr.description]}

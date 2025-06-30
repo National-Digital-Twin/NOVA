@@ -1,21 +1,15 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import SubstationsList from './SubstationsList';
-
-// Define the ListItem interface to match the one in the component
-interface ListItem {
-    text: string;
-    distance: string;
-}
+import SubstationsList, { type Substation } from './SubstationsList';
 
 describe('SubstationsList', () => {
     it('renders with default items', () => {
-        const manyItems: ListItem[] = [
-            { text: 'Item 1', distance: '100km' },
-            { text: 'Item 2', distance: '200km' },
-            { text: 'Item 3', distance: '300km' },
-            { text: 'Item 4', distance: '400km' },
-            { text: 'Item 5', distance: '500km' },
+        const manyItems: Substation[] = [
+            { id: 1, name: 'Item 1', distanceFromTurbine: '100km', coordinates: [1, 2] },
+            { id: 1, name: 'Item 2', distanceFromTurbine: '200km', coordinates: [1, 2] },
+            { id: 1, name: 'Item 3', distanceFromTurbine: '300km', coordinates: [1, 2] },
+            { id: 1, name: 'Item 4', distanceFromTurbine: '400km', coordinates: [1, 2] },
+            { id: 1, name: 'Item 5', distanceFromTurbine: '500km', coordinates: [1, 2] },
         ];
         render(<SubstationsList items={manyItems} />);
 
@@ -29,10 +23,10 @@ describe('SubstationsList', () => {
     });
 
     it('renders with custom items', () => {
-        const customItems: ListItem[] = [
-            { text: 'Custom 1', distance: '150km' },
-            { text: 'Custom 2', distance: '250km' },
-            { text: 'Custom 3', distance: '350km' },
+        const customItems: Substation[] = [
+            { id: 1, name: 'Custom 1', distanceFromTurbine: '150km', coordinates: [1, 2] },
+            { id: 1, name: 'Custom 2', distanceFromTurbine: '250km', coordinates: [1, 2] },
+            { id: 1, name: 'Custom 3', distanceFromTurbine: '350km', coordinates: [1, 2] },
         ];
         render(<SubstationsList items={customItems} />);
 
@@ -45,12 +39,12 @@ describe('SubstationsList', () => {
     });
 
     it('renders all items provided', () => {
-        const manyItems: ListItem[] = [
-            { text: 'Item 1', distance: '100km' },
-            { text: 'Item 2', distance: '200km' },
-            { text: 'Item 3', distance: '300km' },
-            { text: 'Item 4', distance: '400km' },
-            { text: 'Item 5', distance: '500km' },
+        const manyItems: Substation[] = [
+            { id: 1, name: 'Item 1', distanceFromTurbine: '100km', coordinates: [1, 2] },
+            { id: 1, name: 'Item 2', distanceFromTurbine: '200km', coordinates: [1, 2] },
+            { id: 1, name: 'Item 3', distanceFromTurbine: '300km', coordinates: [1, 2] },
+            { id: 1, name: 'Item 4', distanceFromTurbine: '400km', coordinates: [1, 2] },
+            { id: 1, name: 'Item 5', distanceFromTurbine: '500km', coordinates: [1, 2] },
         ];
         render(<SubstationsList items={manyItems} />);
 
@@ -67,12 +61,12 @@ describe('SubstationsList', () => {
     });
 
     it('disables confirm button until an item is selected', () => {
-        const manyItems: ListItem[] = [
-            { text: 'Item 1', distance: '100km' },
-            { text: 'Item 2', distance: '200km' },
-            { text: 'Item 3', distance: '300km' },
-            { text: 'Item 4', distance: '400km' },
-            { text: 'Item 5', distance: '500km' },
+        const manyItems: Substation[] = [
+            { id: 1, name: 'Item 1', distanceFromTurbine: '100km', coordinates: [1, 2] },
+            { id: 1, name: 'Item 2', distanceFromTurbine: '200km', coordinates: [1, 2] },
+            { id: 1, name: 'Item 3', distanceFromTurbine: '300km', coordinates: [1, 2] },
+            { id: 1, name: 'Item 4', distanceFromTurbine: '400km', coordinates: [1, 2] },
+            { id: 1, name: 'Item 5', distanceFromTurbine: '500km', coordinates: [1, 2] },
         ];
         render(<SubstationsList items={manyItems} />);
 
@@ -84,12 +78,12 @@ describe('SubstationsList', () => {
     });
 
     it('calls onConfirm with the selected item when confirm button is clicked', () => {
-        const manyItems: ListItem[] = [
-            { text: 'Item 1', distance: '100km' },
-            { text: 'Item 2', distance: '200km' },
-            { text: 'Item 3', distance: '300km' },
-            { text: 'Item 4', distance: '400km' },
-            { text: 'Item 5', distance: '500km' },
+        const manyItems: Substation[] = [
+            { id: 1, name: 'Item 1', distanceFromTurbine: '100km', coordinates: [1, 2] },
+            { id: 1, name: 'Item 2', distanceFromTurbine: '200km', coordinates: [1, 2] },
+            { id: 1, name: 'Item 3', distanceFromTurbine: '300km', coordinates: [1, 2] },
+            { id: 1, name: 'Item 4', distanceFromTurbine: '400km', coordinates: [1, 2] },
+            { id: 1, name: 'Item 5', distanceFromTurbine: '500km', coordinates: [1, 2] },
         ];
         const mockOnConfirm = vi.fn();
         render(<SubstationsList items={manyItems} onConfirm={mockOnConfirm} />);

@@ -7,10 +7,10 @@ const StyledIconButton = styled(IconButton, { shouldForwardProp: (prop) => prop 
     color: isActive ? theme.palette.primary.contrastText : theme.palette.text.primary,
     height: '3rem',
     padding: 0,
-    width: '3rem',
     '&:hover': {
-        backgroundColor: isActive ? theme.palette.secondary.dark : theme.palette.action.hover,
+        backgroundColor: isActive ? theme.palette.secondary.dark : theme.palette.background.paper,
     },
+    width: '3rem',
     '& .MuiTouchRipple-root .MuiTouchRipple-child': {
         borderRadius: theme.shape.borderRadius,
     },

@@ -66,12 +66,14 @@ describe('DataProviderUtils', () => {
         },
     ];
 
-    const mockWindspeedGoodLayerData = {
+    const mockWindspeedLayerData = {
         type: 'FeatureCollection',
         features: [
             {
                 type: 'Feature',
-                properties: {},
+                properties: {
+                    ws_spring1: 4.5,
+                },
                 geometry: {
                     coordinates: [
                         [
@@ -85,15 +87,11 @@ describe('DataProviderUtils', () => {
                     type: 'Polygon',
                 },
             },
-        ],
-    };
-
-    const mockWindspeedBadLayerData = {
-        type: 'FeatureCollection',
-        features: [
             {
                 type: 'Feature',
-                properties: {},
+                properties: {
+                    ws_spring1: 8,
+                },
                 geometry: {
                     coordinates: [
                         [
@@ -110,7 +108,7 @@ describe('DataProviderUtils', () => {
         ],
     };
 
-    const mockSpecialAreasOfConvservationLayerData = {
+    const mockSpecialAreasOfConservationLayerData = {
         type: 'FeatureCollection',
         features: [
             {
@@ -126,29 +124,29 @@ describe('DataProviderUtils', () => {
                             [-1.281658414106687, 50.71330487610129],
                         ],
                     ],
-                    type: 'Polygon',
+                    type: 'MultiPolygon',
                 },
             },
         ],
     };
 
-    const mockSpecialAreasOfConservation2KmLayerData = {
+    const mockSpecialAreasOfConservation1KmLayerData = {
         type: 'FeatureCollection',
         features: [
             {
                 type: 'Feature',
                 properties: {},
                 geometry: {
+                    type: 'MultiPolygon',
                     coordinates: [
                         [
-                            [-1.2846072279981229, 50.71519249535743],
-                            [-1.2846072279981229, 50.70037458785512],
-                            [-1.2536965621014815, 50.70037458785512],
-                            [-1.2536965621014815, 50.71519249535743],
-                            [-1.2846072279981229, 50.71519249535743],
+                            [-1.28293431783257, 50.714173063987346],
+                            [-1.28293431783257, 50.701177307578604],
+                            [-1.2549382762238963, 50.701177307578604],
+                            [-1.2549382762238963, 50.714173063987346],
+                            [-1.28293431783257, 50.714173063987346],
                         ],
                     ],
-                    type: 'Polygon',
                 },
             },
         ],
@@ -176,7 +174,7 @@ describe('DataProviderUtils', () => {
         ],
     };
 
-    const mockSitesOfSpecialScientificInterest2KmLayerData = {
+    const mockSitesOfSpecialScientificInterest1KmLayerData = {
         type: 'FeatureCollection',
         features: [
             {
@@ -185,14 +183,14 @@ describe('DataProviderUtils', () => {
                 geometry: {
                     coordinates: [
                         [
-                            [-1.3448236211275173, 50.71459877389401],
-                            [-1.3448236211275173, 50.70264161030374],
-                            [-1.3197472499953449, 50.70264161030374],
-                            [-1.3197472499953449, 50.71459877389401],
-                            [-1.3448236211275173, 50.71459877389401],
+                            [-1.3441100836511737, 50.71386752595595],
+                            [-1.3441100836511737, 50.70326744495887],
+                            [-1.3208198470697141, 50.70326744495887],
+                            [-1.3208198470697141, 50.71386752595595],
+                            [-1.3441100836511737, 50.71386752595595],
                         ],
                     ],
-                    type: 'Polygon',
+                    type: 'MultiPolygon',
                 },
             },
         ],
@@ -214,13 +212,13 @@ describe('DataProviderUtils', () => {
                             [-1.3419963357412428, 50.691229841834996],
                         ],
                     ],
-                    type: 'Polygon',
+                    type: 'MultiPolygon',
                 },
             },
         ],
     };
 
-    const mockAreasOfNaturalBeauty2KmLayerData = {
+    const mockAreasOfNaturalBeauty1KmLayerData = {
         type: 'FeatureCollection',
         features: [
             {
@@ -229,14 +227,14 @@ describe('DataProviderUtils', () => {
                 geometry: {
                     coordinates: [
                         [
-                            [-1.3435141171325995, 50.69272286828951],
-                            [-1.3435141171325995, 50.68002596642458],
-                            [-1.3226502245397285, 50.68002596642458],
-                            [-1.3226502245397285, 50.69272286828951],
-                            [-1.3435141171325995, 50.69272286828951],
+                            [-1.342721183047928, 50.69163334609394],
+                            [-1.342721183047928, 50.680674670924674],
+                            [-1.3235323694318026, 50.680674670924674],
+                            [-1.3235323694318026, 50.69163334609394],
+                            [-1.342721183047928, 50.69163334609394],
                         ],
                     ],
-                    type: 'Polygon',
+                    type: 'MutiPolygon',
                 },
             },
         ],
@@ -258,13 +256,13 @@ describe('DataProviderUtils', () => {
                             [-1.314421032212266, 50.70469119871362],
                         ],
                     ],
-                    type: 'Polygon',
+                    type: 'MultiPolygon',
                 },
             },
         ],
     };
 
-    const mockBuiltupAreas2KmLayerData = {
+    const mockBuiltupAreas1KmLayerData = {
         type: 'FeatureCollection',
         features: [
             {
@@ -273,14 +271,14 @@ describe('DataProviderUtils', () => {
                 geometry: {
                     coordinates: [
                         [
-                            [-1.3158927157848268, 50.70543644051841],
-                            [-1.3158927157848268, 50.695162844379155],
-                            [-1.2928806637628156, 50.695162844379155],
-                            [-1.2928806637628156, 50.70543644051841],
-                            [-1.3158927157848268, 50.70543644051841],
+                            [-1.3151006805906604, 50.70536658605337],
+                            [-1.3151006805906604, 50.69551854205466],
+                            [-1.2934632384579174, 50.69551854205466],
+                            [-1.2934632384579174, 50.70536658605337],
+                            [-1.3151006805906604, 50.70536658605337],
                         ],
                     ],
-                    type: 'Polygon',
+                    type: 'MultiPolygon',
                 },
             },
         ],
@@ -342,42 +340,26 @@ describe('DataProviderUtils', () => {
         });
     });
 
-    describe('getWindspeedGoodLayerData', () => {
-        it('should read and parse the windspeed good layer data from file', () => {
+    describe('getWindspeedLayerData', () => {
+        it('should read and parse the windspeed layer data from file', () => {
             // Mock fs.readFileSync to return our mock data
-            (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockWindspeedGoodLayerData));
+            (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockWindspeedLayerData));
 
             // Call the method
-            const result = dataProviderUtils.getWindspeedGoodLayerData();
+            const result = dataProviderUtils.getWindspeedLayerData();
 
             // Verify fs.readFileSync was called with the correct path
-            expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringContaining('windspeed-good.geojson'), 'utf8');
+            expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringContaining('windspeed.geojson'), 'utf8');
 
             // Verify the result
-            expect(result).toEqual(mockWindspeedGoodLayerData);
-        });
-    });
-
-    describe('getWindspeedBadLayerData', () => {
-        it('should read and parse the windspeed bad layer data from file', () => {
-            // Mock fs.readFileSync to return our mock data
-            (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockWindspeedBadLayerData));
-
-            // Call the method
-            const result = dataProviderUtils.getWindspeedBadLayerData();
-
-            // Verify fs.readFileSync was called with the correct path
-            expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringContaining('windspeed-bad.geojson'), 'utf8');
-
-            // Verify the result
-            expect(result).toEqual(mockWindspeedBadLayerData);
+            expect(result).toEqual(mockWindspeedLayerData);
         });
     });
 
     describe('getSpecialAreasOfConservationLayerData', () => {
         it('should read and parse the special areas of conservation layer data from file', () => {
             // Mock fs.readFileSync to return our mock data
-            (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockSpecialAreasOfConvservationLayerData));
+            (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockSpecialAreasOfConservationLayerData));
 
             // Call the method
             const result = dataProviderUtils.getSpecialAreasOfConservationLayerData();
@@ -386,23 +368,23 @@ describe('DataProviderUtils', () => {
             expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringContaining('sac.geojson'), 'utf8');
 
             // Verify the result
-            expect(result).toEqual(mockSpecialAreasOfConvservationLayerData);
+            expect(result).toEqual(mockSpecialAreasOfConservationLayerData);
         });
     });
 
-    describe('getSpecialAreasOfConservation2KmLayerData', () => {
-        it('should read and parse the special areas of conservation 2km layer data from file', () => {
+    describe('getSpecialAreasOfConservation1KmLayerData', () => {
+        it('should read and parse the special areas of conservation 1 km layer data from file', () => {
             // Mock fs.readFileSync to return our mock data
-            (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockSpecialAreasOfConservation2KmLayerData));
+            (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockSpecialAreasOfConservation1KmLayerData));
 
             // Call the method
-            const result = dataProviderUtils.getSpecialAreasOfConservation2KmLayerData();
+            const result = dataProviderUtils.getSpecialAreasOfConservation1KmLayerData();
 
             // Verify fs.readFileSync was called with the correct path
-            expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringContaining('sac-2km.geojson'), 'utf8');
+            expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringContaining('sac-1km.geojson'), 'utf8');
 
             // Verify the result
-            expect(result).toEqual(mockSpecialAreasOfConservation2KmLayerData);
+            expect(result).toEqual(mockSpecialAreasOfConservation1KmLayerData);
         });
     });
 
@@ -422,19 +404,19 @@ describe('DataProviderUtils', () => {
         });
     });
 
-    describe('getSiteOfSpecialScientificInterest2KmLayerData', () => {
-        it('should read and parse the sites of special scientific interest layer data from file', () => {
+    describe('getSiteOfSpecialScientificInterest1KmLayerData', () => {
+        it('should read and parse the sites of special scientific interest 1 km layer data from file', () => {
             // Mock fs.readFileSync to return our mock data
-            (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockSitesOfSpecialScientificInterest2KmLayerData));
+            (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockSitesOfSpecialScientificInterest1KmLayerData));
 
             // Call the method
-            const result = dataProviderUtils.getSitesOfSpecialScientificInterest2KmLayerData();
+            const result = dataProviderUtils.getSitesOfSpecialScientificInterest1KmLayerData();
 
             // Verify fs.readFileSync was called with the correct path
-            expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringContaining('sssi-2km.geojson'), 'utf8');
+            expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringContaining('sssi-1km.geojson'), 'utf8');
 
             // Verify the result
-            expect(result).toEqual(mockSitesOfSpecialScientificInterest2KmLayerData);
+            expect(result).toEqual(mockSitesOfSpecialScientificInterest1KmLayerData);
         });
     });
 
@@ -454,19 +436,19 @@ describe('DataProviderUtils', () => {
         });
     });
 
-    describe('getAreasOfNaturalBeauty2KmLayerData', () => {
-        it('should read and parse the areas of natural beauty layer data from file', () => {
+    describe('getAreasOfNaturalBeauty1KmLayerData', () => {
+        it('should read and parse the areas of natural beauty 1 km layer data from file', () => {
             // Mock fs.readFileSync to return our mock data
-            (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockAreasOfNaturalBeauty2KmLayerData));
+            (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockAreasOfNaturalBeauty1KmLayerData));
 
             // Call the method
-            const result = dataProviderUtils.getAreasOfNaturalBeauty2KmLayerData();
+            const result = dataProviderUtils.getAreasOfNaturalBeauty1KmLayerData();
 
             // Verify fs.readFileSync was called with the correct path
-            expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringContaining('areanb-2km.geojson'), 'utf8');
+            expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringContaining('areanb-1km.geojson'), 'utf8');
 
             // Verify the result
-            expect(result).toEqual(mockAreasOfNaturalBeauty2KmLayerData);
+            expect(result).toEqual(mockAreasOfNaturalBeauty1KmLayerData);
         });
     });
 
@@ -486,19 +468,19 @@ describe('DataProviderUtils', () => {
         });
     });
 
-    describe('getBuiltupAreas2KmLayerData', () => {
-        it('should read and parse the built up areas 2km layer data from file', () => {
+    describe('getBuiltupAreas1KmLayerData', () => {
+        it('should read and parse the built up areas 1 km layer data from file', () => {
             // Mock fs.readFileSync to return our mock data
-            (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockBuiltupAreas2KmLayerData));
+            (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockBuiltupAreas1KmLayerData));
 
             // Call the method
-            const result = dataProviderUtils.getBuiltupAreas2KmLayerData();
+            const result = dataProviderUtils.getBuiltupAreas1KmLayerData();
 
             // Verify fs.readFileSync was called with the correct path
-            expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringContaining('bua-2km.geojson'), 'utf8');
+            expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringContaining('bua-1km.geojson'), 'utf8');
 
             // Verify the result
-            expect(result).toEqual(mockBuiltupAreas2KmLayerData);
+            expect(result).toEqual(mockBuiltupAreas1KmLayerData);
         });
     });
 });

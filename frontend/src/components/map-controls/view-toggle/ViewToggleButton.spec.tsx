@@ -64,4 +64,21 @@ describe('ViewToggleButton', () => {
             duration: 400,
         });
     });
+
+    it('does nothing if map is moving', () => {
+        mockMap.isMoving = () => true;
+        const { button, onStyleChange, setIs3D } = setup(false, 'basic');
+        fireEvent.click(button);
+        expect(onStyleChange).not.toHaveBeenCalled();
+        expect(setIs3D).not.toHaveBeenCalled();
+    });
+
+    it('does nothing if mapRef.current is null', () => {
+        const nullMapRef = { current: null } as unknown as React.RefObject<MapRef>;
+        const onStyleChange = vi.fn();
+        const setIs3D = vi.fn();
+        render(<ViewToggleButton mapRef={nullMapRef} onStyleChange={onStyleChange} is3D={false} setIs3D={setIs3D} currentStyle="basic" />);
+        fireEvent.click(screen.getByRole('button'));
+        expect(onStyleChange).not.toHaveBeenCalled();
+    });
 });

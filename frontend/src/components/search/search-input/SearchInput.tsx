@@ -9,11 +9,7 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
         height: 48,
         minHeight: 48,
         padding: '0 16px',
-        '& fieldset': {
-            border: 'none',
-            margin: 0,
-            top: 0,
-        },
+        '& fieldset': { border: 'none', margin: 0, top: 0 },
         '&:hover fieldset': {
             outline: '4px solid',
             outlineColor: theme.palette.secondary.dark,
@@ -38,7 +34,6 @@ const SearchInput: React.FC<SearchInputProps> = ({ onSearchResultClick }) => {
 
     useEffect(() => {
         const controller = new AbortController();
-
         if (input.trim().length < MIN_INPUT_LENGTH) {
             setOptions([]);
             return;
@@ -61,10 +56,9 @@ const SearchInput: React.FC<SearchInputProps> = ({ onSearchResultClick }) => {
     }, [input]);
 
     const handleInputChange = useCallback((_e: unknown, value: string, reason: string) => {
-        if (reason !== 'reset') {
-            setInput(value);
-        }
+        if (reason !== 'reset') setInput(value);
     }, []);
+
     const handleChange = useCallback(
         (_e: unknown, value: SearchResponse | null) => {
             if (value && 'latitude' in value && 'longitude' in value) {
@@ -85,7 +79,14 @@ const SearchInput: React.FC<SearchInputProps> = ({ onSearchResultClick }) => {
             onChange={handleChange}
             clearIcon={<ClearIcon />}
             disableClearable={false}
-            slotProps={{ popper: { modifiers: [{ name: 'offset', options: { offset: [0, 8] } }] } }}
+            noOptionsText={input.trim().length < MIN_INPUT_LENGTH ? '' : 'No options'}
+            open={input.trim().length >= MIN_INPUT_LENGTH}
+            filterOptions={(opts) => (input.trim().length >= MIN_INPUT_LENGTH ? opts : [])}
+            slotProps={{
+                popper: {
+                    modifiers: [{ name: 'offset', options: { offset: [0, 8] } }],
+                },
+            }}
             renderInput={(params) => (
                 <StyledTextField
                     {...params}
@@ -96,9 +97,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ onSearchResultClick }) => {
                         input: {
                             'aria-label': 'Search by region',
                             ...params.InputProps,
-                            inputProps: {
-                                ...params.inputProps,
-                            },
+                            inputProps: { ...params.inputProps },
                             startAdornment: (
                                 <InputAdornment position="start">
                                     <SearchIcon />
