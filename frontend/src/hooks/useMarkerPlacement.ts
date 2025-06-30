@@ -13,7 +13,7 @@ export function useMarkerPlacement() {
 
     const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
     const [isInsidePolygon, setIsInsidePolygon] = useState(true);
-    const [suitability, setSuitability] = useState<'red' | 'amber' | 'green' | null>(null);
+    const [suitability, setSuitability] = useState<'darkRed' | 'red' | 'amber' | 'green' | null>(null);
 
     useEffect(() => {
         if (!placing || !mapRef?.getMap) return;

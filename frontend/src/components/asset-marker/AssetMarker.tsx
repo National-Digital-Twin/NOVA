@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Marker, type MarkerDragEvent } from 'react-map-gl/maplibre';
+import { Marker } from 'react-map-gl/maplibre';
 import windTurbineIcon from '../../assets/Windturbine_blue_unselected.svg';
 import windTurbineSelectedIcon from '../../assets/Windturbine_blue_selected.svg';
 import AssetControls from './AssetControls';
@@ -12,11 +12,10 @@ interface AssetMarkerProps {
     onClick?: () => void;
     onBoltClick?: () => void;
     isSelected?: boolean;
-    onDragEnd?: (longitude: number, latitude: number) => void;
     setIsPanelOpen?: (isPanelOpen: boolean) => void;
 }
 
-const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltClick, isSelected = false, onDragEnd, setIsPanelOpen }) => {
+const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltClick, isSelected = false, setIsPanelOpen }) => {
     const markerRef = useRef<HTMLDivElement>(null);
     const [hasOpened, setHasOpened] = useState(false);
     const [showControls, setShowControls] = useState(false);
@@ -30,13 +29,6 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
         setShowControls((v) => !v);
     };
 
-    const handleDragEnd = (event: MarkerDragEvent) => {
-        console.log('Marker dragged to:', event.lngLat);
-        if (onDragEnd) {
-            onDragEnd(event.lngLat.lng, event.lngLat.lat);
-        }
-    };
-
     // Only render if valid coordinates
     if (longitude === undefined || latitude === undefined) return null;
 
@@ -46,7 +38,7 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
     }
 
     return (
-        <Marker longitude={longitude} latitude={latitude} anchor="bottom" draggable={false} onDragEnd={handleDragEnd}>
+        <Marker longitude={longitude} latitude={latitude} anchor="bottom" draggable={false}>
             <div ref={markerRef} style={{ position: 'relative' }}>
                 {showControls && (
                     <div

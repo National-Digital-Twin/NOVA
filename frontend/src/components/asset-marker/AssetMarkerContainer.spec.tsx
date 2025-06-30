@@ -48,13 +48,4 @@ describe('AssetMarkerContainer', () => {
         expect(marker).toHaveAttribute('data-lng', '-5.5');
         expect(marker).toHaveAttribute('data-lat', '10.1');
     });
-
-    it('calls setMarkerPosition when marker drag ends', () => {
-        setupStore({ longitude: 3, latitude: 4 });
-        render(<AssetMarkerContainer is3D={false} />);
-        const marker = screen.getByTestId('mock-marker');
-        marker.click(); // simulate drag end via onClick in mock
-
-        expect(mockSetMarkerPosition).toHaveBeenCalledWith({ longitude: 4, latitude: 5 });
-    });
 });

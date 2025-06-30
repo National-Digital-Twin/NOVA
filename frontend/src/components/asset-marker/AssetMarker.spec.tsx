@@ -141,13 +141,6 @@ describe('AssetMarker', () => {
         expect(setPlacingMock).toHaveBeenCalledWith(true);
     });
 
-    it('calls onDragEnd with new coordinates', () => {
-        const dragEndFn = vi.fn();
-        render(<AssetMarker longitude={lng} latitude={lat} onDragEnd={dragEndFn} />);
-        fireEvent.mouseUp(screen.getByTestId('mock-marker'));
-        expect(dragEndFn).toHaveBeenCalledWith(lng + 0.01, lat + 0.01);
-    });
-
     it('returns null if coordinates are missing', () => {
         const { container } = render(<AssetMarker />);
         expect(container.firstChild).toBeNull();

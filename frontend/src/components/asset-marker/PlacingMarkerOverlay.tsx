@@ -7,7 +7,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 interface PlacingMarkerOverlayProps {
     mousePos: { x: number; y: number } | null;
     isInsidePolygon: boolean;
-    suitability: 'red' | 'amber' | 'green' | null;
+    suitability: 'darkRed' | 'red' | 'amber' | 'green' | null;
 }
 
 const PlacingMarkerOverlay: React.FC<PlacingMarkerOverlayProps> = ({ mousePos, isInsidePolygon, suitability }) => {
@@ -73,6 +73,7 @@ const PlacingMarkerOverlay: React.FC<PlacingMarkerOverlayProps> = ({ mousePos, i
                             boxShadow: '0 0 4px rgba(0,0,0,0.2)',
                         }}
                     >
+                        {suitability === 'darkRed' && <BlockIcon style={{ color: '#8B0000', marginRight: 6 }} />}
                         {suitability === 'red' && <BlockIcon style={{ color: 'red', marginRight: 6 }} />}
                         {suitability === 'amber' && <WarningAmberIcon style={{ color: '#f39c12', marginRight: 6 }} />}
                         {suitability === 'green' && <CheckCircleIcon style={{ color: 'green', marginRight: 6 }} />}
