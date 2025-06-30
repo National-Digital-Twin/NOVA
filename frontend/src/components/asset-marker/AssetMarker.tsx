@@ -77,6 +77,14 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
         }
     }
 
+    const getMarkerSize = () => {
+        if (markerStatus === MarkerStatus.Connecting) {
+            return 100;
+        } else {
+            return 60;
+        }
+    }
+
     return (
         <Marker longitude={longitude} latitude={latitude} anchor="bottom" draggable={true} onDragEnd={handleDragEnd}>
             <div ref={markerRef} style={{ position: 'relative' }}>
@@ -119,7 +127,7 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
                 <img
                     src={ getMarkerImg() }
                     alt="Wind Turbine"
-                    style={{ width: '100px', height: '100px', cursor: 'pointer' }}
+                    style={{ width: `${getMarkerSize()}px`, height: `${getMarkerSize()}px`, cursor: 'pointer' }}
                     onClick={ handleMarkerClick }
                 />
             </div>
