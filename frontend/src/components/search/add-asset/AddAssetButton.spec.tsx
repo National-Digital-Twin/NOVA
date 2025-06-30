@@ -28,6 +28,7 @@ vi.mock('./AddAssetPanel', () => ({
 
 describe('AddAssetButton', () => {
     const setPlacingMock = vi.fn();
+    const setMarkerPositionMock = vi.fn();
 
     const TestAddAssetWrapper = () => {
         const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -41,6 +42,7 @@ describe('AddAssetButton', () => {
             selector({
                 setPlacing: setPlacingMock,
                 cachedHeatmap: { mock: 'data' },
+                setMarkerPosition: setMarkerPositionMock,
             })
         );
     });
