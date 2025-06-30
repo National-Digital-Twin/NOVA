@@ -1,4 +1,5 @@
 import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 import { Autocomplete, CircularProgress, InputAdornment, styled, TextField } from '@mui/material';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { SearchResponse } from '../../../types/searchResponse';
@@ -59,7 +60,11 @@ const SearchInput: React.FC<SearchInputProps> = ({ onSearchResultClick }) => {
         };
     }, [input]);
 
-    const handleInputChange = useCallback((_e: unknown, value: string) => setInput(value), []);
+    const handleInputChange = useCallback((_e: unknown, value: string, reason: string) => {
+        if (reason !== 'reset') {
+            setInput(value);
+        }
+    }, []);
     const handleChange = useCallback(
         (_e: unknown, value: SearchResponse | null) => {
             if (value && 'latitude' in value && 'longitude' in value) {
@@ -75,22 +80,21 @@ const SearchInput: React.FC<SearchInputProps> = ({ onSearchResultClick }) => {
             loading={loading}
             options={options}
             getOptionLabel={(option) => option.name}
+            inputValue={input}
             onInputChange={handleInputChange}
             onChange={handleChange}
-            slotProps={{
-                popper: {
-                    modifiers: [{ name: 'offset', options: { offset: [0, 8] } }],
-                },
-            }}
+            clearIcon={<ClearIcon />}
+            disableClearable={false}
+            slotProps={{ popper: { modifiers: [{ name: 'offset', options: { offset: [0, 8] } }] } }}
             renderInput={(params) => (
                 <StyledTextField
                     {...params}
-                    placeholder="Search by region, county"
+                    placeholder="Search by region"
                     variant="outlined"
                     fullWidth
                     slotProps={{
                         input: {
-                            'aria-label': 'Search by region or county',
+                            'aria-label': 'Search by region',
                             ...params.InputProps,
                             inputProps: {
                                 ...params.inputProps,
@@ -100,11 +104,16 @@ const SearchInput: React.FC<SearchInputProps> = ({ onSearchResultClick }) => {
                                     <SearchIcon />
                                 </InputAdornment>
                             ),
-                            endAdornment: loading ? (
-                                <InputAdornment position="end">
-                                    <CircularProgress size={20} color="inherit" />
-                                </InputAdornment>
-                            ) : null,
+                            endAdornment: (
+                                <>
+                                    {loading && (
+                                        <InputAdornment position="end">
+                                            <CircularProgress size={20} color="inherit" />
+                                        </InputAdornment>
+                                    )}
+                                    {params.InputProps.endAdornment}
+                                </>
+                            ),
                         },
                     }}
                 />

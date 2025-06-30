@@ -3,10 +3,10 @@ import { Marker, type MapRef, type MarkerDragEvent } from 'react-map-gl/maplibre
 import unselected_turbine_icon from '../../assets/Windturbine_blue_unselected.svg';
 import selected_turbine_icon from '../../assets/Windturbine_blue_selected.svg';
 import white_turbine_icon from '../../assets/white_turbine.svg';
-import AssetControls from './AssetControls';
-import { SubstationsListContainer } from '../map-substations-list';
-import { useMapStore } from '../../stores/useMapStore';
 import { MapVisualHelper } from '../../utils/MapVisualHelper';
+import { useMapStore } from '../../stores/useMapStore';
+import { SubstationsListContainer } from '../map-substations-list';
+import AssetControls from './AssetControls';
 
 interface AssetMarkerProps {
     longitude?: number;
@@ -28,7 +28,13 @@ export enum MarkerStatus {
 /**
  * A reusable component for displaying a wind turbine marker on the map
  */
-const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltClick, onDragEnd, setIsPanelOpen }) => {
+const AssetMarker: React.FC<AssetMarkerProps> = ({
+    longitude,
+    latitude,
+    onBoltClick,
+    onDragEnd,
+    setIsPanelOpen,
+}) => {
     const markerRef = useRef<HTMLDivElement>(null);
     const [showControls, setShowControls] = useState(false);
     const [showSubstationsList, setShowSubstationsList] = useState(false);
@@ -37,7 +43,6 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
     const setMaskLayerId = useMapStore((s) => s.setMaskLayerId);
     const setMaskLayerSourceId = useMapStore((s) => s.setMaskLayerSourceId);
     const preventPolygonEdit = useMapStore((s) => s.preventPolygonEdit);
-    const gridConnectViewActive = useMapStore((s) => s.gridConnectViewActive);
     const markerStatus = useMapStore((s) => s.markerStatus);
 
     const handleMarkerClick = (e: React.MouseEvent) => {

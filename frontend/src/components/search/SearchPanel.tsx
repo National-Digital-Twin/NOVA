@@ -70,18 +70,23 @@ const SearchPanel = ({ drawRef, mapRef, isPanelOpen, setIsPanelOpen }: SearchPan
             </SearchGroup>
 
             <SearchGroup role="group" aria-label="Drawing controls">
-                <DeletePolygonButton
-                    isVisible={polygonDrawn && polygonConfirmed}
-                    onPolygonDeleted={handlePolygonDeleted}
-                />
-                <StyledDivider orientation="vertical" flexItem />
-                <EditPolygonButton
-                    mapRef={mapRef}
-                    drawRef={drawRef}
-                    polygonConfirmationPopUpRef={popupRef}
-                    isVisible={polygonDrawn && polygonConfirmed}
-                    onPolygonEdited={handlePolygonEdited}
-                />
+                {polygonConfirmed && (
+                    <>
+                        <DeletePolygonButton
+                            isVisible={polygonDrawn && polygonConfirmed}
+                            onPolygonDeleted={handlePolygonDeleted}
+                        />
+                        <StyledDivider orientation="vertical" flexItem />
+                        <EditPolygonButton
+                            mapRef={mapRef}
+                            drawRef={drawRef}
+                            polygonConfirmationPopUpRef={popupRef}
+                            isVisible={polygonDrawn && polygonConfirmed}
+                            onPolygonEdited={handlePolygonEdited}
+                        />
+                    </>
+                )}
+
                 <DrawPolygonButton
                     mapRef={mapRef}
                     drawRef={drawRef}
@@ -89,7 +94,7 @@ const SearchPanel = ({ drawRef, mapRef, isPanelOpen, setIsPanelOpen }: SearchPan
                     onPolygonDrawn={handlePolygonDrawn}
                     polygonDrawn={polygonDrawn}
                 />
-                <StyledDivider orientation="vertical" flexItem />
+
                 <HideLayersButton mapRef={mapRef} />
             </SearchGroup>
 

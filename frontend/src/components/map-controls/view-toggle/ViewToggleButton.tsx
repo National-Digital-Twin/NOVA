@@ -22,6 +22,8 @@ const ViewToggleButton = ({ mapRef, onStyleChange, is3D, setIs3D, currentStyle }
 
     const cachedHeatmap = useMapStore((s) => s.cachedHeatmap);
     const markerPosition = useMapStore((s) => s.markerPosition);
+    const markerBearing = useMapStore((s) => s.markerBearing);
+    const markerVariant = useMapStore((s) => s.markerVariant);
 
     const reapplyHeatmap = () => {
         if (cachedHeatmap) {
@@ -77,7 +79,7 @@ const ViewToggleButton = ({ mapRef, onStyleChange, is3D, setIs3D, currentStyle }
             if (changingTo3d) {
                 map.once('idle', () => {
                     reapplyHeatmap();
-                    MapVisualHelper.visualiseAssetsIn3d(map, markerPosition);
+                    MapVisualHelper.visualiseAssetsIn3d(map, markerPosition, markerBearing, markerVariant);
                 });
             }
         });

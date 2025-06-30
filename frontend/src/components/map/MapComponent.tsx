@@ -1,18 +1,19 @@
+import { Box } from '@mui/material';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { Map } from 'react-map-gl/maplibre';
-import { MAP_STYLES, type MapStyle } from '../../types/map';
-import MapControls from '../map-controls/MapControls';
-import SearchPanel from '../search/SearchPanel';
-import LayerControlPanel from '../layer-selection/LayerControlPanel';
-import AssetMarker from '../asset-marker/AssetMarker';
 import windTurbineIcon from '../../assets/pending_turbine.svg';
 import useMapboxDraw from '../../hooks/useMapboxDraw';
-import { MapVisualHelper } from '../../utils/MapVisualHelper';
 import { useMapStore } from '../../stores/useMapStore';
-import TurbineOutputPanel from '../grid-connect/output-panel/TurbineOutputPanel';
 import GridConnectPanel from '../grid-connect/GridConnectPanel';
+import { MAP_STYLES, type MapStyle } from '../../types/map';
+import { MapVisualHelper } from '../../utils/MapVisualHelper';
+import AssetMarker from '../asset-marker/AssetMarker';
+import GridConnectFooterPanel from '../grid-connect/GridConnectFooterPanel';
+import LayerControlPanel from '../layer-selection/LayerControlPanel';
+import MapControls from '../map-controls/MapControls';
+import SearchPanel from '../search/SearchPanel';
 
 const MAP_VIEW_BOUNDS: [[number, number], [number, number]] = [
     [-25.0, 42.0],
@@ -30,6 +31,7 @@ const MapComponent = () => {
     const setMarkerPosition = useMapStore((s) => s.setMarkerPosition);
     const placing = useMapStore((s) => s.placing);
     const gridConnectViewActive = useMapStore((s) => s.gridConnectViewActive);
+    const selectedSubstation = useMapStore((s) => s.selectedSubstation);
 
     const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -53,7 +55,6 @@ const MapComponent = () => {
         setIsMapInitialized(true);
     };
 
-    // Handle marker drag end to update marker position
     const handleMarkerDragEnd = useCallback(
         (longitude: number, latitude: number) => {
             console.log('Marker position updated:', { longitude, latitude });
@@ -93,7 +94,7 @@ const MapComponent = () => {
     }, [placing]);
 
     return (
-        <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+        <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
             <Map
                 ref={mapRef}
                 maxBounds={MAP_VIEW_BOUNDS}
@@ -138,11 +139,15 @@ const MapComponent = () => {
                             />
                         )}
                         {showLayerControl && <LayerControlPanel mapRef={mapRef} drawRef={drawRef} />}
-                        {gridConnectViewActive && <TurbineOutputPanel />}
                     </>
                 )}
             </Map>
-        </div>
+            {gridConnectViewActive && selectedSubstation && (
+                <>
+                    <GridConnectFooterPanel selectedSubstation={selectedSubstation} />
+                </>
+            )}
+        </Box>
     );
 };
 
