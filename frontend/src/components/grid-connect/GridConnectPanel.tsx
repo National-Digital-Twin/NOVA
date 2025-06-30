@@ -12,9 +12,7 @@ const PanelContainer = styled(Box)({
     zIndex: 1,
 });
 
-interface GridConnectPanelProps { }
-
-const GridConnectPanel = ({ }: GridConnectPanelProps) => {
+const GridConnectPanel = () => {
     return (
         <PanelContainer>
             <SelectSubstationButton />

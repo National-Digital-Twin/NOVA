@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import * as MapStore from '../../stores/useMapStore';
 import SubstationsListContainer from './SubstationsListContainer';
 import * as substationsApi from './substationsApi';
 
@@ -9,10 +10,28 @@ vi.mock('./substationsApi', () => ({
 }));
 
 describe('SubstationsListContainer', () => {
+    const longitude = 12.34;
+    const latitude = 56.78;
+    
+    const mockCoordinates = [
+            parseFloat((Math.random() * 360 - 180).toFixed(6)), // longitude
+            parseFloat((Math.random() * 180 - 90).toFixed(6)),  // latitude
+            ];
     const mockItems = [
-        { text: 'Test Substation 1', distance: '150km' },
-        { text: 'Test Substation 2', distance: '250km' },
+        { id: 0, name: 'Test Substation 1', distanceFromTurbine: '150km', coordinates: mockCoordinates },
+        { id: 1, name: 'Test Substation 2', distanceFromTurbine: '250km', coordinates: mockCoordinates },
     ];
+
+    vi.spyOn(MapStore, 'useMapStore').mockImplementation((selector) =>
+      selector({
+        markerPosition: { longitude, latitude },
+        setSubstations: vi.fn(),
+        substations: mockItems,
+      } as unknown as MapStore.MapState)
+    );
+
+    const setShowSubstationsList = vi.fn();
+    const setShowControls = vi.fn();
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -22,7 +41,7 @@ describe('SubstationsListContainer', () => {
         // Mock the fetchSubstations function to return a promise that never resolves
         vi.spyOn(substationsApi, 'fetchSubstations').mockImplementation(() => new Promise(() => {}));
 
-        render(<SubstationsListContainer longitude={1.23} latitude={4.56} />);
+        render(<SubstationsListContainer setShowSubstationsList={setShowSubstationsList} setShowControls={setShowControls} />);
 
         expect(screen.getByText('Loading substations...')).toBeInTheDocument();
     });
@@ -34,7 +53,7 @@ describe('SubstationsListContainer', () => {
             error: 'Test error message',
         });
 
-        render(<SubstationsListContainer longitude={1.23} latitude={4.56} />);
+        render(<SubstationsListContainer setShowSubstationsList={setShowSubstationsList} setShowControls={setShowControls} />);
 
         await waitFor(() => {
             expect(screen.getByText('Test error message')).toBeInTheDocument();
@@ -48,7 +67,7 @@ describe('SubstationsListContainer', () => {
             error: null,
         });
 
-        render(<SubstationsListContainer longitude={1.23} latitude={4.56} />);
+        render(<SubstationsListContainer setShowSubstationsList={setShowSubstationsList} setShowControls={setShowControls} />);
 
         await waitFor(() => {
             expect(screen.getByText('Test Substation 1')).toBeInTheDocument();
@@ -58,12 +77,6 @@ describe('SubstationsListContainer', () => {
         });
     });
 
-    it('does not fetch data if longitude or latitude is undefined', () => {
-        render(<SubstationsListContainer />);
-
-        expect(substationsApi.fetchSubstations).not.toHaveBeenCalled();
-    });
-
     it('calls fetchSubstations with the provided coordinates', async () => {
         // Mock the fetchSubstations function to return data
         vi.spyOn(substationsApi, 'fetchSubstations').mockResolvedValue({
@@ -71,10 +84,10 @@ describe('SubstationsListContainer', () => {
             error: null,
         });
 
-        render(<SubstationsListContainer longitude={1.23} latitude={4.56} />);
+        render(<SubstationsListContainer setShowSubstationsList={setShowSubstationsList} setShowControls={setShowControls} />);
 
         await waitFor(() => {
-            expect(substationsApi.fetchSubstations).toHaveBeenCalledWith(1.23, 4.56);
+            expect(substationsApi.fetchSubstations).toHaveBeenCalledWith(longitude, latitude);
         });
     });
 });

@@ -29,7 +29,7 @@ const SubstationsListContainer: React.FC<SubstationsListContainerProps> = ({ set
     const [error, setError] = useState<string | null>(null);
     const substations = useMapStore((s) => s.substations);
     const setSubstations = useMapStore((s) => s.setSubstations);
-    const mapRef = useMapStore((s) => s.mapRef);    
+    const mapRef = useMapStore((s) => s.mapRef);
     const map = mapRef?.getMap();
     const setGridConnectViewActive = useMapStore((s) => s.setGridConnectViewActive);
     const gridConnectViewActive = useMapStore((s) => s.gridConnectViewActive);
@@ -51,19 +51,18 @@ const SubstationsListContainer: React.FC<SubstationsListContainerProps> = ({ set
         renderGridLayers();
         renderGridConnectionLine(MapVisualHelper.connectionLineLayerId, MapVisualHelper.powerLineColor);
         if (markerPosition && markerPosition.latitude && markerPosition.longitude) flyToLocation(markerPosition.latitude, markerPosition.longitude, 10);
-    }
-
+    };
 
     const renderGridLayers = async () => {
         const substationLayer: GridLayer = { id: MapVisualHelper.substationLayerId, type: 'circle', endpoint: '/api/ui/substation-geojson' };
         const powerLineLayer: GridLayer = { id: MapVisualHelper.powerLineLayerId, type: 'line', endpoint: '/api/ui/power-line-geojson' };
-        
+
         const substationFeatureData = fetchFeatureData(substationLayer);
         const powerLineFeatureData = fetchFeatureData(powerLineLayer);
 
         await Promise.all([substationFeatureData, powerLineFeatureData]).then((allFeatureData) => {
             setLayers(allFeatureData);
-        })
+        });
     };
 
     const fetchFeatureData = async (layerToFetch: GridLayer) => {
@@ -76,29 +75,32 @@ const SubstationsListContainer: React.FC<SubstationsListContainerProps> = ({ set
         } catch (err) {
             console.error('Failed to load layers', err);
         }
-    }
+    };
 
     const setLayers = (layers: (GridLayer | undefined)[]) => {
         if (!map) return;
-        for (var layer of layers) {
+        for (const layer of layers) {
             if (!layer || !layer.data) continue;
             if (!map.getSource(layer.id)) {
-                    const paint = layer.type === 'circle' ? { 'circle-radius': 8, 'circle-color': '#CF9FFF', 'circle-opacity': 0.8 } : { 'line-color': MapVisualHelper.powerLineColor, 'line-width': 4, 'line-opacity': 0.8 }
-                    map.addSource(layer.id, { type: 'geojson', data: layer.data });
-                    map.addLayer({
-                        id: layer.id,
-                        type: layer.type,
-                        source: layer.id,
-                        paint: paint,
-                    });
+                const paint =
+                    layer.type === 'circle'
+                        ? { 'circle-radius': 8, 'circle-color': '#CF9FFF', 'circle-opacity': 0.8 }
+                        : { 'line-color': MapVisualHelper.powerLineColor, 'line-width': 4, 'line-opacity': 0.8 };
+                map.addSource(layer.id, { type: 'geojson', data: layer.data });
+                map.addLayer({
+                    id: layer.id,
+                    type: layer.type,
+                    source: layer.id,
+                    paint: paint,
+                });
 
-                    console.log(map.getSource(layer.id));
+                console.log(map.getSource(layer.id));
             } else {
                 const source = map.getSource(layer.id) as GeoJSONSource;
                 source.setData(layer.data);
             }
         }
-    }
+    };
 
     useEffect(() => {
         const loadSubstations = async () => {
@@ -120,7 +122,7 @@ const SubstationsListContainer: React.FC<SubstationsListContainerProps> = ({ set
         };
 
         loadSubstations();
-    }, [markerPosition]);
+    }, [markerPosition, setSubstations]);
 
     if (isLoading) {
         return (

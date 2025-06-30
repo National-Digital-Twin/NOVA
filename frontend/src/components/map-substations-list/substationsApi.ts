@@ -30,7 +30,7 @@ export const fetchSubstations = async (longitude: number, latitude: number): Pro
             id: item.id,
             name: item.name,
             distanceFromTurbine: item.distance,
-            coordinates: item.location.geometry.coordinates
+            coordinates: item.location.geometry.coordinates,
         }));
     } catch (err) {
         console.error('Error fetching substations:', err);

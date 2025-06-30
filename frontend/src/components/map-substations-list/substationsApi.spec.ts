@@ -1,10 +1,21 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SubstationResponse } from '../../types/substationResponse';
 import { fetchSubstations } from './substationsApi';
+import type { Point } from 'geojson';
 
 global.fetch = vi.fn();
 
 describe('substationsApi', () => {
+    const mockCoordinates = [
+            parseFloat((Math.random() * 360 - 180).toFixed(6)), // longitude
+            parseFloat((Math.random() * 180 - 90).toFixed(6)),  // latitude
+            ];
+    const mockLocation = {
+        geometry: {
+            type: 'Point',
+            coordinates: mockCoordinates,
+        } as Point  
+    };
     beforeEach(() => {
         vi.clearAllMocks();
         vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -12,8 +23,8 @@ describe('substationsApi', () => {
 
     it('fetches substations successfully', async () => {
         const mockSubstations: SubstationResponse[] = [
-            { name: 'Substation A', distance: '1.5' },
-            { name: 'Substation B', distance: '2.3' },
+            { id: 0, name: 'Substation A', distance: '1.5', location: mockLocation },
+            { id: 1, name: 'Substation B', distance: '2.3', location: mockLocation },
         ];
 
         const mockResponse = {
@@ -39,8 +50,8 @@ describe('substationsApi', () => {
         });
 
         expect(result.items).toEqual([
-            { text: 'Substation A', distance: '1.5' },
-            { text: 'Substation B', distance: '2.3' },
+            { id: 0, name: 'Substation A', distanceFromTurbine: '1.5', coordinates: mockCoordinates },
+            { id: 1, name: 'Substation B', distanceFromTurbine: '2.3', coordinates: mockCoordinates },
         ]);
         expect(result.error).toBeNull();
     });
@@ -86,7 +97,7 @@ describe('substationsApi', () => {
     });
 
     it('handles single substation response', async () => {
-        const mockSubstations: SubstationResponse[] = [{ name: 'Single Substation', distance: '0.5' }];
+        const mockSubstations: SubstationResponse[] = [{ id: 0, name: 'Single Substation', distance: '0.5', location: mockLocation }];
 
         const mockResponse = {
             ok: true,
@@ -97,7 +108,7 @@ describe('substationsApi', () => {
 
         const result = await fetchSubstations(0, 0);
 
-        expect(result.items).toEqual([{ text: 'Single Substation', distance: '0.5' }]);
+        expect(result.items).toEqual([{ id: 0, name: 'Single Substation', distanceFromTurbine: '0.5', coordinates: mockCoordinates }]);
         expect(result.error).toBeNull();
     });
 
@@ -117,7 +128,7 @@ describe('substationsApi', () => {
     });
 
     it('handles different coordinate values', async () => {
-        const mockSubstations: SubstationResponse[] = [{ name: 'Test Substation', distance: '1.0' }];
+        const mockSubstations: SubstationResponse[] = [{ id: 0, name: 'Test Substation', distance: '1.0', location: mockLocation }];
 
         const mockResponse = {
             ok: true,
@@ -141,12 +152,12 @@ describe('substationsApi', () => {
             }),
         });
 
-        expect(result.items).toEqual([{ text: 'Test Substation', distance: '1.0' }]);
+        expect(result.items).toEqual([{ id: 0, name: 'Test Substation', distanceFromTurbine: '1.0', coordinates: mockCoordinates }]);
         expect(result.error).toBeNull();
     });
 
     it('handles substations with zero distance', async () => {
-        const mockSubstations: SubstationResponse[] = [{ name: 'Zero Distance Substation', distance: '0' }];
+        const mockSubstations: SubstationResponse[] = [{ id: 0, name: 'Zero Distance Substation', distance: '0', location: mockLocation }];
 
         const mockResponse = {
             ok: true,
@@ -157,12 +168,12 @@ describe('substationsApi', () => {
 
         const result = await fetchSubstations(123.456, 78.901);
 
-        expect(result.items).toEqual([{ text: 'Zero Distance Substation', distance: '0' }]);
+        expect(result.items).toEqual([{ id: 0, name: 'Zero Distance Substation', distanceFromTurbine: '0', coordinates: mockCoordinates }]);
         expect(result.error).toBeNull();
     });
 
     it('handles substations with decimal distances', async () => {
-        const mockSubstations: SubstationResponse[] = [{ name: 'Decimal Distance Substation', distance: '3.14159' }];
+        const mockSubstations: SubstationResponse[] = [{ id: 0, name: 'Decimal Distance Substation', distance: '3.14159', location: mockLocation }];
 
         const mockResponse = {
             ok: true,
@@ -173,7 +184,7 @@ describe('substationsApi', () => {
 
         const result = await fetchSubstations(123.456, 78.901);
 
-        expect(result.items).toEqual([{ text: 'Decimal Distance Substation', distance: '3.14159' }]);
+        expect(result.items).toEqual([{ id: 0, name: 'Decimal Distance Substation', distanceFromTurbine: '3.14159', coordinates: mockCoordinates }]);
         expect(result.error).toBeNull();
     });
 });

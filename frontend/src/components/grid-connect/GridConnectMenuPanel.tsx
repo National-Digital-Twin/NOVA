@@ -1,8 +1,4 @@
-import { Box, MenuItem, Select, styled } from '@mui/material';
-import { useEffect, useState } from 'react';
-import ControlButton from '../../shared/control-button/ControlButton';
-import type { Substation } from '../map-substations-list/SubstationsList';
-import { useMapStore } from '../../stores/useMapStore';
+import { Box, styled } from '@mui/material';
 
 const GridConnectMenuContainer = styled(Box)({
     display: 'flex',
@@ -24,28 +20,10 @@ const GridConnectMenuGroup = styled(Box)(({ theme }) => ({
     position: 'relative',
 }));
 
-interface GridConnectMenuPanelProps {
-    selected: Substation;
-}
-
-export default function GridConnectMenuPanel({ selected }: GridConnectMenuPanelProps) {
-    const [substations, setSubstations] = useState<string[]>([]);
-    const setSelectedSubstation = useMapStore((s) => s.setSelectedSubstation);
-
-    const exitView = () => {
-        setSelectedSubstation(null);
-    }
-
-    useEffect(() => {
-        fetch('/data/mock-substations.json')
-            .then((res) => res.json())
-            .then((data) => setSubstations(data));
-    }, []);
-
+export default function GridConnectMenuPanel() {
     return (
         <GridConnectMenuContainer>
-            <GridConnectMenuGroup role="group" aria-label="Substation selection">
-            </GridConnectMenuGroup>
+            <GridConnectMenuGroup role="group" aria-label="Substation selection"></GridConnectMenuGroup>
         </GridConnectMenuContainer>
     );
 }

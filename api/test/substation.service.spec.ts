@@ -266,6 +266,7 @@ describe('SubstationService', () => {
             // Mock the findNearestSubstations method to return a non-empty array
             const findNearestSpy = jest.spyOn(service, 'findNearestSubstations').mockReturnValue([
                 {
+                    id: 1,
                     location: {
                         type: 'Feature',
                         properties: {
@@ -280,6 +281,7 @@ describe('SubstationService', () => {
                     distance: 0.014142,
                 },
                 {
+                    id: 2,
                     location: {
                         type: 'Feature',
                         properties: {
@@ -294,6 +296,7 @@ describe('SubstationService', () => {
                     distance: 0.022361,
                 },
                 {
+                    id: 3,
                     location: {
                         type: 'Feature',
                         properties: {

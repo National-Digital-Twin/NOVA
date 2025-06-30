@@ -2,15 +2,12 @@ import { Box, MenuItem, Select, styled } from '@mui/material';
 import { useMapStore } from '../../../stores/useMapStore';
 import { MapVisualHelper } from '../../../utils/MapVisualHelper';
 
-interface SelectSubstationButtonProps {
-}
-
-const SelectSubstationButton = ({ }: SelectSubstationButtonProps) => {
+const SelectSubstationButton = () => {
     const selected = useMapStore((s) => s.selectedSubstation);
     const setSelectedSubstationById = useMapStore((s) => s.setSelectedSubstationById);
     const substations = useMapStore((s) => s.substations);
     const renderGridConnectionLine = useMapStore((s) => s.renderGridConnectionLine);
-    
+
     const GridConnectMenuGroup = styled(Box)(({ theme }) => ({
         alignItems: 'center',
         backgroundColor: theme.palette.background.paper,
@@ -20,7 +17,7 @@ const SelectSubstationButton = ({ }: SelectSubstationButtonProps) => {
         flexDirection: 'row',
         position: 'relative',
     }));
-    
+
     const GridConnectSelect = styled(Select)(({ theme }) => ({
         minWidth: 200,
         height: 48,
@@ -47,7 +44,7 @@ const SelectSubstationButton = ({ }: SelectSubstationButtonProps) => {
     const handleSubstationChange = (id: number) => {
         setSelectedSubstationById(id);
         renderGridConnectionLine(MapVisualHelper.connectionLineLayerId, MapVisualHelper.powerLineColor);
-    }
+    };
 
     return (
         <GridConnectMenuGroup role="group" aria-label="Substation selection">

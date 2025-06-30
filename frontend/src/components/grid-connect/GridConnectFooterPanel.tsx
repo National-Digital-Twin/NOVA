@@ -1,5 +1,5 @@
 import { Box, Typography, styled } from '@mui/material';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import StatCircle from './StatCircle';
 import type { Substation } from '../map-substations-list/SubstationsList';
 import { useMapStore } from '../../stores/useMapStore';
@@ -71,9 +71,9 @@ const StatLabel = styled(Typography)(({ theme }) => ({
 }));
 
 type Range = {
-  min: number;
-  max: number;
-  decimals?: number; // number of decimal places
+    min: number;
+    max: number;
+    decimals?: number; // number of decimal places
 };
 
 interface GridConnectFooterPanelProps {
@@ -100,10 +100,8 @@ export default function GridConnectFooterPanel({ selectedSubstation }: GridConne
 
     const getRandomInRange = (range: Range): number => {
         const raw = Math.random() * (range.max - range.min) + range.min;
-        return range.decimals !== undefined
-            ? parseFloat(raw.toFixed(range.decimals))
-            : raw;
-    }
+        return range.decimals !== undefined ? parseFloat(raw.toFixed(range.decimals)) : raw;
+    };
 
     const getStats = (substation: Substation): AssetStats => {
         return {
@@ -116,13 +114,13 @@ export default function GridConnectFooterPanel({ selectedSubstation }: GridConne
             boostPercent: getRandomInRange({ min: 1, max: 20, decimals: 1 }),
             maxOutputMWh: getRandomInRange({ min: 25000, max: 35000 }),
             maxOutputMW: getRandomInRange({ min: 8, max: 12, decimals: 2 }),
-            maxBoostPercent: getRandomInRange({ min: 20, max: 100, decimals: 1 })
-        }
-    }
+            maxBoostPercent: getRandomInRange({ min: 20, max: 100, decimals: 1 }),
+        };
+    };
 
     const stats = useMemo(() => {
         return getStats(selectedSubstation);
-    }, [selectedSubstation]);
+    }, [selectedSubstation, getStats]);
 
     return (
         <GridConnectFooterContainer>

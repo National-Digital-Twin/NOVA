@@ -53,6 +53,7 @@ describe('DataProviderUtils', () => {
 
     const mockSubstationsData: LocationsDTO = [
         {
+            id: 0,
             name: 'Test Substation',
             location: {
                 type: 'Feature',

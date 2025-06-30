@@ -2,16 +2,13 @@ import { Box, styled } from '@mui/material';
 import ControlButton from '../../../shared/control-button/ControlButton';
 import { useMapStore } from '../../../stores/useMapStore';
 import { MapVisualHelper } from '../../../utils/MapVisualHelper';
-import { MarkerStatus } from '../../asset-marker/AssetMarker';
+import { MarkerStatus } from '../../asset-marker/AssetMarkerStatus';
 
 const StyledContainer = styled(Box)({
     position: 'relative',
 });
 
-interface ExitConnectGridViewButtonProps {
-}
-
-const ExitConnectGridViewButton = ({ }: ExitConnectGridViewButtonProps) => {
+const ExitConnectGridViewButton = () => {
     const setGridConnectViewActive = useMapStore((s) => s.setGridConnectViewActive);
     const mapRef = useMapStore((s) => s.mapRef);
     const flyToLocation = useMapStore((s) => s.flyToLocation);
@@ -22,7 +19,7 @@ const ExitConnectGridViewButton = ({ }: ExitConnectGridViewButtonProps) => {
         removeLayer(MapVisualHelper.connectionLineLayerId);
         removeLayer(MapVisualHelper.powerLineLayerId);
         removeLayer(MapVisualHelper.substationLayerId);
-    }
+    };
 
     const removeLayer = (layerId: string) => {
         const map = mapRef?.getMap();
@@ -32,7 +29,7 @@ const ExitConnectGridViewButton = ({ }: ExitConnectGridViewButtonProps) => {
             map.removeLayer(layerId);
             map.removeSource(layerId);
         }
-    }
+    };
 
     const exitGridConnectView = () => {
         setGridConnectViewActive(false);

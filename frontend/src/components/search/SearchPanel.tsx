@@ -48,7 +48,7 @@ const SearchPanel = ({ drawRef, mapRef, isPanelOpen, setIsPanelOpen }: SearchPan
         (lat: number, long: number, zoom: number) => {
             flyToLocation(lat, long, zoom);
         },
-        [mapRef]
+        [flyToLocation]
     );
 
     return (

@@ -95,7 +95,7 @@ describe('SubstationsList', () => {
         fireEvent.click(screen.getByText('Confirm'));
 
         expect(mockOnConfirm).toHaveBeenCalledTimes(1);
-        expect(mockOnConfirm).toHaveBeenCalledWith({ text: 'Item 1', distance: '100km' });
+        expect(mockOnConfirm).toHaveBeenCalledWith({ id: 1, name: 'Item 1', distanceFromTurbine: '100km', coordinates: [1, 2] });
     });
 
     it('does not call onConfirm when confirm button is clicked without selection', () => {

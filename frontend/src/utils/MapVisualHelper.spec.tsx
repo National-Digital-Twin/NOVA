@@ -108,12 +108,6 @@ describe('MapVisualHelper', () => {
         expect(result).toEqual([3, 6.005]);
     });
 
-    it('flyToLocation calls flyTo', () => {
-        const mapRef = { current: { getMap: () => map } };
-        MapVisualHelper.flyToLocation(mapRef as any, 10, 20, 5);
-        expect(map.flyTo).toHaveBeenCalledWith({ center: [20, 10], zoom: 5, duration: 2000 });
-    });
-
     it('getFirstPolygon returns polygon', () => {
         const draw = { getAll: () => ({ features: [{ geometry: { type: 'Polygon', coordinates: [] } }] }) };
         expect(MapVisualHelper.getFirstPolygon(draw as any)?.type).toBe('Polygon');

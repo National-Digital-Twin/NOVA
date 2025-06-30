@@ -4,9 +4,9 @@ import type { Popup } from 'maplibre-gl';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { create } from 'zustand';
 import type { Variation } from '../components/search/add-asset/AddAsset';
-import type { Feature, FeatureCollection, Polygon } from 'geojson';
+import type { FeatureCollection } from 'geojson';
 import type { Substation } from '../components/map-substations-list/SubstationsList';
-import { MarkerStatus } from '../components/asset-marker/AssetMarker';
+import { MarkerStatus } from '../components/asset-marker/AssetMarkerStatus';
 
 export type PolygonStatus = 'none' | 'drawing' | 'editing' | 'pendingConfirmation' | 'confirmed';
 
@@ -40,25 +40,20 @@ export interface MapState {
     cachedHeatmap: FeatureCollection | null;
     setCachedHeatmap: (featureCollection: FeatureCollection | null) => void;
 
-    maskLayerId: string | null,
-    setMaskLayerId: (id: string) => void;
-    maskLayerSourceId: string | null,
-    setMaskLayerSourceId: (id: string) => void;
-
     flyToLocation: (lat: number, lng: number, zoom: number, duration?: number) => void;
-    applyDimmedMaskToMap: () => void;
 
-    gridConnectViewActive: boolean,
+    gridConnectViewActive: boolean;
     setGridConnectViewActive: (active: boolean) => void;
-    
-    selectedSubstation: Substation | null,
+
+    selectedSubstation: Substation | null;
     setSelectedSubstation: (substation: Substation | null) => void;
     setSelectedSubstationById: (substationId: number) => void;
 
-    substations: Substation[],
+    substations: Substation[];
     setSubstations: (substations: Substation[]) => void;
 
     renderGridConnectionLine: (connectionLineLayerId: string, lineColor: string) => void;
+
     polygonStatus: PolygonStatus;
     setPolygonStatus: (status: PolygonStatus) => void;
 
@@ -73,8 +68,8 @@ export const useMapStore = create<MapState>((set, get) => ({
     setDrawRef: (ref) => set({ drawRef: ref }),
 
     showLayerControl: false,
-    setShowLayerControl: (layerControl) => set({showLayerControl: layerControl}),
-    
+    setShowLayerControl: (layerControl) => set({ showLayerControl: layerControl }),
+
     polygonConfirmPopup: null,
     setPolygonConfirmPopup: (popup) => set({ polygonConfirmPopup: popup }),
 
@@ -94,74 +89,65 @@ export const useMapStore = create<MapState>((set, get) => ({
     setGridConnectViewActive: (active) => set({ gridConnectViewActive: active }),
 
     substations: [],
-    setSubstations: (substations) => set(({substations: substations})),
-    
+    setSubstations: (substations) => set({ substations: substations }),
+
     selectedSubstation: null,
     setSelectedSubstation: (substation) => set({ selectedSubstation: substation }),
-    setSelectedSubstationById: (substationId) => set((state) => {
-        const substations = state.substations.filter(substation => substation.id === substationId);
-        if (substations.length > 1) throw new Error(`Duplicate ID found for substation ${substationId}`);
-        return {selectedSubstation: substations[0]};
-    }),
+    setSelectedSubstationById: (substationId) =>
+        set((state) => {
+            const substations = state.substations.filter((substation) => substation.id === substationId);
+            if (substations.length > 1) throw new Error(`Duplicate ID found for substation ${substationId}`);
+            return { selectedSubstation: substations[0] };
+        }),
 
     cachedHeatmap: null,
     setCachedHeatmap: (featureCollection) => set({ cachedHeatmap: featureCollection }),
-
-    maskLayerId: null,
-    setMaskLayerId: (id) => set({maskLayerId: id}),
-    maskLayerSourceId: null,
-    setMaskLayerSourceId: (id) => set({maskLayerSourceId: id}),
 
     polygonStatus: 'none',
     setPolygonStatus: (status) => set({ polygonStatus: status }),
 
     clearMarkerValues: () => set({ markerBearing: null, markerVariant: null, markerPosition: null }),
-    
 
     renderGridConnectionLine: (connectionLineLayerId: string, lineColor: string) => {
         const map = get().mapRef?.getMap();
         const markerPosition = get().markerPosition;
         const selectedSubstation = get().selectedSubstation;
         if (!map || !markerPosition || !markerPosition.longitude || !markerPosition.latitude || !selectedSubstation || !selectedSubstation.coordinates) return;
-            const layerId = connectionLineLayerId;
-            const data = {
-                type: 'Feature',
-                properties: {},
-                geometry: {
-                    type: 'LineString',
-                    coordinates: [
-                        [ markerPosition.longitude, markerPosition.latitude ],
-                        selectedSubstation.coordinates
-                    ]
-                }
-            };
-    
-            if (map.getSource(layerId)) {
-                const source = map.getSource(layerId) as GeoJSONSource;
-                source.setData(data);
-            }
-            else {
-                map.addSource(layerId, {
-                    type: 'geojson',
-                    data: data
-                });
-    
-                // Add a layer to display the path
-                map.addLayer({
-                    id: connectionLineLayerId,
-                    type: 'line',
-                    source: connectionLineLayerId,
-                    layout: {
-                        'line-join': 'round',
-                        'line-cap': 'round'
-                    },
-                    paint: {
-                        'line-color': lineColor,
-                        'line-width': 2,
-                        'line-dasharray': [2, 2]
-                    }
-                });
-            }        
+        const layerId = connectionLineLayerId;
+        const data = {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+                type: 'LineString',
+                coordinates: [[markerPosition.longitude, markerPosition.latitude], selectedSubstation.coordinates],
+            },
+        };
+
+        if (map.getSource(layerId)) {
+            const source = map.getSource(layerId) as GeoJSONSource;
+            source.setData(data);
+        } else {
+            map.addSource(layerId, {
+                type: 'geojson',
+                data: data,
+            });
+
+            // Add a layer to display the path
+            map.addLayer({
+                id: connectionLineLayerId,
+                type: 'line',
+                source: connectionLineLayerId,
+                layout: {
+                    'line-join': 'round',
+                    'line-cap': 'round',
+                },
+                paint: {
+                    'line-color': lineColor,
+                    'line-width': 2,
+                    'line-dasharray': [2, 2],
+                },
+            });
+        }
     },
 
     /**
@@ -179,54 +165,6 @@ export const useMapStore = create<MapState>((set, get) => ({
 
         if (!map) return;
         map.flyTo({ center: [lng, lat], zoom, duration });
-    },
-
-    applyDimmedMaskToMap: () => {
-        const mapRef = get().mapRef;
-        const maskLayerId = get().maskLayerId;
-        const maskLayerSourceId = get().maskLayerSourceId;
-        if (!mapRef || !maskLayerId || !maskLayerSourceId) return;
-        const map = mapRef.getMap();
-        
-        const maskFeature: Feature<Polygon> = {
-            type: 'Feature',
-            geometry: {
-                type: 'Polygon',
-                coordinates: [
-                    [
-                        [-180, -85],
-                        [180, -85],
-                        [180, 85],
-                        [-180, 85],
-                        [-180, -85],
-                    ],
-                    // polygon.coordinates[0],
-                ],
-            },
-            properties: {},
-        };
-
-        if (!map.getSource(maskLayerSourceId)) {
-            map.addSource(maskLayerSourceId, {
-                type: 'geojson',
-                data: maskFeature,
-            });
-        } else {
-            const source = map.getSource(maskLayerSourceId) as GeoJSONSource;
-            source.setData(maskFeature);
-        }
-
-        if (!map.getLayer(maskLayerId)) {
-            map.addLayer({
-                id: maskLayerId,
-                type: 'fill',
-                source: maskLayerSourceId,
-                paint: {
-                    'fill-color': '#000000',
-                    'fill-opacity': 0.5,
-                },
-            });
-        }
     },
 
     preventPolygonEdit: (e: MouseEvent | ({ point?: { x: number; y: number } } & MouseEvent)) => {
@@ -273,5 +211,5 @@ export const useMapStore = create<MapState>((set, get) => ({
 
             get().setPlacing(false);
         }
-    }
+    },
 }));
