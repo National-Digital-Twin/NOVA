@@ -1,16 +1,60 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { ViewState } from 'react-map-gl/maplibre';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { act } from 'react'; //  use react's act
 import MapComponent from '../../components/map/MapComponent';
 import * as mapStore from '../../stores/useMapStore';
+import type { MapState, PolygonStatus } from '../../stores/useMapStore';
+
+const createMockMapState = (overrides: Partial<MapState> = {}): MapState => ({
+    mapRef: null, // simulate map is loaded or use a valid MapRef mock if needed
+    setMapRef: vi.fn(),
+
+    drawRef: null,
+    setDrawRef: vi.fn(),
+
+    polygonConfirmPopup: null,
+    setPolygonConfirmPopup: vi.fn(),
+
+    placing: false,
+    setPlacing: vi.fn(),
+
+    markerPosition: null,
+    setMarkerPosition: vi.fn(),
+
+    markerBearing: null,
+    setMarkerBearing: vi.fn(),
+
+    markerVariant: null,
+    setMarkerVariant: vi.fn(),
+
+    cachedHeatmap: null,
+    setCachedHeatmap: vi.fn(),
+
+    polygonStatus: 'none' as PolygonStatus,
+    setPolygonStatus: vi.fn(),
+
+    clearMarkerValues: vi.fn(),
+
+    ...overrides,
+});
+
+// --- Mocks ---
+
+vi.stubGlobal(
+    'fetch',
+    vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => [], //  return array to avoid .forEach crash
+    })
+);
 
 vi.mock('../../components/search/SearchPanel', () => ({
-    default: ({ setPlacing, showLayerControl }: { setPlacing: () => void; showLayerControl: () => void }) => (
-        <div data-testid="search-panel">
-            <button onClick={showLayerControl}>Show Layer Panel</button>
-            <button onClick={setPlacing}>Add Asset</button>
-        </div>
-    ),
+    default: () => <div data-testid="search-panel" />,
+}));
+
+vi.mock('../../components/layer-selection/LayerControlPanel', () => ({
+    default: () => <div data-testid="layer-panel" />,
 }));
 
 vi.mock('react-map-gl/maplibre', () => ({
@@ -62,22 +106,7 @@ vi.mock('../../components/map-controls/MapControls', () => ({
     ),
 }));
 
-const baseStoreMock = {
-    setPlacing: vi.fn(),
-    setMarkerPosition: vi.fn(),
-    setMapRef: vi.fn(),
-    setDrawRef: vi.fn(),
-    handleMapClick: vi.fn(),
-    drawRef: null,
-    mapRef: null,
-    markerBearing: null,
-    setMarkerBearing: vi.fn(),
-    markerVariant: null,
-    setMarkerVariant: vi.fn(),
-    cachedHeatmap: null,
-    setCachedHeatmap: vi.fn(),
-    preventPolygonEdit: vi.fn(),
-};
+// --- Tests ---
 
 describe('MapComponent', () => {
     beforeEach(() => {
@@ -85,61 +114,61 @@ describe('MapComponent', () => {
     });
 
     it('does not render controls before map is initialized', () => {
-        vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) => selector({ ...baseStoreMock, placing: false, markerPosition: null }));
+        vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) => selector(createMockMapState({ mapRef: null })));
+
         render(<MapComponent />);
         expect(screen.getByTestId('map')).toBeInTheDocument();
         expect(screen.queryByTestId('map-controls')).not.toBeInTheDocument();
     });
 
-    it('renders controls after map is initialized', () => {
-        vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) => selector({ ...baseStoreMock, placing: false, markerPosition: null }));
+    it('renders controls after map is initialized', async () => {
+        vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) => selector(createMockMapState()));
+
         render(<MapComponent />);
-        fireEvent.click(screen.getByTestId('map'));
+        await act(async () => {
+            fireEvent.click(screen.getByTestId('map'));
+        });
         expect(screen.getByTestId('map-controls')).toBeInTheDocument();
     });
 
-    it('handles map style changes', () => {
-        vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) => selector({ ...baseStoreMock, placing: false, markerPosition: null }));
+    it('handles map style changes', async () => {
+        vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) => selector(createMockMapState()));
+
         render(<MapComponent />);
-        fireEvent.click(screen.getByTestId('map'));
-        fireEvent.click(screen.getByText('Change Style'));
+        await act(async () => {
+            fireEvent.click(screen.getByTestId('map')); // triggers onLoad
+        });
+
+        const styleButton = await screen.findByText('Change Style'); //  wait for it
+        fireEvent.click(styleButton);
+
         expect(screen.getByTestId('map')).toBeInTheDocument();
     });
 
-    it('handles map movement', () => {
-        vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) => selector({ ...baseStoreMock, placing: false, markerPosition: null }));
+    it('handles map movement', async () => {
+        vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) => selector(createMockMapState()));
+
         render(<MapComponent />);
-        fireEvent.click(screen.getByTestId('map'));
+        await act(async () => {
+            fireEvent.click(screen.getByTestId('map'));
+        });
         expect(screen.getByTestId('map')).toBeInTheDocument();
     });
 
-    it('shows the wind turbine pending icon when placing asset', async () => {
-        vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) => selector({ ...baseStoreMock, placing: true, markerPosition: null }));
-
-        render(<MapComponent />);
-        fireEvent.click(screen.getByTestId('map'));
-
-        const moveEvent = new MouseEvent('mousemove', {
-            bubbles: true,
-            cancelable: true,
-            clientX: 100,
-            clientY: 200,
-        });
-        window.dispatchEvent(moveEvent);
-
-        await waitFor(() => {
-            expect(screen.getByAltText(/Wind Turbine pending/i)).toBeInTheDocument();
-        });
-    });
-
-    it('shows the wind turbine confirmed icon when placing asset', () => {
+    it('shows the wind turbine confirmed icon when placed', async () => {
         vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) =>
-            selector({ ...baseStoreMock, placing: false, markerPosition: { longitude: -1.33, latitude: 50.65 } })
+            selector(
+                createMockMapState({
+                    placing: false,
+                    markerPosition: { longitude: -1.33, latitude: 50.65 },
+                })
+            )
         );
 
         render(<MapComponent />);
-        fireEvent.click(screen.getByTestId('map'));
-
+        await act(async () => {
+            fireEvent.click(screen.getByTestId('map'));
+        });
         expect(screen.getByAltText('Wind Turbine')).toBeInTheDocument();
     });
 });

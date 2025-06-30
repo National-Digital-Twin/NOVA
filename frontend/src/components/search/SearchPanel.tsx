@@ -1,8 +1,7 @@
-import { Box, Divider, styled } from '@mui/material';
+import { Box, styled } from '@mui/material';
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
-import maplibregl from 'maplibre-gl';
-import { useCallback, useRef, useState } from 'react';
-import type { MapRef } from 'react-map-gl/maplibre';
+import { useCallback } from 'react';
+import { type MapRef } from 'react-map-gl/maplibre';
 import DeletePolygonButton from './delete-polygon/DeletePolygonButton';
 import DrawPolygonButton from './draw-polygon/DrawPolygonButton';
 import EditPolygonButton from './edit-polygon/EditPolygonButton';
@@ -33,33 +32,17 @@ const SearchGroup = styled(Box)(({ theme }) => ({
     position: 'relative',
 }));
 
-const StyledDivider = styled(Divider)(({ theme }) => ({
-    backgroundColor: theme.palette.divider,
-}));
-
 interface SearchPanelProps {
     drawRef: React.RefObject<MapboxDraw | null>;
-    hideLayerControl: () => void;
     mapRef: React.RefObject<MapRef>;
     isPanelOpen: boolean;
     setIsPanelOpen: (isPanelOpen: boolean) => void;
-    showLayerControl: () => void;
 }
 
-const SearchPanel = ({ drawRef, hideLayerControl, mapRef, isPanelOpen, setIsPanelOpen, showLayerControl }: SearchPanelProps) => {
-    const popupRef = useRef<maplibregl.Popup | null>(null);
-    const [polygonDrawn, setPolygonDrawn] = useState(false);
-    const [polygonConfirmed, setPolygonConfirmed] = useState(false);
-
+const SearchPanel = ({ drawRef, mapRef, isPanelOpen, setIsPanelOpen }: SearchPanelProps) => {
     const cachedHeatmap = useMapStore((s) => s.cachedHeatmap);
 
-    const { handlePolygonDrawn, handlePolygonEdited, handlePolygonDeleted } = usePolygonHandlers({
-        mapRef,
-        popupRef,
-        setPolygonDrawn,
-        setPolygonConfirmed,
-        showLayerControl,
-    });
+    const { handlePolygonDeleted, startPolygonDraw, startPolygonEdit } = usePolygonHandlers({ mapRef, drawRef });
 
     const handleLocationSelect = useCallback(
         (lat: number, long: number, zoom: number) => {
@@ -75,40 +58,10 @@ const SearchPanel = ({ drawRef, hideLayerControl, mapRef, isPanelOpen, setIsPane
             </SearchGroup>
 
             <SearchGroup role="group" aria-label="Drawing controls">
-                {polygonConfirmed && (
-                    <>
-                        <EditPolygonButton
-                            mapRef={mapRef}
-                            drawRef={drawRef}
-                            polygonConfirmationPopUpRef={popupRef}
-                            isVisible={polygonDrawn && polygonConfirmed}
-                            onPolygonEdited={handlePolygonEdited}
-                            hideLayerControl={hideLayerControl}
-                        />
-                        <StyledDivider orientation="vertical" flexItem />
-                        <DeletePolygonButton
-                            drawRef={drawRef}
-                            isVisible={polygonDrawn && polygonConfirmed}
-                            onPolygonDeleted={handlePolygonDeleted}
-                            hideLayerControl={hideLayerControl}
-                        />
-                    </>
-                )}
-
-                <DrawPolygonButton
-                    mapRef={mapRef}
-                    drawRef={drawRef}
-                    isVisible={!polygonConfirmed}
-                    onPolygonDrawn={handlePolygonDrawn}
-                    polygonDrawn={polygonDrawn}
-                />
-
-                {cachedHeatmap != null && (
-                    <>
-                        <StyledDivider orientation="vertical" flexItem />
-                        <HideLayersButton mapRef={mapRef} cachedHeatmap={cachedHeatmap} />
-                    </>
-                )}
+                <DrawPolygonButton startPolygonDraw={startPolygonDraw} />
+                <DeletePolygonButton deletePolygon={handlePolygonDeleted} />
+                <EditPolygonButton startPolygonEdit={startPolygonEdit} />
+                <HideLayersButton mapRef={mapRef} cachedHeatmap={cachedHeatmap} />
             </SearchGroup>
 
             <SearchGroup>
