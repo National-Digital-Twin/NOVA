@@ -61,7 +61,6 @@ describe('AssetMarker', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-
         vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) =>
             selector({
                 setPlacing: setPlacingMock,
@@ -94,29 +93,35 @@ describe('AssetMarker', () => {
         expect(marker).toHaveAttribute('data-lat', lat.toString());
     });
 
-    it('hides controls and substations by default', () => {
+    it('shows controls by default on first render', () => {
         render(<AssetMarker longitude={lng} latitude={lat} />);
-        expect(screen.queryByLabelText('Edit')).not.toBeInTheDocument();
-        expect(screen.queryByLabelText('Connect to grid')).not.toBeInTheDocument();
-        expect(screen.queryByLabelText('Delete Asset')).not.toBeInTheDocument();
-        expect(screen.queryByLabelText('Move')).not.toBeInTheDocument();
-    });
-
-    it('shows controls on marker click', () => {
-        render(<AssetMarker longitude={lng} latitude={lat} />);
-        fireEvent.click(screen.getByAltText('Wind Turbine'));
         expect(screen.getByLabelText('Edit')).toBeInTheDocument();
         expect(screen.getByLabelText('Connect to grid')).toBeInTheDocument();
         expect(screen.getByLabelText('Delete Asset')).toBeInTheDocument();
         expect(screen.getByLabelText('Move')).toBeInTheDocument();
     });
 
+    it('toggles controls visibility when marker is clicked', () => {
+        render(<AssetMarker longitude={lng} latitude={lat} />);
+        const img = screen.getByAltText('Wind Turbine');
+
+        // First click hides
+        fireEvent.click(img);
+        expect(screen.queryByLabelText('Edit')).not.toBeInTheDocument();
+
+        // Second click shows again
+        fireEvent.click(img);
+        expect(screen.getByLabelText('Edit')).toBeInTheDocument();
+    });
+
     it('calls onBoltClick and shows substations list', async () => {
         const boltFn = vi.fn();
         render(<AssetMarker onBoltClick={boltFn} longitude={lng} latitude={lat} />);
-        fireEvent.click(screen.getByAltText('Wind Turbine'));
+
+        // controls are already visible
         fireEvent.click(screen.getByLabelText('Connect to grid'));
         expect(boltFn).toHaveBeenCalledOnce();
+
         await waitFor(() => {
             expect(screen.getByText(/loading/i)).toBeInTheDocument();
         });
@@ -124,7 +129,6 @@ describe('AssetMarker', () => {
 
     it('calls setMarkerPosition on delete', () => {
         render(<AssetMarker longitude={lng} latitude={lat} />);
-        fireEvent.click(screen.getByAltText('Wind Turbine'));
         fireEvent.click(screen.getByLabelText('Delete Asset'));
         expect(setMarkerPositionMock).toHaveBeenCalledOnce();
         expect(setMarkerPositionMock).toHaveBeenCalledWith(null);
@@ -132,7 +136,6 @@ describe('AssetMarker', () => {
 
     it('calls setMarkerPosition and setPlacing on move', () => {
         render(<AssetMarker longitude={lng} latitude={lat} />);
-        fireEvent.click(screen.getByAltText('Wind Turbine'));
         fireEvent.click(screen.getByLabelText('Move'));
         expect(setMarkerPositionMock).toHaveBeenCalledOnce();
         expect(setPlacingMock).toHaveBeenCalledWith(true);
@@ -141,7 +144,7 @@ describe('AssetMarker', () => {
     it('calls onDragEnd with new coordinates', () => {
         const dragEndFn = vi.fn();
         render(<AssetMarker longitude={lng} latitude={lat} onDragEnd={dragEndFn} />);
-        fireEvent.mouseUp(screen.getByTestId('mock-marker')); // Triggers drag end
+        fireEvent.mouseUp(screen.getByTestId('mock-marker'));
         expect(dragEndFn).toHaveBeenCalledWith(lng + 0.01, lat + 0.01);
     });
 
@@ -153,19 +156,8 @@ describe('AssetMarker', () => {
     it('calls setIsPanelOpen(true) on edit click', () => {
         const setPanelOpenMock = vi.fn();
         render(<AssetMarker longitude={lng} latitude={lat} setIsPanelOpen={setPanelOpenMock} />);
-        fireEvent.click(screen.getByAltText('Wind Turbine'));
         fireEvent.click(screen.getByLabelText('Edit'));
         expect(setMarkerPositionMock).toHaveBeenCalledWith(null);
         expect(setPanelOpenMock).toHaveBeenCalledWith(true);
-    });
-
-    it('toggles controls visibility when marker is clicked multiple times', () => {
-        render(<AssetMarker longitude={lng} latitude={lat} />);
-        const marker = screen.getByAltText('Wind Turbine');
-        fireEvent.click(marker);
-        expect(screen.getByLabelText('Edit')).toBeInTheDocument();
-
-        fireEvent.click(marker); // hide again
-        expect(screen.queryByLabelText('Edit')).not.toBeInTheDocument();
     });
 });

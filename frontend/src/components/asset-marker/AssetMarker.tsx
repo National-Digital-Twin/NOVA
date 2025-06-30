@@ -18,6 +18,7 @@ interface AssetMarkerProps {
 
 const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltClick, isSelected = false, onDragEnd, setIsPanelOpen }) => {
     const markerRef = useRef<HTMLDivElement>(null);
+    const [hasOpened, setHasOpened] = useState(false);
     const [showControls, setShowControls] = useState(false);
     const [showSubstationsList, setShowSubstationsList] = useState(false);
 
@@ -31,7 +32,6 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
 
     const handleDragEnd = (event: MarkerDragEvent) => {
         console.log('Marker dragged to:', event.lngLat);
-        // TODO - check if dragging is still needed recognising cannot be placed outside polygon
         if (onDragEnd) {
             onDragEnd(event.lngLat.lng, event.lngLat.lat);
         }
@@ -39,6 +39,11 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
 
     // Only render if valid coordinates
     if (longitude === undefined || latitude === undefined) return null;
+
+    if (!hasOpened) {
+        setHasOpened(true);
+        setShowControls(true);
+    }
 
     return (
         <Marker longitude={longitude} latitude={latitude} anchor="bottom" draggable={false} onDragEnd={handleDragEnd}>
