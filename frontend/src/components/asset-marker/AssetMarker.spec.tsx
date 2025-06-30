@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import AssetMarker from './AssetMarker';
 import * as mapStore from '../../stores/useMapStore';
+import type { Asset } from '../search/add-asset/AddAsset';
 
 vi.mock('react-map-gl/maplibre', async () => {
     const actual = await vi.importActual('react-map-gl/maplibre');
@@ -82,6 +83,10 @@ describe('AssetMarker', () => {
                 polygonConfirmPopup: null,
                 setPolygonConfirmPopup: vi.fn(),
                 clearMarkerValues: vi.fn(),
+                cachedAssets: null,
+                setCachedAssets: function (_assets: Asset[] | null): void {
+                    throw new Error('Function not implemented.');
+                },
             })
         );
     });
