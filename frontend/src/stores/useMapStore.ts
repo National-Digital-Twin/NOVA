@@ -2,7 +2,7 @@ import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import type { Popup } from 'maplibre-gl';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { create } from 'zustand';
-import type { Variation } from '../components/search/add-asset/AddAsset';
+import type { Asset, Variation } from '../components/search/add-asset/AddAsset';
 import type { FeatureCollection } from 'geojson';
 
 export type PolygonStatus = 'none' | 'drawing' | 'editing' | 'pendingConfirmation' | 'confirmed';
@@ -32,6 +32,9 @@ export interface MapState {
     cachedHeatmap: FeatureCollection | null;
     setCachedHeatmap: (featureCollection: FeatureCollection | null) => void;
 
+    cachedAssets: Asset[] | null;
+    setCachedAssets: (assets: Asset[] | null) => void;
+
     polygonStatus: PolygonStatus;
     setPolygonStatus: (status: PolygonStatus) => void;
 
@@ -60,6 +63,9 @@ export const useMapStore = create<MapState>((set) => ({
 
     cachedHeatmap: null,
     setCachedHeatmap: (featureCollection) => set({ cachedHeatmap: featureCollection }),
+
+    cachedAssets: null,
+    setCachedAssets: (assets) => set({ cachedAssets: assets }),
 
     polygonStatus: 'none',
     setPolygonStatus: (status) => set({ polygonStatus: status }),

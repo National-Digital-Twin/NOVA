@@ -40,27 +40,35 @@ interface AddAssetPanelProps {
 }
 
 const AddAssetPanel = ({ onClose, onSelect }: AddAssetPanelProps) => {
-    const [assets, setAssets] = useState<Asset[]>([]);
+    const assets = useMapStore((s) => s.cachedAssets);
+    const setAssets = useMapStore((s) => s.setCachedAssets);
     const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
     const setSelectedVariant = useMapStore((s) => s.setMarkerVariant);
     const selectedVariant = useMapStore((s) => s.markerVariant);
 
     useEffect(() => {
-        fetch('/data/assets.json')
-            .then((res) => res.json())
-            .then((data) => {
+        const fetchAssets = async () => {
+            try {
+                const res = await fetch('/data/assets.json');
+                const data = await res.json();
                 setAssets(data);
+
                 if (data.length > 0) {
                     setSelectedAsset(data[0]);
                     if (data[0].variations.length > 0) {
                         setSelectedVariant(data[0].variations[0]);
                     }
                 }
-            });
-    }, [setSelectedVariant]);
+            } catch (err) {
+                console.error('Failed to fetch assets:', err);
+            }
+        };
+
+        fetchAssets();
+    }, [setSelectedVariant, setAssets]);
 
     const handleAssetChange = (assetId: string) => {
-        const asset = assets.find((a) => a.id === assetId);
+        const asset = assets?.find((a) => a.id === assetId);
         if (asset) {
             setSelectedAsset(asset);
             setSelectedVariant(asset.variations.length > 0 ? asset.variations[0] : null);
@@ -80,7 +88,7 @@ const AddAssetPanel = ({ onClose, onSelect }: AddAssetPanelProps) => {
     return (
         <AddAssetPanelContainer>
             <PanelContent>
-                <AssetTypeSelector assets={assets} selectedAsset={selectedAsset} onChange={handleAssetChange} />
+                <AssetTypeSelector assets={assets ?? []} selectedAsset={selectedAsset} onChange={handleAssetChange} />
                 {selectedVariant && <AssetDetails selectedAsset={selectedAsset} selectedVariant={selectedVariant} />}
                 <AssetVariantSelector selectedAsset={selectedAsset} selectedVariant={selectedVariant} onChange={setSelectedVariant} />
             </PanelContent>

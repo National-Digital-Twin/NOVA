@@ -31,6 +31,9 @@ const createMockMapState = (overrides: Partial<MapState> = {}): MapState => ({
     cachedHeatmap: null,
     setCachedHeatmap: vi.fn(),
 
+    cachedAssets: null,
+    setCachedAssets: vi.fn(),
+
     polygonStatus: 'none' as PolygonStatus,
     setPolygonStatus: vi.fn(),
 

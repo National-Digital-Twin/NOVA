@@ -7,7 +7,7 @@ import * as mapStore from '../../stores/useMapStore';
 import { MapVisualHelper } from '../../utils/MapVisualHelper';
 import LayerControlPanel from './LayerControlPanel';
 import type { Popup } from 'maplibre-gl';
-import type { Variation } from '../search/add-asset/AddAsset';
+import type { Asset, Variation } from '../search/add-asset/AddAsset';
 
 const mockMapRef = { current: {} } as unknown as React.RefObject<MapRef>;
 const mockDrawRef = { current: {} } as unknown as React.RefObject<MapboxDraw>;
@@ -102,6 +102,10 @@ describe('LayerControlPanel', () => {
                     throw new Error('Function not implemented.');
                 },
                 clearMarkerValues: function (): void {
+                    throw new Error('Function not implemented.');
+                },
+                cachedAssets: null,
+                setCachedAssets: function (_assets: Asset[] | null): void {
                     throw new Error('Function not implemented.');
                 },
             })
