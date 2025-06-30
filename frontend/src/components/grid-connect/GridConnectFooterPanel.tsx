@@ -1,5 +1,5 @@
 import { Box, Typography, styled } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import StatCircle from './StatCircle';
 import type { Substation } from '../map-substations-list/SubstationsList';
 import { useMapStore } from '../../stores/useMapStore';
@@ -94,7 +94,6 @@ interface AssetStats {
 }
 
 export default function GridConnectFooterPanel({ selectedSubstation }: GridConnectFooterPanelProps) {
-    // const [stats, setStats] = useState<AssetStats | null>(null);
     const markerPosition = useMapStore((s) => s.markerPosition);
     const lng = markerPosition && markerPosition.longitude ? markerPosition.longitude : -3.744;
     const lat = markerPosition && markerPosition.latitude ? markerPosition.latitude : 57.148;
@@ -121,7 +120,9 @@ export default function GridConnectFooterPanel({ selectedSubstation }: GridConne
         }
     }
 
-    const stats = getStats(selectedSubstation);
+    const stats = useMemo(() => {
+        return getStats(selectedSubstation);
+    }, [selectedSubstation]);
 
     return (
         <GridConnectFooterContainer>
