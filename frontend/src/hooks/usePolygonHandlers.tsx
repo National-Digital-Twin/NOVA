@@ -1,13 +1,13 @@
-import { useCallback, useEffect } from 'react';
-import type { MapRef } from 'react-map-gl/maplibre';
+import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import type { FeatureCollection, Geometry, Polygon } from 'geojson';
 import maplibregl from 'maplibre-gl';
+import { useCallback, useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
-import { MapVisualHelper } from '../utils/MapVisualHelper';
+import type { MapRef } from 'react-map-gl/maplibre';
 import ConfirmPolygonButton from '../components/map-controls/confirm-polygon/ConfirmPolygonButton';
-import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { useMapStore } from '../stores/useMapStore';
 import { preventPolygonEdit } from '../utils/MapEditGuards';
+import { MapVisualHelper } from '../utils/MapVisualHelper';
 
 interface UsePolygonHandlersProps {
     mapRef: React.RefObject<MapRef>;
@@ -29,6 +29,12 @@ export function usePolygonHandlers({ mapRef, drawRef }: UsePolygonHandlersProps)
     const setPolygonStatus = useMapStore((s) => s.setPolygonStatus);
     const setCachedHeatmap = useMapStore((s) => s.setCachedHeatmap);
     const clearMarkerValues = useMapStore((s) => s.clearMarkerValues);
+
+    const eventHandlersRef = useRef<{
+        updatePopupPosition?: () => void;
+        handleUserFinishDragging?: () => void;
+        handleModeChange?: () => void;
+    }>({});
 
     useEffect(() => {
         const map = mapRef.current?.getMap();
@@ -65,6 +71,7 @@ export function usePolygonHandlers({ mapRef, drawRef }: UsePolygonHandlersProps)
 
     const showConfirmationPopup = useCallback(
         (polygon: Polygon, onConfirm: () => void) => {
+            MapVisualHelper.removeExistingPopup(useMapStore.getState().polygonConfirmPopup);
             const popup = createConfirmationPopup(polygon, onConfirm, mapRef.current!.getMap());
             setPopupRef(popup);
         },
@@ -110,6 +117,7 @@ export function usePolygonHandlers({ mapRef, drawRef }: UsePolygonHandlersProps)
             }
         };
 
+        eventHandlersRef.current.handleModeChange = handleModeChange;
         map.on('draw.modechange', handleModeChange);
     }, [mapRef, drawRef, handlePolygonDrawn, setPolygonStatus]);
 
@@ -151,6 +159,8 @@ export function usePolygonHandlers({ mapRef, drawRef }: UsePolygonHandlersProps)
             const latestPolygon = MapVisualHelper.getFirstPolygon(draw);
             if (!latestPolygon) return;
 
+            MapVisualHelper.removeExistingPopup(useMapStore.getState().polygonConfirmPopup);
+
             const popup = createConfirmationPopup(
                 latestPolygon,
                 () => {
@@ -175,6 +185,9 @@ export function usePolygonHandlers({ mapRef, drawRef }: UsePolygonHandlersProps)
             map.on('draw.update', updatePopupPosition);
             map.on('draw.selectionchange', updatePopupPosition);
 
+            eventHandlersRef.current.updatePopupPosition = updatePopupPosition;
+            eventHandlersRef.current.handleUserFinishDragging = handleUserFinishDragging;
+
             map.off('mouseup', handleUserFinishDragging);
             map.off('touchend', handleUserFinishDragging);
         };
@@ -189,7 +202,10 @@ export function usePolygonHandlers({ mapRef, drawRef }: UsePolygonHandlersProps)
         setCachedHeatmap(null);
 
         const draw = drawRef.current;
-        if (draw) draw.deleteAll();
+        if (draw) {
+            draw.deleteAll();
+            draw.changeMode('simple_select', { featureIds: [] });
+        }
 
         const map = mapRef.current?.getMap();
         if (map) {
@@ -197,6 +213,18 @@ export function usePolygonHandlers({ mapRef, drawRef }: UsePolygonHandlersProps)
             MapVisualHelper.removeExistingPopup(useMapStore.getState().polygonConfirmPopup);
             MapVisualHelper.removeHeatmapLayer(mapRef);
             MapVisualHelper.remove3DAssets(mapRef.current.getMap());
+
+            if (eventHandlersRef.current.updatePopupPosition) {
+                map.off('draw.update', eventHandlersRef.current.updatePopupPosition);
+                map.off('draw.selectionchange', eventHandlersRef.current.updatePopupPosition);
+            }
+            if (eventHandlersRef.current.handleModeChange) {
+                map.off('draw.modechange', eventHandlersRef.current.handleModeChange);
+            }
+
+            eventHandlersRef.current = {};
+
+            map.getCanvas().style.cursor = '';
         }
     }, [mapRef, setPolygonStatus, clearMarkerValues, setCachedHeatmap, drawRef]);
 
