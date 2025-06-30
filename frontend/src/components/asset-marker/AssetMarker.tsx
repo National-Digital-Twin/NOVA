@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react';
 import { Marker } from 'react-map-gl/maplibre';
-import windTurbineIcon from '../../assets/Windturbine_blue_unselected.svg';
 import windTurbineSelectedIcon from '../../assets/Windturbine_blue_selected.svg';
-import AssetControls from './AssetControls';
-import { SubstationsListContainer } from '../map-substations-list';
+import windTurbineIcon from '../../assets/Windturbine_blue_unselected.svg';
 import { useMapStore } from '../../stores/useMapStore';
+import { SubstationsListContainer } from '../map-substations-list';
+import AssetControls from './AssetControls';
 
 interface AssetMarkerProps {
     longitude?: number;
@@ -81,14 +81,7 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
                         onMouseUp={(e) => e.stopPropagation()}
                         onPointerDown={(e) => e.stopPropagation()}
                     >
-                        <SubstationsListContainer
-                            longitude={longitude}
-                            latitude={latitude}
-                            onConfirm={(selected) => {
-                                console.log(`Selected substation: ${selected.text}`);
-                                setShowSubstationsList(false);
-                            }}
-                        />
+                        <SubstationsListContainer longitude={longitude} latitude={latitude} onConfirm={() => setShowSubstationsList(false)} />
                     </div>
                 )}
                 <img

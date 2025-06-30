@@ -1,5 +1,5 @@
-import { useMapStore } from '../../../stores/useMapStore';
 import ControlIcon from '../../../shared/control-icon/ControlIcon';
+import { useMapStore } from '../../../stores/useMapStore';
 
 interface DeletePolygonButtonProps {
     deletePolygon: () => void;
@@ -7,7 +7,7 @@ interface DeletePolygonButtonProps {
 
 const DeletePolygonButton = ({ deletePolygon }: DeletePolygonButtonProps) => {
     const polygonStatus = useMapStore((s) => s.polygonStatus);
-    const isVisible = polygonStatus === 'editing' || polygonStatus === 'confirmed';
+    const isVisible = polygonStatus === 'drawing' || polygonStatus === 'pendingConfirmation' || polygonStatus === 'editing' || polygonStatus === 'confirmed';
 
     if (!isVisible) return null;
 
