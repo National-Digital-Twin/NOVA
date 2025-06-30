@@ -30,6 +30,11 @@ import { Feature } from 'geojson';
  */
 export interface LocationDTO {
     /**
+     * ID of the location
+     */
+    id: number;
+
+    /**
      * GeoJSON representation of the location
      */
     location: Feature;

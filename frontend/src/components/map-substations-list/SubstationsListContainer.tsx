@@ -27,7 +27,8 @@ interface GridLayer {
 const SubstationsListContainer: React.FC<SubstationsListContainerProps> = ({ setShowSubstationsList, setShowControls }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [substations, setSubstations] = useState<Substation[]>([]);
+    const substations = useMapStore((s) => s.substations);
+    const setSubstations = useMapStore((s) => s.setSubstations);
     const mapRef = useMapStore((s) => s.mapRef);    
     const map = mapRef?.getMap();
     const setGridConnectViewActive = useMapStore((s) => s.setGridConnectViewActive);
@@ -37,7 +38,7 @@ const SubstationsListContainer: React.FC<SubstationsListContainerProps> = ({ set
     const setSelectedSubstation = useMapStore((s) => s.setSelectedSubstation);
     const setMarkerStatus = useMapStore((s) => s.setMarkerStatus);
     const markerPosition = useMapStore((s) => s.markerPosition);
-    const powerLineColor = '#007AFF';
+    const renderGridConnectionLine = useMapStore((s) => s.renderGridConnectionLine);
 
     const onSubstationSelection = (selected: Substation) => {
         console.log(`Selected substation: ${selected.name}`);
@@ -48,7 +49,7 @@ const SubstationsListContainer: React.FC<SubstationsListContainerProps> = ({ set
         setShowLayerControl(false);
         setShowSubstationsList(false);
         renderGridLayers();
-        renderConnectionLineLayer(selected);        
+        renderGridConnectionLine(MapVisualHelper.connectionLineLayerId, MapVisualHelper.powerLineColor);
         if (markerPosition && markerPosition.latitude && markerPosition.longitude) flyToLocation(markerPosition.latitude, markerPosition.longitude, 10);
     }
 
@@ -82,7 +83,7 @@ const SubstationsListContainer: React.FC<SubstationsListContainerProps> = ({ set
         for (var layer of layers) {
             if (!layer || !layer.data) continue;
             if (!map.getSource(layer.id)) {
-                    const paint = layer.type === 'circle' ? { 'circle-radius': 8, 'circle-color': '#CF9FFF', 'circle-opacity': 0.8 } : { 'line-color': powerLineColor, 'line-width': 4, 'line-opacity': 0.8 }
+                    const paint = layer.type === 'circle' ? { 'circle-radius': 8, 'circle-color': '#CF9FFF', 'circle-opacity': 0.8 } : { 'line-color': MapVisualHelper.powerLineColor, 'line-width': 4, 'line-opacity': 0.8 }
                     map.addSource(layer.id, { type: 'geojson', data: layer.data });
                     map.addLayer({
                         id: layer.id,
@@ -96,49 +97,6 @@ const SubstationsListContainer: React.FC<SubstationsListContainerProps> = ({ set
                 const source = map.getSource(layer.id) as GeoJSONSource;
                 source.setData(layer.data);
             }
-        }
-    }
-
-    const renderConnectionLineLayer = (selected: Substation) => {
-        if (!map || !markerPosition || !markerPosition.longitude || !markerPosition.latitude || !selected || !selected.coordinates) return;
-        const layerId = MapVisualHelper.connectionLineLayerId;
-        const data = {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-                type: 'LineString',
-                coordinates: [
-                    [ markerPosition.longitude, markerPosition.latitude ],
-                    selected.coordinates
-                ]
-            }
-        };
-
-        if (map.getSource(layerId)) {
-            const source = map.getSource(layerId) as GeoJSONSource;
-            source.setData(data);
-        }
-        else {
-            map.addSource(layerId, {
-                type: 'geojson',
-                data: data
-            });
-
-            // Add a layer to display the path
-            map.addLayer({
-                id: MapVisualHelper.connectionLineLayerId,
-                type: 'line',
-                source: MapVisualHelper.connectionLineLayerId,
-                layout: {
-                    'line-join': 'round',
-                    'line-cap': 'round'
-                },
-                paint: {
-                    'line-color': powerLineColor,
-                    'line-width': 2,
-                    'line-dasharray': [2, 2]
-                }
-            });
         }
     }
 

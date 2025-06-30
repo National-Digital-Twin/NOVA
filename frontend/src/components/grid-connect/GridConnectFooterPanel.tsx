@@ -1,6 +1,8 @@
 import { Box, Typography, styled } from '@mui/material';
 import { useEffect, useState } from 'react';
 import StatCircle from './StatCircle';
+import type { Substation } from '../map-substations-list/SubstationsList';
+import { useMapStore } from '../../stores/useMapStore';
 
 const GridConnectFooterContainer = styled(Box)(({ theme }) => ({
     position: 'fixed',
@@ -68,8 +70,14 @@ const StatLabel = styled(Typography)(({ theme }) => ({
     whiteSpace: 'nowrap',
 }));
 
+type Range = {
+  min: number;
+  max: number;
+  decimals?: number; // number of decimal places
+};
+
 interface GridConnectFooterPanelProps {
-    selectedSubstation: string;
+    selectedSubstation: Substation;
 }
 
 interface AssetStats {
@@ -86,15 +94,34 @@ interface AssetStats {
 }
 
 export default function GridConnectFooterPanel({ selectedSubstation }: GridConnectFooterPanelProps) {
-    const [stats, setStats] = useState<AssetStats | null>(null);
+    // const [stats, setStats] = useState<AssetStats | null>(null);
+    const markerPosition = useMapStore((s) => s.markerPosition);
+    const lng = markerPosition && markerPosition.longitude ? markerPosition.longitude : -3.744;
+    const lat = markerPosition && markerPosition.latitude ? markerPosition.latitude : 57.148;
 
-    useEffect(() => {
-        fetch('/data/mock-asset-stats.json')
-            .then((res) => res.json())
-            .then((data) => setStats(data));
-    }, []);
+    const getRandomInRange = (range: Range): number => {
+        const raw = Math.random() * (range.max - range.min) + range.min;
+        return range.decimals !== undefined
+            ? parseFloat(raw.toFixed(range.decimals))
+            : raw;
+    }
 
-    if (!stats || !selectedSubstation) return null;
+    const getStats = (substation: Substation): AssetStats => {
+        return {
+            turbineId: `WT-${substation.id}`,
+            location: `${lat}, ${lng}`,
+            connectedSubstation: substation.name,
+            connectionDistance: substation.distanceFromTurbine,
+            outputMWh: getRandomInRange({ min: 5000, max: 25000, decimals: 0 }),
+            outputMW: getRandomInRange({ min: 1.5, max: 8, decimals: 2 }),
+            boostPercent: getRandomInRange({ min: 1, max: 20, decimals: 1 }),
+            maxOutputMWh: getRandomInRange({ min: 25000, max: 35000 }),
+            maxOutputMW: getRandomInRange({ min: 8, max: 12, decimals: 2 }),
+            maxBoostPercent: getRandomInRange({ min: 20, max: 100, decimals: 1 })
+        }
+    }
+
+    const stats = getStats(selectedSubstation);
 
     return (
         <GridConnectFooterContainer>

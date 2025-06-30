@@ -40,6 +40,7 @@ export const fetchSubstations = async (
 
         const data: SubstationResponse[] = await response.json();
         items = data.map((item) => ({
+            id: item.id,
             name: item.name,
             distanceFromTurbine: item.distance,
             coordinates: item.location.geometry.coordinates

@@ -34,6 +34,7 @@ export class MapVisualHelper {
     public static readonly substationLayerId = 'substation-layer';
     public static readonly powerLineLayerId = 'power-line-layer';
     public static readonly connectionLineLayerId = 'connection-line-layer';
+    public static readonly powerLineColor = '#007AFF';
 
     /**
      * Applies a dimmed mask over the entire map except inside the given polygon and centers the map on that polygon.

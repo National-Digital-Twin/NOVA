@@ -1,42 +1,69 @@
-import { Box, styled } from '@mui/material';
-import ControlButton from '../../../shared/control-button/ControlButton';
-import { SubstationsListContainer } from '../../map-substations-list';
-import { useState } from 'react';
-
-const StyledContainer = styled(Box)({
-    position: 'relative',
-});
+import { Box, MenuItem, Select, styled } from '@mui/material';
+import { useMapStore } from '../../../stores/useMapStore';
+import { MapVisualHelper } from '../../../utils/MapVisualHelper';
 
 interface SelectSubstationButtonProps {
 }
 
 const SelectSubstationButton = ({ }: SelectSubstationButtonProps) => {
-    const [showSubstationsList, setShowSubstationsList] = useState(false);
-    const revealSubstationsList = () => {
-        setShowSubstationsList(!showSubstationsList);
+    const selected = useMapStore((s) => s.selectedSubstation);
+    const setSelectedSubstationById = useMapStore((s) => s.setSelectedSubstationById);
+    const substations = useMapStore((s) => s.substations);
+    const renderGridConnectionLine = useMapStore((s) => s.renderGridConnectionLine);
+    
+    const GridConnectMenuGroup = styled(Box)(({ theme }) => ({
+        alignItems: 'center',
+        backgroundColor: theme.palette.background.paper,
+        borderRadius: theme.shape.borderRadius,
+        boxShadow: theme.shadows[2],
+        display: 'flex',
+        flexDirection: 'row',
+        position: 'relative',
+    }));
+    
+    const GridConnectSelect = styled(Select)(({ theme }) => ({
+        minWidth: 200,
+        height: 48,
+        minHeight: 48,
+        fontWeight: 600,
+        fontSize: 20,
+        color: '#1a2233',
+        bgcolor: 'transparent',
+        border: 'none',
+        '& .MuiOutlinedInput-notchedOutline': {
+            border: 'none',
+            inset: 0,
+        },
+        '&:hover .MuiOutlinedInput-notchedOutline': {
+            outline: '4px solid',
+            outlineColor: theme.palette.secondary.dark,
+        },
+        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            outline: '4px solid',
+            outlineColor: theme.palette.secondary.main,
+        },
+    }));
+
+    const handleSubstationChange = (id: number) => {
+        setSelectedSubstationById(id);
+        renderGridConnectionLine(MapVisualHelper.connectionLineLayerId, MapVisualHelper.powerLineColor);
     }
 
     return (
-        <StyledContainer>
-            <ControlButton onClick={revealSubstationsList} aria-label="Select substation">
-                <span style={{ marginRight: '8px' }}>Choose substation</span>
-            </ControlButton>
-            {showSubstationsList && (
-                <div style={{
-                        position: 'absolute',
-                        bottom: '-320px',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        zIndex: 1000,
-                        width: '250px',
-                    }}
-                >
-                    <SubstationsListContainer
-                        setShowSubstationsList={setShowSubstationsList}
-                    />
-                </div>
-            )}
-        </StyledContainer>
+        <GridConnectMenuGroup role="group" aria-label="Substation selection">
+            <GridConnectSelect
+                value={selected?.id}
+                onChange={(e) => handleSubstationChange(e.target.value as number)}
+                displayEmpty
+                MenuProps={{ slotProps: { paper: { sx: { marginTop: 1 } } } }}
+            >
+                {substations.map((s) => (
+                    <MenuItem key={s.name} value={s.id}>
+                        {s.name}
+                    </MenuItem>
+                ))}
+            </GridConnectSelect>
+        </GridConnectMenuGroup>
     );
 };
 

@@ -1,6 +1,8 @@
 import { Box, MenuItem, Select, styled } from '@mui/material';
 import { useEffect, useState } from 'react';
 import ControlButton from '../../shared/control-button/ControlButton';
+import type { Substation } from '../map-substations-list/SubstationsList';
+import { useMapStore } from '../../stores/useMapStore';
 
 const GridConnectMenuContainer = styled(Box)({
     display: 'flex',
@@ -22,37 +24,17 @@ const GridConnectMenuGroup = styled(Box)(({ theme }) => ({
     position: 'relative',
 }));
 
-const GridConnectSelect = styled(Select)(({ theme }) => ({
-    minWidth: 200,
-    height: 48,
-    minHeight: 48,
-    fontWeight: 600,
-    fontSize: 20,
-    color: '#1a2233',
-    bgcolor: 'transparent',
-    border: 'none',
-    '& .MuiOutlinedInput-notchedOutline': {
-        border: 'none',
-        inset: 0,
-    },
-    '&:hover .MuiOutlinedInput-notchedOutline': {
-        outline: '4px solid',
-        outlineColor: theme.palette.secondary.dark,
-    },
-    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-        outline: '4px solid',
-        outlineColor: theme.palette.secondary.main,
-    },
-}));
-
 interface GridConnectMenuPanelProps {
-    selected: string;
-    onSelect: (value: string) => void;
-    onExit: () => void;
+    selected: Substation;
 }
 
-export default function GridConnectMenuPanel({ selected, onSelect, onExit }: GridConnectMenuPanelProps) {
+export default function GridConnectMenuPanel({ selected }: GridConnectMenuPanelProps) {
     const [substations, setSubstations] = useState<string[]>([]);
+    const setSelectedSubstation = useMapStore((s) => s.setSelectedSubstation);
+
+    const exitView = () => {
+        setSelectedSubstation(null);
+    }
 
     useEffect(() => {
         fetch('/data/mock-substations.json')
@@ -63,24 +45,6 @@ export default function GridConnectMenuPanel({ selected, onSelect, onExit }: Gri
     return (
         <GridConnectMenuContainer>
             <GridConnectMenuGroup role="group" aria-label="Substation selection">
-                <GridConnectSelect
-                    value={selected}
-                    onChange={(e) => onSelect(e.target.value as string)}
-                    displayEmpty
-                    MenuProps={{ slotProps: { paper: { sx: { marginTop: 1 } } } }}
-                >
-                    {substations.map((s) => (
-                        <MenuItem key={s} value={s}>
-                            {s}
-                        </MenuItem>
-                    ))}
-                </GridConnectSelect>
-            </GridConnectMenuGroup>
-
-            <GridConnectMenuGroup role="group" aria-label="Grid connect controls">
-                <ControlButton onClick={onExit} aria-label="Exit connect grid view">
-                    Exit connect grid view
-                </ControlButton>
             </GridConnectMenuGroup>
         </GridConnectMenuContainer>
     );

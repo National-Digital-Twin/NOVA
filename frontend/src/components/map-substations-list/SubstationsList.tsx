@@ -3,6 +3,7 @@ import { Box, List, ListItem, ListItemButton, ListItemText, ListItemIcon, Button
 import BoltIcon from '@mui/icons-material/Bolt';
 
 export interface Substation {
+    id: number;
     name: string;
     distanceFromTurbine: string;
     coordinates: number[];

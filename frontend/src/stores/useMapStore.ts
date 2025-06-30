@@ -47,7 +47,13 @@ interface MapState {
     setGridConnectViewActive: (active: boolean) => void;
     
     selectedSubstation: Substation | null,
-    setSelectedSubstation: (substation: Substation) => void;
+    setSelectedSubstation: (substation: Substation | null) => void;
+    setSelectedSubstationById: (substationId: number) => void;
+
+    substations: Substation[],
+    setSubstations: (substations: Substation[]) => void;
+
+    renderGridConnectionLine: (connectionLineLayerId: string, lineColor: string) => void;
 }
 
 export const useMapStore = create<MapState>((set, get) => ({
@@ -74,9 +80,17 @@ export const useMapStore = create<MapState>((set, get) => ({
 
     gridConnectViewActive: false,
     setGridConnectViewActive: (active) => set({ gridConnectViewActive: active }),
+
+    substations: [],
+    setSubstations: (substations) => set(({substations: substations})),
     
     selectedSubstation: null,
     setSelectedSubstation: (substation) => set({ selectedSubstation: substation }),
+    setSelectedSubstationById: (substationId) => set((state) => {
+        const substations = state.substations.filter(substation => substation.id === substationId);
+        if (substations.length > 1) throw new Error(`Duplicate ID found for substation ${substationId}`);
+        return {selectedSubstation: substations[0]};
+    }),
 
     cachedHeatmap: null,
     setCachedHeatmap: (featureCollection) => set({ cachedHeatmap: featureCollection }),
@@ -86,6 +100,53 @@ export const useMapStore = create<MapState>((set, get) => ({
     maskLayerSourceId: null,
     setMaskLayerSourceId: (id) => set({maskLayerSourceId: id}),
     
+
+    renderGridConnectionLine: (connectionLineLayerId: string, lineColor: string) => {
+        const map = get().mapRef?.getMap();
+        const markerPosition = get().markerPosition;
+        const selectedSubstation = get().selectedSubstation;
+        if (!map || !markerPosition || !markerPosition.longitude || !markerPosition.latitude || !selectedSubstation || !selectedSubstation.coordinates) return;
+            const layerId = connectionLineLayerId;
+            const data = {
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                    type: 'LineString',
+                    coordinates: [
+                        [ markerPosition.longitude, markerPosition.latitude ],
+                        selectedSubstation.coordinates
+                    ]
+                }
+            };
+    
+            if (map.getSource(layerId)) {
+                const source = map.getSource(layerId) as GeoJSONSource;
+                source.setData(data);
+            }
+            else {
+                map.addSource(layerId, {
+                    type: 'geojson',
+                    data: data
+                });
+    
+                // Add a layer to display the path
+                map.addLayer({
+                    id: connectionLineLayerId,
+                    type: 'line',
+                    source: connectionLineLayerId,
+                    layout: {
+                        'line-join': 'round',
+                        'line-cap': 'round'
+                    },
+                    paint: {
+                        'line-color': lineColor,
+                        'line-width': 2,
+                        'line-dasharray': [2, 2]
+                    }
+                });
+            }        
+    },
+
     /**
      * Flies the map to a specific location with a smooth animation.
      *
