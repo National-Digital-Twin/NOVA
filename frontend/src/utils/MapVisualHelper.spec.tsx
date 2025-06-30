@@ -3,7 +3,14 @@ import { MapVisualHelper } from './MapVisualHelper';
 import type { FeatureCollection, Polygon } from 'geojson';
 import { Popup } from 'maplibre-gl';
 
-// Mock GLTFLoader for visualiseAssetsIn3d
+vi.mock('../stores/useMapStore', () => ({
+    useMapStore: {
+        getState: () => ({
+            setPolygonConfirmPopup: vi.fn(),
+        }),
+    },
+}));
+
 vi.mock('three/examples/jsm/loaders/GLTFLoader.js', () => ({
     GLTFLoader: class {
         loadAsync = vi.fn().mockResolvedValue({
@@ -101,14 +108,6 @@ describe('MapVisualHelper', () => {
         expect(result).toEqual([3, 6.005]);
     });
 
-    it('removeExistingPopup removes popup if present', () => {
-        const mockRemove = vi.fn();
-        const popupRef = { current: { remove: mockRemove } };
-        MapVisualHelper.removeExistingPopup(popupRef as any);
-        expect(mockRemove).toHaveBeenCalled();
-        expect(popupRef.current).toBeNull();
-    });
-
     it('flyToLocation calls flyTo', () => {
         const mapRef = { current: { getMap: () => map } };
         MapVisualHelper.flyToLocation(mapRef as any, 10, 20, 5);
@@ -198,7 +197,7 @@ describe('MapVisualHelper', () => {
         expect(result).toEqual([]);
     });
 
-    it('_handleClick creates popup with issue text', () => {
+    it('_handleHeatmapLayerClick creates popup with issue text', () => {
         const addTo = vi.fn().mockReturnThis();
         const setHTML = vi.fn().mockReturnValue({ addTo });
         const setLngLat = vi.fn().mockReturnValue({ setHTML });
@@ -209,11 +208,19 @@ describe('MapVisualHelper', () => {
 
         const event = {
             lngLat: { lng: 0, lat: 0 },
-            features: [{ properties: { issue: 'Test issue' } }],
+            features: [
+                {
+                    properties: { issue: 'Test issue' },
+                    // Include layer.id to simulate heatmap feature
+                    layer: { id: 'heatmap-layer' },
+                },
+            ],
             target: map,
+            defaultPrevented: false,
+            originalEvent: { target: { tagName: 'DIV' } },
         };
 
-        (MapVisualHelper as any)._handleClick(event);
+        (MapVisualHelper as any)._handleHeatmapLayerClick(event);
         expect(setLngLat).toHaveBeenCalled();
         expect(setHTML).toHaveBeenCalledWith(expect.stringContaining('Test issue'));
         expect(addTo).toHaveBeenCalledWith(map);

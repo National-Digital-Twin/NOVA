@@ -3,8 +3,11 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { MapRef } from 'react-map-gl/maplibre';
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
+import * as mapStore from '../../stores/useMapStore';
 import { MapVisualHelper } from '../../utils/MapVisualHelper';
 import LayerControlPanel from './LayerControlPanel';
+import type { Popup } from 'maplibre-gl';
+import type { Variation } from '../search/add-asset/AddAsset';
 
 const mockMapRef = { current: {} } as unknown as React.RefObject<MapRef>;
 const mockDrawRef = { current: {} } as unknown as React.RefObject<MapboxDraw>;
@@ -61,6 +64,53 @@ describe('LayerControlPanel', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+
+        vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) =>
+            selector({
+                polygonStatus: 'confirmed',
+                setCachedHeatmap: vi.fn(),
+                mapRef: null,
+                setMapRef: function (_ref: MapRef): void {
+                    throw new Error('Function not implemented.');
+                },
+                drawRef: null,
+                setDrawRef: function (_ref: MapboxDraw): void {
+                    throw new Error('Function not implemented.');
+                },
+                polygonConfirmPopup: null,
+                setPolygonConfirmPopup: function (_ref: Popup | null): void {
+                    throw new Error('Function not implemented.');
+                },
+                placing: false,
+                setPlacing: function (_placing: boolean): void {
+                    throw new Error('Function not implemented.');
+                },
+                markerPosition: null,
+                setMarkerPosition: function (_position: { longitude?: number; latitude?: number } | null): void {
+                    throw new Error('Function not implemented.');
+                },
+                markerBearing: null,
+                setMarkerBearing: function (_bearing: number): void {
+                    throw new Error('Function not implemented.');
+                },
+                markerVariant: null,
+                setMarkerVariant: function (_variant: Variation | null): void {
+                    throw new Error('Function not implemented.');
+                },
+                cachedHeatmap: null,
+                setPolygonStatus: function (_status: mapStore.PolygonStatus): void {
+                    throw new Error('Function not implemented.');
+                },
+                clearMarkerValues: function (): void {
+                    throw new Error('Function not implemented.');
+                },
+            })
+        );
+
+        (mapStore.useMapStore as any).getState = () => ({
+            polygonStatus: 'confirmed',
+            setCachedHeatmap: vi.fn(),
+        });
 
         fetchSpy = vi.spyOn(global, 'fetch' as any).mockImplementation((...args: unknown[]) => {
             const url = args[0] as string;
@@ -160,8 +210,6 @@ describe('LayerControlPanel', () => {
         await screen.findByText('Layers');
 
         const toggleBtn = screen.getAllByRole('button').find((btn) => btn.querySelector('svg'));
-        expect(toggleBtn).toBeTruthy();
-
         await userEvent.click(toggleBtn!);
         expect(screen.queryByText('Layers')).not.toBeInTheDocument();
 
@@ -174,8 +222,6 @@ describe('LayerControlPanel', () => {
         await screen.findByText('Layers');
 
         const toggleBtn = screen.getAllByRole('button').find((btn) => btn.querySelector('svg'));
-        expect(toggleBtn).toBeTruthy();
-
         await userEvent.click(toggleBtn!);
 
         const icon = toggleBtn!.querySelector('svg');
@@ -188,8 +234,6 @@ describe('LayerControlPanel', () => {
         await screen.findByText('Areas of outstanding natural beauty');
 
         const targetBtn = screen.getAllByRole('button').find((btn) => btn.parentElement?.textContent?.includes('Areas of outstanding natural beauty'));
-        expect(targetBtn).toBeTruthy();
-
         await userEvent.click(targetBtn!);
 
         const input = await screen.findByLabelText('Distance from layer');
