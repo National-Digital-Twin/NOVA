@@ -56,7 +56,6 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
                                 if (setMarkerPosition) setMarkerPosition(null);
                             }}
                             onEditClick={() => {
-                                if (setMarkerPosition) setMarkerPosition(null);
                                 if (setIsPanelOpen) setIsPanelOpen(true);
                             }}
                             onMoveClick={() => {

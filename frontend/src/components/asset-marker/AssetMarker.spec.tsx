@@ -150,7 +150,6 @@ describe('AssetMarker', () => {
         const setPanelOpenMock = vi.fn();
         render(<AssetMarker longitude={lng} latitude={lat} setIsPanelOpen={setPanelOpenMock} />);
         fireEvent.click(screen.getByLabelText('Edit'));
-        expect(setMarkerPositionMock).toHaveBeenCalledWith(null);
         expect(setPanelOpenMock).toHaveBeenCalledWith(true);
     });
 });

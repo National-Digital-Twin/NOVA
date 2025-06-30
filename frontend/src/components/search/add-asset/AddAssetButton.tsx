@@ -14,6 +14,8 @@ interface AddAssetButtonProps {
 
 const AddAssetButton = ({ isPanelOpen, setIsPanelOpen }: AddAssetButtonProps) => {
     const setPlacing = useMapStore((s) => s.setPlacing);
+    const setMarkerPosition = useMapStore((s) => s.setMarkerPosition);
+    const markerPlaced = useMapStore((s) => s.markerPosition);
     const cachedHeatmap = useMapStore((s) => s.cachedHeatmap);
 
     const handleTogglePanel = () => {
@@ -27,9 +29,13 @@ const AddAssetButton = ({ isPanelOpen, setIsPanelOpen }: AddAssetButtonProps) =>
     const handleAssetSelect = () => {
         setPlacing(true);
         setIsPanelOpen(false);
+        setMarkerPosition(null);
     };
 
     if (!cachedHeatmap) return null;
+
+    // Hide add asset button if marker already placed
+    if (markerPlaced && !isPanelOpen) return null;
 
     return (
         <StyledContainer>
