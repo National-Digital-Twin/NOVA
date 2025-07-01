@@ -219,11 +219,43 @@ export class UIController {
         }
     }
 
+    /**
+     * @swagger
+     * /api/ui/substation-geojson:
+     *   get:
+     *     summary: Get a GeoJSON containing substation data.
+     *     description: Returns substation data.
+     *     tags:
+     *       - UI
+     *     responses:
+     *       200:
+     *         description: Substation data retrieved successfully.
+     *       404:
+     *         description: Substation data file not found.
+     *       500:
+     *         description: Internal server error.
+     */
     public getSubstationGeoJSON(req: Request, res:Response): void {
         const geoJsonData = dataProviderUtils.readGridSupplyPointData();
         res.status(200).json(geoJsonData);
     }
 
+    /**
+     * @swagger
+     * /api/ui/power-line-geojson:
+     *   get:
+     *     summary: Get a GeoJSON containing power line data.
+     *     description: Returns power line data.
+     *     tags:
+     *       - UI
+     *     responses:
+     *       200:
+     *         description: Power line data retrieved successfully.
+     *       404:
+     *         description: Power line data file not found.
+     *       500:
+     *         description: Internal server error.
+     */
     public getPowerLineGeoJSON(req: Request, res:Response): void {
         const geoJsonData = dataProviderUtils.readPowerLineData();
         res.status(200).json(geoJsonData);
