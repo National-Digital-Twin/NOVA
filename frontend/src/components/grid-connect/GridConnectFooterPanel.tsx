@@ -55,7 +55,6 @@ const StatGrid = styled(Box)(({ theme }) => ({
     rowGap: theme.spacing(0.5),
     columnGap: theme.spacing(2),
     alignItems: 'center',
-    justifyItems: 'center',
 }));
 
 const StatGridItem = styled(Box)(({ theme }) => ({
@@ -87,10 +86,14 @@ interface AssetStats {
     connectionDistance: string;
     outputMWh: number;
     outputMW: number;
+    gridSupportMW: number;
     boostPercent: number;
+    localBoostPercent: number;
     maxOutputMWh?: number;
     maxOutputMW?: number;
     maxBoostPercent?: number;
+    maxLocalBoostPercent?: number;
+    maxGridSupportMW: number;
 }
 
 export default function GridConnectFooterPanel({ selectedSubstation }: GridConnectFooterPanelProps) {
@@ -111,10 +114,14 @@ export default function GridConnectFooterPanel({ selectedSubstation }: GridConne
             connectionDistance: selectedSubstation.distanceFromTurbine,
             outputMWh: getRandomInRange({ min: 5000, max: 25000, decimals: 0 }),
             outputMW: getRandomInRange({ min: 1.5, max: 8, decimals: 2 }),
-            boostPercent: getRandomInRange({ min: 1, max: 20, decimals: 1 }),
+            gridSupportMW: getRandomInRange({ min: 1.5, max: 8, decimals: 2 }),
+            boostPercent: getRandomInRange({ min: 1, max: 10, decimals: 1 }),
+            localBoostPercent: getRandomInRange({ min: 1, max: 10, decimals: 1 }),
             maxOutputMWh: getRandomInRange({ min: 25000, max: 35000 }),
-            maxOutputMW: getRandomInRange({ min: 8, max: 12, decimals: 2 }),
+            maxOutputMW: getRandomInRange({ min: 8, max: 10, decimals: 2 }),
             maxBoostPercent: getRandomInRange({ min: 20, max: 100, decimals: 1 }),
+            maxLocalBoostPercent: getRandomInRange({ min: 20, max: 100, decimals: 1 }),
+            maxGridSupportMW: getRandomInRange({ min: 8, max: 10, decimals: 2 }),
         };
     }, [selectedSubstation, lat, lng]);
 
@@ -152,16 +159,16 @@ export default function GridConnectFooterPanel({ selectedSubstation }: GridConne
                     <StatLabel variant="body2">to local distribution network</StatLabel>
                 </StatGridItem>
                 <StatGridItem>
-                    <StatCircle value={stats.outputMW} max={stats.maxOutputMW ?? 10} unit="MW" size={64} decimals={1} />
-                    <StatLabel variant="body2">to local distribution network</StatLabel>
+                    <StatCircle value={stats.gridSupportMW} max={stats.maxGridSupportMW ?? 10} unit="MW" size={64} decimals={1} />
+                    <StatLabel variant="body2">MW grid support</StatLabel>
                 </StatGridItem>
                 <StatGridItem>
                     <StatCircle value={stats.boostPercent} max={stats.maxBoostPercent ?? 100} suffix="%" size={64} decimals={1} />
                     <StatLabel variant="body2">boost to substation capacity</StatLabel>
                 </StatGridItem>
                 <StatGridItem>
-                    <StatCircle value={stats.boostPercent} max={stats.maxBoostPercent ?? 100} suffix="%" size={64} decimals={1} />
-                    <StatLabel variant="body2">boost to substation capacity</StatLabel>
+                    <StatCircle value={stats.localBoostPercent} max={stats.maxLocalBoostPercent ?? 100} suffix="%" size={64} decimals={1} />
+                    <StatLabel variant="body2">local self-sufficiency</StatLabel>
                 </StatGridItem>
             </StatGrid>
         </GridConnectFooterContainer>
