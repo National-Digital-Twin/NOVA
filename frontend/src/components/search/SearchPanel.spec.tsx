@@ -1,16 +1,25 @@
+import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import SearchPanel from './SearchPanel';
 import { createMockMapRef } from '../../../test/test-utils';
-import type MapboxDraw from '@mapbox/mapbox-gl-draw';
+import SearchPanel from './SearchPanel';
 
-// Mocks
 const mockDrawRef = { current: {} } as unknown as React.RefObject<MapboxDraw>;
 const mockMapRef = createMockMapRef();
 
+let mockStore = {
+    cachedHeatmap: { type: 'FeatureCollection', features: [] },
+    polygonStatus: 'none',
+};
+
 vi.mock('../../stores/useMapStore', () => ({
-    useMapStore: vi.fn().mockImplementation((selector) => selector({ cachedHeatmap: null })),
+    useMapStore: vi.fn().mockImplementation((selector) => selector(mockStore)),
 }));
+
+const setUseMapStoreMock = (polygonStatus: string, cachedHeatmap: any = { type: 'FeatureCollection', features: [] }) => {
+    mockStore.polygonStatus = polygonStatus;
+    mockStore.cachedHeatmap = cachedHeatmap;
+};
 
 vi.mock('../../hooks/usePolygonHandlers', () => ({
     usePolygonHandlers: () => ({
@@ -76,20 +85,54 @@ vi.mock('./add-asset/AddAssetButton', () => ({
     ),
 }));
 
-// Actual tests
 describe('SearchPanel', () => {
     beforeEach(() => {
+        mockStore = {
+            cachedHeatmap: { type: 'FeatureCollection', features: [] },
+            polygonStatus: 'none',
+        };
         vi.clearAllMocks();
     });
 
-    it('renders all main controls', () => {
+    it('renders confirmed state controls (delete, edit, hide buttons with dividers)', () => {
+        setUseMapStoreMock('confirmed');
         render(<SearchPanel mapRef={mockMapRef} drawRef={mockDrawRef} isPanelOpen={false} setIsPanelOpen={() => {}} />);
-
         expect(screen.getByTestId('search-input')).toBeInTheDocument();
-        expect(screen.getByTestId('draw-polygon-button')).toBeInTheDocument();
+        expect(screen.queryByTestId('draw-polygon-button')).not.toBeInTheDocument();
         expect(screen.getByTestId('delete-polygon-button')).toBeInTheDocument();
         expect(screen.getByTestId('edit-polygon-button')).toBeInTheDocument();
         expect(screen.getByTestId('hide-layers-button')).toBeInTheDocument();
         expect(screen.getByTestId('add-asset-button')).toBeInTheDocument();
+        expect(screen.getAllByRole('separator', { hidden: true }).length).toBe(2);
+    });
+
+    it('renders only draw and hide buttons with one divider', () => {
+        setUseMapStoreMock('none');
+        render(<SearchPanel mapRef={mockMapRef} drawRef={mockDrawRef} isPanelOpen={false} setIsPanelOpen={() => {}} />);
+        expect(screen.getByTestId('draw-polygon-button')).toBeInTheDocument();
+        expect(screen.getByTestId('hide-layers-button')).toBeInTheDocument();
+        expect(screen.queryByTestId('delete-polygon-button')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('edit-polygon-button')).not.toBeInTheDocument();
+        expect(screen.getAllByRole('separator', { hidden: true }).length).toBe(1);
+    });
+
+    it('renders only one button and no dividers', () => {
+        setUseMapStoreMock('none', null);
+        render(<SearchPanel mapRef={mockMapRef} drawRef={mockDrawRef} isPanelOpen={false} setIsPanelOpen={() => {}} />);
+        expect(screen.getByTestId('draw-polygon-button')).toBeInTheDocument();
+        expect(screen.queryByTestId('hide-layers-button')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('delete-polygon-button')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('edit-polygon-button')).not.toBeInTheDocument();
+        expect(screen.queryAllByRole('separator', { hidden: true }).length).toBe(0);
+    });
+
+    it('renders editing state controls (delete, edit, hide buttons with dividers)', () => {
+        setUseMapStoreMock('editing');
+        render(<SearchPanel mapRef={mockMapRef} drawRef={mockDrawRef} isPanelOpen={false} setIsPanelOpen={() => {}} />);
+        expect(screen.queryByTestId('draw-polygon-button')).not.toBeInTheDocument();
+        expect(screen.getByTestId('delete-polygon-button')).toBeInTheDocument();
+        expect(screen.getByTestId('edit-polygon-button')).toBeInTheDocument();
+        expect(screen.getByTestId('hide-layers-button')).toBeInTheDocument();
+        expect(screen.getAllByRole('separator', { hidden: true }).length).toBe(2);
     });
 });

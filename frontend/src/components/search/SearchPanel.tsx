@@ -1,16 +1,16 @@
-import { Box, styled } from '@mui/material';
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
-import { useCallback } from 'react';
+import { Box, Divider, styled } from '@mui/material';
+import { useCallback, useMemo } from 'react';
 import { type MapRef } from 'react-map-gl/maplibre';
+import { usePolygonHandlers } from '../../hooks/usePolygonHandlers';
+import { useMapStore } from '../../stores/useMapStore';
+import { MapVisualHelper } from '../../utils/MapVisualHelper';
+import AddAssetButton from './add-asset/AddAssetButton';
 import DeletePolygonButton from './delete-polygon/DeletePolygonButton';
 import DrawPolygonButton from './draw-polygon/DrawPolygonButton';
 import EditPolygonButton from './edit-polygon/EditPolygonButton';
 import HideLayersButton from './hide-map-layers/HideLayersButton';
 import SearchInput from './search-input/SearchInput';
-import { usePolygonHandlers } from '../../hooks/usePolygonHandlers';
-import AddAssetButton from './add-asset/AddAssetButton';
-import { useMapStore } from '../../stores/useMapStore';
-import { MapVisualHelper } from '../../utils/MapVisualHelper';
 
 const SearchContainer = styled(Box)({
     display: 'flex',
@@ -32,6 +32,11 @@ const SearchGroup = styled(Box)(({ theme }) => ({
     position: 'relative',
 }));
 
+const VerticalDivider = styled(Divider)(({ theme }) => ({
+    backgroundColor: theme.palette.divider,
+    width: 2,
+}));
+
 interface SearchPanelProps {
     drawRef: React.RefObject<MapboxDraw | null>;
     mapRef: React.RefObject<MapRef>;
@@ -41,12 +46,46 @@ interface SearchPanelProps {
 
 const SearchPanel = ({ drawRef, mapRef, isPanelOpen, setIsPanelOpen }: SearchPanelProps) => {
     const cachedHeatmap = useMapStore((s) => s.cachedHeatmap);
+    const polygonStatus = useMapStore((s) => s.polygonStatus);
 
     const { handlePolygonDeleted, startPolygonDraw, startPolygonEdit } = usePolygonHandlers({ mapRef, drawRef });
 
     const handleLocationSelect = useCallback((lat: number, long: number, zoom: number) => {
         MapVisualHelper.flyToLocation(lat, long, zoom);
     }, []);
+
+    const drawingControls = useMemo(() => {
+        const controls = [
+            {
+                component: <DrawPolygonButton key="draw" startPolygonDraw={startPolygonDraw} />,
+                visible: polygonStatus === 'none' || polygonStatus === 'drawing' || polygonStatus === 'pendingConfirmation',
+            },
+            {
+                component: <DeletePolygonButton key="delete" deletePolygon={handlePolygonDeleted} />,
+                visible: polygonStatus === 'drawing' || polygonStatus === 'pendingConfirmation' || polygonStatus === 'editing' || polygonStatus === 'confirmed',
+            },
+            {
+                component: <EditPolygonButton key="edit" startPolygonEdit={startPolygonEdit} />,
+                visible: polygonStatus === 'confirmed' || polygonStatus === 'editing',
+            },
+            {
+                component: <HideLayersButton key="hide" mapRef={mapRef} cachedHeatmap={cachedHeatmap} />,
+                visible: !!cachedHeatmap,
+            },
+        ];
+
+        const visibleControls = controls.filter((control) => control.visible);
+
+        const controlsWithDividers: React.ReactNode[] = [];
+        visibleControls.forEach((control, index) => {
+            if (index > 0) {
+                controlsWithDividers.push(<VerticalDivider key={`divider-${index}`} orientation="vertical" />);
+            }
+            controlsWithDividers.push(control.component);
+        });
+
+        return controlsWithDividers;
+    }, [startPolygonDraw, handlePolygonDeleted, startPolygonEdit, mapRef, cachedHeatmap, polygonStatus]);
 
     return (
         <SearchContainer>
@@ -55,10 +94,7 @@ const SearchPanel = ({ drawRef, mapRef, isPanelOpen, setIsPanelOpen }: SearchPan
             </SearchGroup>
 
             <SearchGroup role="group" aria-label="Drawing controls">
-                <DrawPolygonButton startPolygonDraw={startPolygonDraw} />
-                <DeletePolygonButton deletePolygon={handlePolygonDeleted} />
-                <EditPolygonButton startPolygonEdit={startPolygonEdit} />
-                <HideLayersButton mapRef={mapRef} cachedHeatmap={cachedHeatmap} />
+                {drawingControls}
             </SearchGroup>
 
             <SearchGroup>
