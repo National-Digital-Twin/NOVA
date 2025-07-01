@@ -116,7 +116,7 @@ export default function GridConnectFooterPanel({ selectedSubstation }: GridConne
             maxOutputMW: getRandomInRange({ min: 8, max: 12, decimals: 2 }),
             maxBoostPercent: getRandomInRange({ min: 20, max: 100, decimals: 1 }),
         };
-    }, [selectedSubstation]);
+    }, [selectedSubstation, lat, lng]);
 
     return (
         <GridConnectFooterContainer>
