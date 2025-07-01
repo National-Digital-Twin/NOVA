@@ -103,12 +103,12 @@ export default function GridConnectFooterPanel({ selectedSubstation }: GridConne
         return range.decimals !== undefined ? parseFloat(raw.toFixed(range.decimals)) : raw;
     };
 
-    const getStats = (substation: Substation): AssetStats => {
+    const stats = useMemo((): AssetStats => {
         return {
-            turbineId: `WT-${substation.id}`,
+            turbineId: `WT-${selectedSubstation.id}`,
             location: `${lat}, ${lng}`,
-            connectedSubstation: substation.name,
-            connectionDistance: substation.distanceFromTurbine,
+            connectedSubstation: selectedSubstation.name,
+            connectionDistance: selectedSubstation.distanceFromTurbine,
             outputMWh: getRandomInRange({ min: 5000, max: 25000, decimals: 0 }),
             outputMW: getRandomInRange({ min: 1.5, max: 8, decimals: 2 }),
             boostPercent: getRandomInRange({ min: 1, max: 20, decimals: 1 }),
@@ -116,11 +116,7 @@ export default function GridConnectFooterPanel({ selectedSubstation }: GridConne
             maxOutputMW: getRandomInRange({ min: 8, max: 12, decimals: 2 }),
             maxBoostPercent: getRandomInRange({ min: 20, max: 100, decimals: 1 }),
         };
-    };
-
-    const stats = useMemo(() => {
-        return getStats(selectedSubstation);
-    }, [selectedSubstation, getStats]);
+    }, [selectedSubstation, lat, lng]);
 
     return (
         <GridConnectFooterContainer>
