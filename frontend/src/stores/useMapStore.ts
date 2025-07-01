@@ -3,7 +3,7 @@ import type { GeoJSONSource, MapLayerMouseEvent } from 'maplibre-gl';
 import type { Popup } from 'maplibre-gl';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { create } from 'zustand';
-import type { Variation } from '../components/search/add-asset/AddAsset';
+import type { Asset, Variation } from '../components/search/add-asset/AddAsset';
 import type { FeatureCollection } from 'geojson';
 import type { Substation } from '../components/map-substations-list/SubstationsList';
 import { MarkerStatus } from '../components/asset-marker/AssetMarkerStatus';
@@ -53,6 +53,8 @@ export interface MapState {
     setSubstations: (substations: Substation[]) => void;
 
     renderGridConnectionLine: (connectionLineLayerId: string, lineColor: string) => void;
+    cachedAssets: Asset[] | null;
+    setCachedAssets: (assets: Asset[] | null) => void;
 
     polygonStatus: PolygonStatus;
     setPolygonStatus: (status: PolygonStatus) => void;
@@ -102,6 +104,9 @@ export const useMapStore = create<MapState>((set, get) => ({
 
     cachedHeatmap: null,
     setCachedHeatmap: (featureCollection) => set({ cachedHeatmap: featureCollection }),
+
+    cachedAssets: null,
+    setCachedAssets: (assets) => set({ cachedAssets: assets }),
 
     polygonStatus: 'none',
     setPolygonStatus: (status) => set({ polygonStatus: status }),

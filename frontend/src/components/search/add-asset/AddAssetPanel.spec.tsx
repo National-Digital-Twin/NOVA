@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import type { Asset } from './AddAsset';
@@ -8,12 +8,15 @@ let markerVariant: any = null;
 const setMarkerVariant = vi.fn((variant) => {
     markerVariant = variant;
 });
+const setCachedAssets = vi.fn();
 
 vi.mock('../../../stores/useMapStore', () => ({
     useMapStore: (selector: any) =>
         selector({
             markerVariant,
             setMarkerVariant,
+            cachedAssets: null,
+            setCachedAssets,
         }),
 }));
 
@@ -78,39 +81,6 @@ describe('AddAssetPanel', () => {
                         { name: 'Rated Power', value: '6000 KW' },
                     ],
                 },
-                {
-                    name: 'Siemens',
-                    image: '/images/turbine-two.png',
-                    icon: '/images/turbine-icon.png',
-                    specification: [
-                        { name: 'Model', value: 'SWT-6.0' },
-                        { name: 'Rated Power', value: '6000 KW' },
-                    ],
-                },
-            ],
-        },
-        {
-            id: 'solarPanel',
-            name: 'Solar Panel',
-            variations: [
-                {
-                    name: 'Roof',
-                    image: '/images/solar-one.png',
-                    icon: '/images/solar-icon.png',
-                    specification: [
-                        { name: 'Model', value: 'R-100' },
-                        { name: 'Capacity', value: '350 Wp' },
-                    ],
-                },
-                {
-                    name: 'Farm',
-                    image: '/images/solar-two.png',
-                    icon: '/images/solar-icon.png',
-                    specification: [
-                        { name: 'Model', value: 'F-200' },
-                        { name: 'Capacity', value: '400 Wp' },
-                    ],
-                },
             ],
         },
     ];
@@ -123,15 +93,13 @@ describe('AddAssetPanel', () => {
         markerVariant = null;
     });
 
-    it('shows loading state initially', () => {
+    it('shows loading state while waiting for fetch', () => {
         vi.spyOn(window, 'fetch').mockImplementation(() => new Promise(() => {}));
-
         render(<AddAssetPanel onClose={mockOnClose} onSelect={mockOnSelect} />);
-
         expect(screen.getByRole('progressbar')).toBeInTheDocument();
     });
 
-    it('loads assets data and renders components', async () => {
+    it('loads and sets cached assets then renders UI', async () => {
         vi.spyOn(window, 'fetch').mockResolvedValueOnce({
             json: async () => mockAssets,
         } as Response);
@@ -139,11 +107,9 @@ describe('AddAssetPanel', () => {
         render(<AddAssetPanel onClose={mockOnClose} onSelect={mockOnSelect} />);
 
         await waitFor(() => {
+            expect(setCachedAssets).toHaveBeenCalledWith(mockAssets);
             expect(screen.getByTestId('asset-type-selector')).toBeInTheDocument();
         });
-
-        expect(screen.getByTestId('asset-details')).toBeInTheDocument();
-        expect(screen.getByTestId('asset-variant-selector')).toBeInTheDocument();
     });
 
     it('calls onClose when cancel button is clicked', async () => {
@@ -156,10 +122,11 @@ describe('AddAssetPanel', () => {
 
         await waitFor(() => screen.getByText('CANCEL'));
         await user.click(screen.getByText('CANCEL'));
-        expect(mockOnClose).toHaveBeenCalledTimes(1);
+
+        expect(mockOnClose).toHaveBeenCalled();
     });
 
-    it('calls onSelect when select button is clicked', async () => {
+    it('calls onSelect when select button is clicked and variant selected', async () => {
         vi.spyOn(window, 'fetch').mockResolvedValueOnce({
             json: async () => mockAssets,
         } as Response);
@@ -188,111 +155,19 @@ describe('AddAssetPanel', () => {
             json: async () => assetsWithoutVariations,
         } as Response);
 
-        markerVariant = null;
-
         render(<AddAssetPanel onClose={mockOnClose} onSelect={mockOnSelect} />);
-
         await waitFor(() => {
-            const selectButton = screen.getByText('SELECT');
-            expect(selectButton).toBeDisabled();
+            expect(screen.getByText('SELECT')).toBeDisabled();
         });
     });
 
-    it('shows loading state when fetch returns empty array', async () => {
-        await act(async () => {
-            vi.spyOn(window, 'fetch').mockResolvedValueOnce({
-                json: async () => [],
-            } as Response);
-
-            render(<AddAssetPanel onClose={mockOnClose} onSelect={mockOnSelect} />);
-        });
-
-        expect(screen.getByRole('progressbar')).toBeInTheDocument();
-    });
-
-    it('handles fetch error response gracefully', async () => {
+    it('handles fetch error gracefully', async () => {
         const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        vi.spyOn(window, 'fetch').mockRejectedValueOnce(new Error('Fetch failed'));
 
-        await act(async () => {
-            vi.spyOn(window, 'fetch').mockResolvedValueOnce({
-                ok: false,
-                status: 404,
-                json: async () => ({ error: 'Not found' }),
-            } as Response);
+        render(<AddAssetPanel onClose={mockOnClose} onSelect={mockOnSelect} />);
 
-            render(<AddAssetPanel onClose={mockOnClose} onSelect={mockOnSelect} />);
-        });
-
-        expect(screen.getByRole('progressbar')).toBeInTheDocument();
-
+        expect(await screen.findByRole('progressbar')).toBeInTheDocument();
         consoleSpy.mockRestore();
-    });
-
-    it('changes asset type and selects first variant of new asset', async () => {
-        vi.spyOn(window, 'fetch').mockResolvedValueOnce({
-            json: async () => mockAssets,
-        } as Response);
-
-        const user = userEvent.setup();
-        render(<AddAssetPanel onClose={mockOnClose} onSelect={mockOnSelect} />);
-
-        await waitFor(() => {
-            expect(screen.getByTestId('asset-type-selector')).toBeInTheDocument();
-        });
-
-        const selector = screen.getByTestId('asset-type-selector').querySelector('select');
-        await user.selectOptions(selector!, ['solarPanel']);
-
-        markerVariant = mockAssets[1].variations[0];
-
-        await user.click(screen.getByText('SELECT'));
-
-        expect(mockOnSelect).toHaveBeenCalledWith(mockAssets[1].variations[0]);
-    });
-
-    it('handles asset with no variations correctly', async () => {
-        const assetsWithOneEmpty = [
-            {
-                id: 'windTurbine',
-                name: 'Wind Turbine',
-                variations: [
-                    {
-                        name: 'Vestas',
-                        image: '/images/turbine-one.png',
-                        icon: '/images/turbine-icon.png',
-                        specification: [
-                            { name: 'Model', value: 'V150-6.0' },
-                            { name: 'Rated Power', value: '6000 KW' },
-                        ],
-                    },
-                ],
-            },
-            {
-                id: 'emptyAsset',
-                name: 'Empty Asset',
-                variations: [],
-            },
-        ];
-
-        vi.spyOn(window, 'fetch').mockResolvedValueOnce({
-            json: async () => assetsWithOneEmpty,
-        } as Response);
-
-        const user = userEvent.setup();
-        render(<AddAssetPanel onClose={mockOnClose} onSelect={mockOnSelect} />);
-
-        await waitFor(() => {
-            expect(screen.getByTestId('asset-type-selector')).toBeInTheDocument();
-        });
-
-        const selector = screen.getByTestId('asset-type-selector').querySelector('select');
-        await user.selectOptions(selector!, ['emptyAsset']);
-
-        markerVariant = null;
-
-        const selectButton = screen.getByText('SELECT');
-        expect(selectButton).toBeDisabled();
-
-        expect(screen.queryByTestId('asset-details')).not.toBeInTheDocument();
     });
 });

@@ -7,6 +7,7 @@ import { useMapStore } from '../../stores/useMapStore';
 import { SubstationsListContainer } from '../map-substations-list';
 import AssetControls from './AssetControls';
 import { MarkerStatus } from './AssetMarkerStatus';
+import AssetSpecificationPopup from './AssetSpecificationPopup';
 
 interface AssetMarkerProps {
     longitude?: number;
@@ -20,6 +21,7 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
     const markerRef = useRef<HTMLDivElement>(null);
     const [hasOpened, setHasOpened] = useState(false);
     const [showControls, setShowControls] = useState(false);
+    const [showPopup, setShowPopup] = useState(false);
     const [showSubstationsList, setShowSubstationsList] = useState(false);
 
     const setPlacing = useMapStore((s) => s.setPlacing);
@@ -84,6 +86,7 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
                                 if (setPlacing) setPlacing(true);
                             }}
                         />
+                        {showPopup && <AssetSpecificationPopup />}
                     </div>
                 )}
                 {showSubstationsList && (
@@ -114,6 +117,8 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
                         pointerEvents: 'auto',
                     }}
                     onClick={handleMarkerClick}
+                    onMouseEnter={() => setShowPopup(true)}
+                    onMouseLeave={() => setShowPopup(false)}
                 />
             </div>
         </Marker>

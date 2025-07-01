@@ -52,6 +52,9 @@ const createMockMapState = (overrides: Partial<MapState> = {}): MapState => ({
 
     renderGridConnectionLine: vi.fn(),
 
+    cachedAssets: null,
+    setCachedAssets: vi.fn(),
+
     polygonStatus: 'none' as PolygonStatus,
     setPolygonStatus: vi.fn(),
 
