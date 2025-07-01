@@ -26,6 +26,14 @@ vi.mock('./AddAssetPanel', () => ({
     ),
 }));
 
+vi.mock('../../../shared/control-button/ControlButton', () => ({
+    default: ({ children, onClick, 'aria-label': ariaLabel, isActive }: any) => (
+        <button onClick={onClick} aria-label={ariaLabel} data-testid="control-button" data-active={isActive}>
+            {children}
+        </button>
+    ),
+}));
+
 describe('AddAssetButton', () => {
     const setPlacingMock = vi.fn();
     const setMarkerPositionMock = vi.fn();
@@ -109,5 +117,62 @@ describe('AddAssetButton', () => {
 
         expect(setPlacingMock).toHaveBeenCalledWith(true);
         expect(screen.queryByTestId('add-asset-panel')).not.toBeInTheDocument();
+    });
+
+    it('highlights the button when panel is open', async () => {
+        const user = userEvent.setup();
+        render(<TestAddAssetWrapper />);
+
+        await waitFor(() => {
+            expect(screen.getByRole('button', { name: /add asset/i })).toBeInTheDocument();
+        });
+
+        const button = screen.getByTestId('control-button');
+        
+        // Initially, button should not be highlighted
+        expect(button).toHaveAttribute('data-active', 'false');
+        
+        // Click to open panel
+        await user.click(button);
+        
+        // Button should now be highlighted
+        expect(button).toHaveAttribute('data-active', 'true');
+        expect(screen.getByTestId('add-asset-panel')).toBeInTheDocument();
+        
+        // Close panel
+        const closeButton = screen.getByRole('button', { name: /close panel/i });
+        await user.click(closeButton);
+        
+        // Button should no longer be highlighted
+        expect(button).toHaveAttribute('data-active', 'false');
+        expect(screen.queryByTestId('add-asset-panel')).not.toBeInTheDocument();
+    });
+
+    it('uses correct icon based on panel state', async () => {
+        const user = userEvent.setup();
+        render(<TestAddAssetWrapper />);
+
+        await waitFor(() => {
+            expect(screen.getByRole('button', { name: /add asset/i })).toBeInTheDocument();
+        });
+
+        const button = screen.getByTestId('control-button');
+        const icon = screen.getByAltText('Add asset');
+        
+        // Initially, should use regular add icon
+        expect(icon).toHaveAttribute('src', '/icons/add.svg');
+        
+        // Click to open panel
+        await user.click(button);
+        
+        // Should now use white add icon
+        expect(icon).toHaveAttribute('src', '/icons/add-white.svg');
+        
+        // Close panel
+        const closeButton = screen.getByRole('button', { name: /close panel/i });
+        await user.click(closeButton);
+        
+        // Should return to regular add icon
+        expect(icon).toHaveAttribute('src', '/icons/add.svg');
     });
 });

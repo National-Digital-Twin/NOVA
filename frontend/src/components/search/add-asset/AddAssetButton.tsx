@@ -34,14 +34,13 @@ const AddAssetButton = ({ isPanelOpen, setIsPanelOpen }: AddAssetButtonProps) =>
 
     if (!cachedHeatmap) return null;
 
-    // Hide add asset button if marker already placed
     if (markerPlaced && !isPanelOpen) return null;
 
     return (
         <StyledContainer>
-            <ControlButton onClick={handleTogglePanel} aria-label="Add asset">
+            <ControlButton onClick={handleTogglePanel} aria-label="Add asset" isActive={isPanelOpen}>
                 <span style={{ marginRight: '8px' }}>Add asset</span>
-                <img src="/icons/add.svg" alt="Add asset" width={18} height={18} />
+                <img src={isPanelOpen ? '/icons/add-white.svg' : '/icons/add.svg'} alt="Add asset" width={18} height={18} />
             </ControlButton>
             {isPanelOpen && <AddAssetPanel onClose={handleClosePanel} onSelect={handleAssetSelect} />}
         </StyledContainer>
