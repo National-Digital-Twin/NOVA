@@ -110,36 +110,6 @@ export const useMapStore = create<MapState>((set, get) => ({
 
     clearMarkerValues: () => set({ markerBearing: null, markerVariant: null, markerPosition: null }),
 
-    preventPolygonEdit: (e: MouseEvent | ({ point?: { x: number; y: number } } & MouseEvent)) => {
-        let x: number;
-        let y: number;
-
-        if ('point' in e && e.point && typeof e.point.x === 'number' && typeof e.point.y === 'number') {
-            // TypeScript now knows e.point has x and y
-            x = e.point.x;
-            y = e.point.y;
-        } else {
-            x = e.clientX;
-            y = e.clientY;
-        }
-
-        const map = get().mapRef;
-        const draw = get().drawRef;
-        if (map && draw) {
-            const mode = draw.getMode();
-            if (mode.startsWith('draw')) return;
-
-            const features = map.queryRenderedFeatures([x, y], {
-                layers: ['gl-draw-polygon-fill.cold'],
-            });
-
-            if (features.length > 0) {
-                draw.changeMode('simple_select', { featureIds: [] });
-                e.preventDefault();
-            }
-        }
-    },
-
     handleMapClick: (e: MapLayerMouseEvent) => {
         // handle state when asset is being placed
         if (get().placing) {
