@@ -87,12 +87,12 @@ const SearchInput: React.FC<SearchInputProps> = ({ onSearchResultClick }) => {
             renderInput={(params) => (
                 <StyledTextField
                     {...params}
-                    placeholder="Search by region"
+                    placeholder="Search"
                     variant="outlined"
                     fullWidth
                     slotProps={{
                         input: {
-                            'aria-label': 'Search by region',
+                            'aria-label': 'Search',
                             ...params.InputProps,
                             inputProps: { ...params.inputProps },
                             startAdornment: (

@@ -39,7 +39,7 @@ vi.mock('./search-input/SearchInput', () => ({
                     onSearchResultClick(57.1497, -2.0943, 10);
                 }
             }}
-            aria-label="Search by region"
+            aria-label="Search"
         />
     ),
 }));
