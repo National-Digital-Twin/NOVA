@@ -140,7 +140,7 @@ export default function GridConnectFooterPanel({ selectedSubstation }: GridConne
                         <strong>Connected Substation:</strong> {stats.connectedSubstation}
                     </Typography>
                     <Typography fontSize={16} noWrap>
-                        <strong>Connection distance:</strong> {stats.connectionDistance}
+                        <strong>Connection distance:</strong> {stats.connectionDistance}km
                     </Typography>
                 </Box>
             </TurbineInfoSection>
