@@ -160,7 +160,7 @@ export default function GridConnectFooterPanel({ selectedSubstation }: GridConne
                 </StatGridItem>
                 <StatGridItem>
                     <StatCircle value={stats.gridSupportMW} max={stats.maxGridSupportMW ?? 10} unit="MW" size={64} decimals={1} />
-                    <StatLabel variant="body2">MW grid support</StatLabel>
+                    <StatLabel variant="body2">grid support</StatLabel>
                 </StatGridItem>
                 <StatGridItem>
                     <StatCircle value={stats.boostPercent} max={stats.maxBoostPercent ?? 100} suffix="%" size={64} decimals={1} />
