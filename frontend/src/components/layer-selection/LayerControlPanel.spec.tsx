@@ -6,8 +6,6 @@ import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import * as mapStore from '../../stores/useMapStore';
 import { MapVisualHelper } from '../../utils/MapVisualHelper';
 import LayerControlPanel from './LayerControlPanel';
-import type { Popup } from 'maplibre-gl';
-import type { Asset, Variation } from '../search/add-asset/AddAsset';
 
 const mockMapRef = { current: {} } as unknown as React.RefObject<MapRef>;
 const mockDrawRef = { current: {} } as unknown as React.RefObject<MapboxDraw>;
@@ -69,46 +67,7 @@ describe('LayerControlPanel', () => {
             selector({
                 polygonStatus: 'confirmed',
                 setCachedHeatmap: vi.fn(),
-                mapRef: null,
-                setMapRef: function (_ref: MapRef): void {
-                    throw new Error('Function not implemented.');
-                },
-                drawRef: null,
-                setDrawRef: function (_ref: MapboxDraw): void {
-                    throw new Error('Function not implemented.');
-                },
-                polygonConfirmPopup: null,
-                setPolygonConfirmPopup: function (_ref: Popup | null): void {
-                    throw new Error('Function not implemented.');
-                },
-                placing: false,
-                setPlacing: function (_placing: boolean): void {
-                    throw new Error('Function not implemented.');
-                },
-                markerPosition: null,
-                setMarkerPosition: function (_position: { longitude?: number; latitude?: number } | null): void {
-                    throw new Error('Function not implemented.');
-                },
-                markerBearing: null,
-                setMarkerBearing: function (_bearing: number): void {
-                    throw new Error('Function not implemented.');
-                },
-                markerVariant: null,
-                setMarkerVariant: function (_variant: Variation | null): void {
-                    throw new Error('Function not implemented.');
-                },
-                cachedHeatmap: null,
-                setPolygonStatus: function (_status: mapStore.PolygonStatus): void {
-                    throw new Error('Function not implemented.');
-                },
-                clearMarkerValues: function (): void {
-                    throw new Error('Function not implemented.');
-                },
-                cachedAssets: null,
-                setCachedAssets: function (_assets: Asset[] | null): void {
-                    throw new Error('Function not implemented.');
-                },
-            })
+            } as unknown as mapStore.MapState)
         );
 
         (mapStore.useMapStore as any).getState = () => ({

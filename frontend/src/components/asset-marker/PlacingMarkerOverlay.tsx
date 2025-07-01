@@ -1,5 +1,5 @@
 import React from 'react';
-import windTurbineIcon from '../../assets/Windturbine_white.svg';
+import windTurbineIcon from '../../assets/pending_turbine.svg';
 import BlockIcon from '@mui/icons-material/Block';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';

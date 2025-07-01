@@ -1,8 +1,11 @@
+import { Box } from '@mui/material';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useEffect, useRef, useState } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { Map } from 'react-map-gl/maplibre';
+import GridConnectPanel from '../grid-connect/GridConnectPanel';
 import { MAP_STYLES, type MapStyle } from '../../types/map';
+import GridConnectFooterPanel from '../grid-connect/GridConnectFooterPanel';
 import MapControls from '../map-controls/MapControls';
 import SearchPanel from '../search/SearchPanel';
 import LayerControlPanel from '../layer-selection/LayerControlPanel';
@@ -25,6 +28,8 @@ const MapComponent = () => {
     const [mapStyle, setMapStyle] = useState<MapStyle>('hybrid');
     const [isMapInitialized, setIsMapInitialized] = useState(false);
     const placing = useMapStore((s) => s.placing);
+    const gridConnectViewActive = useMapStore((s) => s.gridConnectViewActive);
+    const selectedSubstation = useMapStore((s) => s.selectedSubstation);
 
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const drawRef = useMapboxDraw(mapRef, isMapInitialized);
@@ -57,7 +62,7 @@ const MapComponent = () => {
     };
 
     return (
-        <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+        <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
             <Map
                 ref={mapRef}
                 maxBounds={MAP_VIEW_BOUNDS}
@@ -71,6 +76,7 @@ const MapComponent = () => {
                 {isMapInitialized && (
                     <>
                         <SearchPanel drawRef={drawRef} isPanelOpen={isPanelOpen} mapRef={mapRef} setIsPanelOpen={setIsPanelOpen} />
+                        {gridConnectViewActive && <GridConnectPanel />}
                         <MapControls mapRef={mapRef} onStyleChange={handleStyleChange} currentStyle={mapStyle} is3D={is3D} setIs3D={setIs3D} />
                         {placing && mousePos && <PlacingMarkerOverlay mousePos={mousePos} isInsidePolygon={isInsidePolygon} suitability={suitability} />}
                         <AssetMarkerContainer is3D={is3D} setIsPanelOpen={setIsPanelOpen} />
@@ -78,7 +84,12 @@ const MapComponent = () => {
                     </>
                 )}
             </Map>
-        </div>
+            {gridConnectViewActive && selectedSubstation && (
+                <>
+                    <GridConnectFooterPanel selectedSubstation={selectedSubstation} />
+                </>
+            )}
+        </Box>
     );
 };
 

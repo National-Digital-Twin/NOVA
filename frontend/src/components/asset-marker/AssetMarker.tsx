@@ -1,10 +1,12 @@
 import { useRef, useState } from 'react';
+import unselected_turbine_icon from '../../assets/Windturbine_blue_unselected.svg';
+import selected_turbine_icon from '../../assets/Windturbine_blue_selected.svg';
+import white_turbine_icon from '../../assets/white_turbine.svg';
 import { Marker } from 'react-map-gl/maplibre';
-import windTurbineSelectedIcon from '../../assets/Windturbine_blue_selected.svg';
-import windTurbineIcon from '../../assets/Windturbine_blue_unselected.svg';
 import { useMapStore } from '../../stores/useMapStore';
 import { SubstationsListContainer } from '../map-substations-list';
 import AssetControls from './AssetControls';
+import { MarkerStatus } from './AssetMarkerStatus';
 import AssetSpecificationPopup from './AssetSpecificationPopup';
 
 interface AssetMarkerProps {
@@ -12,11 +14,10 @@ interface AssetMarkerProps {
     latitude?: number;
     onClick?: () => void;
     onBoltClick?: () => void;
-    isSelected?: boolean;
     setIsPanelOpen?: (isPanelOpen: boolean) => void;
 }
 
-const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltClick, isSelected = false, setIsPanelOpen }) => {
+const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltClick, setIsPanelOpen }) => {
     const markerRef = useRef<HTMLDivElement>(null);
     const [hasOpened, setHasOpened] = useState(false);
     const [showControls, setShowControls] = useState(false);
@@ -25,6 +26,7 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
 
     const setPlacing = useMapStore((s) => s.setPlacing);
     const setMarkerPosition = useMapStore((s) => s.setMarkerPosition);
+    const markerStatus = useMapStore((s) => s.markerStatus);
 
     const handleMarkerClick = (e: React.MouseEvent<HTMLImageElement>) => {
         e.preventDefault();
@@ -38,6 +40,25 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
         setHasOpened(true);
         setShowControls(true);
     }
+
+    const getMarkerImg = () => {
+        switch (markerStatus) {
+            case MarkerStatus.Draft:
+                return unselected_turbine_icon;
+            case MarkerStatus.Connecting:
+                return white_turbine_icon;
+            default:
+                return selected_turbine_icon;
+        }
+    };
+
+    const getMarkerSize = () => {
+        if (markerStatus === MarkerStatus.Connecting) {
+            return 100;
+        } else {
+            return 60;
+        }
+    };
 
     return (
         <Marker longitude={longitude} latitude={latitude} anchor="bottom" draggable={false}>
@@ -83,15 +104,15 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
                         onMouseUp={(e) => e.stopPropagation()}
                         onPointerDown={(e) => e.stopPropagation()}
                     >
-                        <SubstationsListContainer longitude={longitude} latitude={latitude} onConfirm={() => setShowSubstationsList(false)} />
+                        <SubstationsListContainer setShowSubstationsList={setShowSubstationsList} setShowControls={setShowControls} />
                     </div>
                 )}
                 <img
-                    src={isSelected ? windTurbineSelectedIcon : windTurbineIcon}
+                    src={getMarkerImg()}
                     alt="Wind Turbine"
                     style={{
-                        width: 60,
-                        height: 60,
+                        width: getMarkerSize(),
+                        height: getMarkerSize(),
                         cursor: 'pointer',
                         pointerEvents: 'auto',
                     }}

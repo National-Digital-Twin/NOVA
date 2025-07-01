@@ -55,7 +55,7 @@ export class SubstationService {
    */
   public findNearestSubstations(point: Feature<Point>, limit: number = 3): LocationsDTO {
     // Read GSP data from the GeoJSON file
-    const gspData = dataProviderUtils.readGSPData() as FeatureCollection;
+    const gspData = dataProviderUtils.readGridSupplyPointData() as FeatureCollection;
 
     // Extract coordinates from the point - we know it's a Point geometry
     const coordinates = point.geometry.coordinates;
@@ -81,8 +81,18 @@ export class SubstationService {
       .sort((a, b) => a.distance - b.distance)
       .slice(0, limit);
 
+    const handleId = (id: string | number | undefined) : number => {
+      if (typeof id === 'number') return id;
+      if (typeof id === 'string') {
+        const parsed = parseFloat(id);
+        return isNaN(parsed) ? 0 : parsed;
+      }
+      return 0;
+    }
+
     // Convert to LocationsDTO format
     return nearestFeatures.map(item => ({
+      id: handleId(item.feature.id),
       location: {
         type: 'Feature',
         properties: item.feature.properties || {},

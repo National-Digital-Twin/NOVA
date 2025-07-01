@@ -7,10 +7,10 @@ import DrawPolygonButton from './draw-polygon/DrawPolygonButton';
 import EditPolygonButton from './edit-polygon/EditPolygonButton';
 import HideLayersButton from './hide-map-layers/HideLayersButton';
 import SearchInput from './search-input/SearchInput';
-import { MapVisualHelper } from '../../utils/MapVisualHelper';
 import { usePolygonHandlers } from '../../hooks/usePolygonHandlers';
 import AddAssetButton from './add-asset/AddAssetButton';
 import { useMapStore } from '../../stores/useMapStore';
+import { MapVisualHelper } from '../../utils/MapVisualHelper';
 
 const SearchContainer = styled(Box)({
     display: 'flex',
@@ -44,12 +44,9 @@ const SearchPanel = ({ drawRef, mapRef, isPanelOpen, setIsPanelOpen }: SearchPan
 
     const { handlePolygonDeleted, startPolygonDraw, startPolygonEdit } = usePolygonHandlers({ mapRef, drawRef });
 
-    const handleLocationSelect = useCallback(
-        (lat: number, long: number, zoom: number) => {
-            MapVisualHelper.flyToLocation(mapRef, lat, long, zoom);
-        },
-        [mapRef]
-    );
+    const handleLocationSelect = useCallback((lat: number, long: number, zoom: number) => {
+        MapVisualHelper.flyToLocation(lat, long, zoom);
+    }, []);
 
     return (
         <SearchContainer>

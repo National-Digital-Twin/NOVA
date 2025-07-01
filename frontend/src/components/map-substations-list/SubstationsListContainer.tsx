@@ -1,32 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import { Paper, Typography, CircularProgress } from '@mui/material';
-import SubstationsList, { type ListItem } from './SubstationsList';
+import SubstationsList, { type Substation } from './SubstationsList';
 import { fetchSubstations } from './substationsApi';
+import { useMapStore } from '../../stores/useMapStore';
+import { MapVisualHelper } from '../../utils/MapVisualHelper';
+import { MarkerStatus } from '../asset-marker/AssetMarkerStatus';
 
 interface SubstationsListContainerProps {
-    longitude?: number;
-    latitude?: number;
-    onConfirm?: (selectedItem: ListItem) => void;
+    setShowSubstationsList: (showSubstationsList: boolean) => void;
+    setShowControls?: (showControls: boolean) => void;
 }
 
 /**
  * A container component that handles loading substations data and displays
  * the SubstationsList with appropriate loading and error states.
  */
-const SubstationsListContainer: React.FC<SubstationsListContainerProps> = ({ longitude, latitude, onConfirm = () => console.log('Confirmed') }) => {
+const SubstationsListContainer: React.FC<SubstationsListContainerProps> = ({ setShowSubstationsList, setShowControls }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [substations, setSubstations] = useState<ListItem[]>([]);
+    const substations = useMapStore((s) => s.substations);
+    const setSubstations = useMapStore((s) => s.setSubstations);
+    const setGridConnectViewActive = useMapStore((s) => s.setGridConnectViewActive);
+    const gridConnectViewActive = useMapStore((s) => s.gridConnectViewActive);
+    const setShowLayerControl = useMapStore((s) => s.setShowLayerControl);
+    const setSelectedSubstation = useMapStore((s) => s.setSelectedSubstation);
+    const setMarkerStatus = useMapStore((s) => s.setMarkerStatus);
+    const markerPosition = useMapStore((s) => s.markerPosition);
+
+    const onSubstationSelection = (selected: Substation) => {
+        console.log(`Selected substation: ${selected.name}`);
+        setSelectedSubstation(selected);
+        setGridConnectViewActive(true);
+        if (!gridConnectViewActive && setShowControls) setShowControls(false);
+        setMarkerStatus(MarkerStatus.Connecting);
+        setShowLayerControl(false);
+        setShowSubstationsList(false);
+        MapVisualHelper.renderSubstationAndPowerLineLayers();
+        MapVisualHelper.renderGridConnectionLine();
+        if (markerPosition && markerPosition.latitude && markerPosition.longitude)
+            MapVisualHelper.flyToLocation(markerPosition.latitude, markerPosition.longitude, 10);
+    };
 
     useEffect(() => {
         const loadSubstations = async () => {
-            if (longitude === undefined || latitude === undefined) return;
+            if (!markerPosition || !markerPosition.latitude || !markerPosition.longitude) return;
 
             setIsLoading(true);
             setError(null);
 
             try {
-                const result = await fetchSubstations(longitude, latitude);
+                const result = await fetchSubstations(markerPosition.longitude, markerPosition.latitude);
                 setSubstations(result.items);
                 setError(result.error);
             } catch (err) {
@@ -38,7 +61,7 @@ const SubstationsListContainer: React.FC<SubstationsListContainerProps> = ({ lon
         };
 
         loadSubstations();
-    }, [longitude, latitude]);
+    }, [markerPosition, setSubstations]);
 
     if (isLoading) {
         return (
@@ -59,7 +82,7 @@ const SubstationsListContainer: React.FC<SubstationsListContainerProps> = ({ lon
         );
     }
 
-    return <SubstationsList items={substations} onConfirm={onConfirm} />;
+    return <SubstationsList items={substations} onConfirm={onSubstationSelection} />;
 };
 
 export default SubstationsListContainer;

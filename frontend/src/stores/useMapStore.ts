@@ -1,9 +1,12 @@
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
+import type { MapLayerMouseEvent } from 'maplibre-gl';
 import type { Popup } from 'maplibre-gl';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { create } from 'zustand';
 import type { Asset, Variation } from '../components/search/add-asset/AddAsset';
 import type { FeatureCollection } from 'geojson';
+import type { Substation } from '../components/map-substations-list/SubstationsList';
+import { MarkerStatus } from '../components/asset-marker/AssetMarkerStatus';
 
 export type PolygonStatus = 'none' | 'drawing' | 'editing' | 'pendingConfirmation' | 'confirmed';
 
@@ -13,6 +16,9 @@ export interface MapState {
 
     drawRef: MapboxDraw | null;
     setDrawRef: (ref: MapboxDraw) => void;
+
+    showLayerControl: boolean;
+    setShowLayerControl: (layerControl: boolean) => void;
 
     polygonConfirmPopup: Popup | null;
     setPolygonConfirmPopup: (ref: Popup | null) => void;
@@ -28,9 +34,21 @@ export interface MapState {
 
     markerVariant: Variation | null;
     setMarkerVariant: (variant: Variation | null) => void;
+    markerStatus: MarkerStatus;
+    setMarkerStatus: (status: MarkerStatus) => void;
 
     cachedHeatmap: FeatureCollection | null;
     setCachedHeatmap: (featureCollection: FeatureCollection | null) => void;
+
+    gridConnectViewActive: boolean;
+    setGridConnectViewActive: (active: boolean) => void;
+
+    selectedSubstation: Substation | null;
+    setSelectedSubstation: (substation: Substation | null) => void;
+    setSelectedSubstationById: (substationId: number) => void;
+
+    substations: Substation[];
+    setSubstations: (substations: Substation[]) => void;
 
     cachedAssets: Asset[] | null;
     setCachedAssets: (assets: Asset[] | null) => void;
@@ -41,12 +59,15 @@ export interface MapState {
     clearMarkerValues: () => void;
 }
 
-export const useMapStore = create<MapState>((set) => ({
+export const useMapStore = create<MapState>((set, get) => ({
     mapRef: null,
     setMapRef: (ref) => set({ mapRef: ref }),
 
     drawRef: null,
     setDrawRef: (ref) => set({ drawRef: ref }),
+
+    showLayerControl: false,
+    setShowLayerControl: (layerControl) => set({ showLayerControl: layerControl }),
 
     polygonConfirmPopup: null,
     setPolygonConfirmPopup: (popup) => set({ polygonConfirmPopup: popup }),
@@ -60,6 +81,23 @@ export const useMapStore = create<MapState>((set) => ({
     setMarkerBearing: (bearing) => set({ markerBearing: bearing }),
     markerVariant: null,
     setMarkerVariant: (variant) => set({ markerVariant: variant }),
+    markerStatus: MarkerStatus.Draft,
+    setMarkerStatus: (status) => set({ markerStatus: status }),
+
+    gridConnectViewActive: false,
+    setGridConnectViewActive: (active) => set({ gridConnectViewActive: active }),
+
+    substations: [],
+    setSubstations: (substations) => set({ substations: substations }),
+
+    selectedSubstation: null,
+    setSelectedSubstation: (substation) => set({ selectedSubstation: substation }),
+    setSelectedSubstationById: (substationId) =>
+        set((state) => {
+            const substations = state.substations.filter((substation) => substation.id === substationId);
+            if (substations.length > 1) throw new Error(`Duplicate ID found for substation ${substationId}`);
+            return { selectedSubstation: substations[0] };
+        }),
 
     cachedHeatmap: null,
     setCachedHeatmap: (featureCollection) => set({ cachedHeatmap: featureCollection }),
@@ -71,4 +109,20 @@ export const useMapStore = create<MapState>((set) => ({
     setPolygonStatus: (status) => set({ polygonStatus: status }),
 
     clearMarkerValues: () => set({ markerBearing: null, markerVariant: null, markerPosition: null }),
+
+    handleMapClick: (e: MapLayerMouseEvent) => {
+        // handle state when asset is being placed
+        if (get().placing) {
+            const { lngLat } = e;
+            get().setMarkerPosition({ longitude: lngLat.lng, latitude: lngLat.lat });
+
+            // set bearing
+            const mapRef = get().mapRef;
+            if (mapRef) {
+                get().setMarkerBearing(mapRef.getBearing());
+            }
+
+            get().setPlacing(false);
+        }
+    },
 }));

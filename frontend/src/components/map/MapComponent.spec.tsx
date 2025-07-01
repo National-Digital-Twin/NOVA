@@ -5,6 +5,7 @@ import { act } from 'react'; //  use react's act
 import MapComponent from '../../components/map/MapComponent';
 import * as mapStore from '../../stores/useMapStore';
 import type { MapState, PolygonStatus } from '../../stores/useMapStore';
+import { MarkerStatus } from '../asset-marker/AssetMarkerStatus';
 
 const createMockMapState = (overrides: Partial<MapState> = {}): MapState => ({
     mapRef: null, // simulate map is loaded or use a valid MapRef mock if needed
@@ -12,6 +13,9 @@ const createMockMapState = (overrides: Partial<MapState> = {}): MapState => ({
 
     drawRef: null,
     setDrawRef: vi.fn(),
+
+    showLayerControl: false,
+    setShowLayerControl: vi.fn(),
 
     polygonConfirmPopup: null,
     setPolygonConfirmPopup: vi.fn(),
@@ -28,8 +32,21 @@ const createMockMapState = (overrides: Partial<MapState> = {}): MapState => ({
     markerVariant: null,
     setMarkerVariant: vi.fn(),
 
+    markerStatus: MarkerStatus.Draft,
+    setMarkerStatus: vi.fn(),
+
     cachedHeatmap: null,
     setCachedHeatmap: vi.fn(),
+    
+    gridConnectViewActive: false,
+    setGridConnectViewActive: vi.fn(),
+    
+    selectedSubstation: null,
+    setSelectedSubstation: vi.fn(),
+    setSelectedSubstationById: vi.fn(),
+
+    substations: [],
+    setSubstations: vi.fn(),
 
     cachedAssets: null,
     setCachedAssets: vi.fn(),
