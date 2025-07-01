@@ -4,26 +4,11 @@ import SubstationsList, { type Substation } from './SubstationsList';
 import { fetchSubstations } from './substationsApi';
 import { useMapStore } from '../../stores/useMapStore';
 import { MapVisualHelper } from '../../utils/MapVisualHelper';
-import type { GeoJSONSource, SourceSpecification } from 'maplibre-gl';
-import type { FeatureCollection } from 'geojson';
 import { MarkerStatus } from '../asset-marker/AssetMarkerStatus';
 
 interface SubstationsListContainerProps {
     setShowSubstationsList: (showSubstationsList: boolean) => void;
     setShowControls?: (showControls: boolean) => void;
-}
-
-interface GridLayer {
-    id: string;
-    endpoint: string;
-    type: LayerType;
-    data?: FeatureCollection;
-}
-
-type LayerType = 'symbol' | 'fill' | 'circle' | 'line' | 'raster' | 'heatmap' | 'fill-extrusion' | 'hillshade' | 'color-relief' | 'background';
-
-function isLayerType(value: string): value is LayerType {
-    return ['symbol', 'fill', 'circle', 'line', 'raster', 'heatmap', 'fill-extrusion', 'hillshade', 'color-relief', 'background'].includes(value);
 }
 
 /**
@@ -35,16 +20,12 @@ const SubstationsListContainer: React.FC<SubstationsListContainerProps> = ({ set
     const [error, setError] = useState<string | null>(null);
     const substations = useMapStore((s) => s.substations);
     const setSubstations = useMapStore((s) => s.setSubstations);
-    const mapRef = useMapStore((s) => s.mapRef);
-    const map = mapRef?.getMap();
     const setGridConnectViewActive = useMapStore((s) => s.setGridConnectViewActive);
     const gridConnectViewActive = useMapStore((s) => s.gridConnectViewActive);
     const setShowLayerControl = useMapStore((s) => s.setShowLayerControl);
-    const flyToLocation = useMapStore((s) => s.flyToLocation);
     const setSelectedSubstation = useMapStore((s) => s.setSelectedSubstation);
     const setMarkerStatus = useMapStore((s) => s.setMarkerStatus);
     const markerPosition = useMapStore((s) => s.markerPosition);
-    const renderGridConnectionLine = useMapStore((s) => s.renderGridConnectionLine);
 
     const onSubstationSelection = (selected: Substation) => {
         console.log(`Selected substation: ${selected.name}`);
@@ -54,63 +35,10 @@ const SubstationsListContainer: React.FC<SubstationsListContainerProps> = ({ set
         setMarkerStatus(MarkerStatus.Connecting);
         setShowLayerControl(false);
         setShowSubstationsList(false);
-        renderGridLayers();
-        renderGridConnectionLine(MapVisualHelper.connectionLineLayerId, MapVisualHelper.powerLineColor);
-        if (markerPosition && markerPosition.latitude && markerPosition.longitude) flyToLocation(markerPosition.latitude, markerPosition.longitude, 10);
-    };
-
-    const renderGridLayers = async () => {
-        const substationLayer: GridLayer = { id: MapVisualHelper.substationLayerId, type: 'circle', endpoint: '/api/ui/substation-geojson' };
-        const powerLineLayer: GridLayer = { id: MapVisualHelper.powerLineLayerId, type: 'line', endpoint: '/api/ui/power-line-geojson' };
-
-        const substationFeatureData = fetchFeatureData(substationLayer);
-        const powerLineFeatureData = fetchFeatureData(powerLineLayer);
-
-        await Promise.all([substationFeatureData, powerLineFeatureData]).then((allFeatureData) => {
-            setLayers(allFeatureData);
-        });
-    };
-
-    const fetchFeatureData = async (layerToFetch: GridLayer) => {
-        try {
-            const response = await fetch(layerToFetch.endpoint);
-            if (!response.ok) throw new Error('API error');
-            const data = await response.json();
-            layerToFetch.data = data;
-            return layerToFetch;
-        } catch (err) {
-            console.error('Failed to load layers', err);
-        }
-    };
-
-    const setLayers = (layers: (GridLayer | undefined)[]) => {
-        if (!map) return;
-        for (const layer of layers) {
-            if (!layer || !layer.data) continue;
-            if (!isLayerType(layer.type)) continue;
-            if (!map.getSource(layer.id)) {
-                const paint =
-                    layer.type === 'circle'
-                        ? { 'circle-radius': 8, 'circle-color': '#CF9FFF', 'circle-opacity': 0.8 }
-                        : { 'line-color': MapVisualHelper.powerLineColor, 'line-width': 4, 'line-opacity': 0.8 };
-                const source: SourceSpecification = {
-                    type: 'geojson',
-                    data: layer.data,
-                };
-
-                map.addLayer({
-                    id: layer.id,
-                    type: layer.type as LayerType,
-                    source: source,
-                    paint: paint,
-                });
-
-                console.log(map.getSource(layer.id));
-            } else {
-                const source = map.getSource(layer.id) as GeoJSONSource;
-                source.setData(layer.data);
-            }
-        }
+        MapVisualHelper.renderSubstationAndPowerLineLayers();
+        MapVisualHelper.renderGridConnectionLine();
+        if (markerPosition && markerPosition.latitude && markerPosition.longitude)
+            MapVisualHelper.flyToLocation(markerPosition.latitude, markerPosition.longitude, 10);
     };
 
     useEffect(() => {

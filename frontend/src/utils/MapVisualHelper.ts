@@ -1,6 +1,6 @@
 import { LngLat, MapMouseEvent, type Map, Popup, MercatorCoordinate } from 'maplibre-gl';
-import type { Feature, FeatureCollection, Geometry, Polygon } from 'geojson';
-import type { GeoJSONSource } from 'maplibre-gl';
+import type { Feature, FeatureCollection, Geometry, LineString, Polygon } from 'geojson';
+import type { GeoJSONSource, SourceSpecification } from 'maplibre-gl';
 import type { MapRef } from 'react-map-gl/maplibre';
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import * as THREE from 'three';
@@ -26,19 +26,33 @@ interface ThreeJsCustomLayer extends maplibregl.CustomLayerInterface {
     renderer: THREE.WebGLRenderer;
 }
 
+interface GridLayer {
+    id: string;
+    endpoint: string;
+    type: LayerType;
+    data?: FeatureCollection;
+    color: string;
+}
+
+type LayerType = 'symbol' | 'fill' | 'circle' | 'line' | 'raster' | 'heatmap' | 'fill-extrusion' | 'hillshade' | 'color-relief' | 'background';
+
+function isLayerType(value: string): value is LayerType {
+    return ['symbol', 'fill', 'circle', 'line', 'raster', 'heatmap', 'fill-extrusion', 'hillshade', 'color-relief', 'background'].includes(value);
+}
+
 /**
  * Helper class for applying map visualisations when using MapLibre GL.
  */
 export class MapVisualHelper {
     // Unique ID for the source and layer used for masking
-    public static readonly maskLayerSourceId = 'mask';
-    public static readonly maskLayerId = 'mask-layer';
+    private static readonly maskLayerSourceId = 'mask';
+    private static readonly maskLayerId = 'mask-layer';
     private static readonly heatmapLayerId = 'heatmap-layer';
     private static readonly threeDimensionalAssetsLayer = '3d-assets-layer';
-    public static readonly substationLayerId = 'substation-layer';
-    public static readonly powerLineLayerId = 'power-line-layer';
-    public static readonly connectionLineLayerId = 'connection-line-layer';
-    public static readonly powerLineColor = '#007AFF';
+    private static readonly substationLayerId = 'substation-layer';
+    private static readonly powerLineLayerId = 'power-line-layer';
+    private static readonly connectionLineLayerId = 'connection-line-layer';
+    private static readonly powerLineColor = '#007AFF';
 
     /**
      * Applies a dimmed mask over the entire map except inside the given polygon and centers the map on that polygon.
@@ -142,6 +156,23 @@ export class MapVisualHelper {
     static removeExistingPopup(popup: Popup | null) {
         if (popup) popup.remove();
         useMapStore.getState().setPolygonConfirmPopup(null);
+    }
+
+    /**
+     * Flies the map to a specific location with a smooth animation.
+     *
+     * @param mapRef - A React ref to the MapLibre map instance
+     * @param lat - Latitude of the target location
+     * @param lng - Longitude of the target location
+     * @param zoom - Zoom level for the target location
+     * @param duration - Duration of the flyTo animation in milliseconds (default is 2000ms)
+     */
+    static flyToLocation(lat: number, lng: number, zoom: number, duration = 2000) {
+        const mapRef = useMapStore.getState().mapRef;
+        const map = mapRef?.getMap();
+
+        if (!map) return;
+        map.flyTo({ center: [lng, lat], zoom, duration });
     }
 
     /**
@@ -377,6 +408,125 @@ export class MapVisualHelper {
 
         const pt = point([lng, lat]);
         return booleanPointInPolygon(pt, polygon);
+    }
+
+    static async renderSubstationAndPowerLineLayers() {
+        const substationLayer: GridLayer = { id: MapVisualHelper.substationLayerId, type: 'circle', endpoint: '/api/ui/substation-geojson', color: '#CF9FFF' };
+        const powerLineLayer: GridLayer = {
+            id: MapVisualHelper.powerLineLayerId,
+            type: 'line',
+            endpoint: '/api/ui/power-line-geojson',
+            color: MapVisualHelper.powerLineColor,
+        };
+
+        const substationFeatureData = MapVisualHelper.fetchFeatureData(substationLayer);
+        const powerLineFeatureData = MapVisualHelper.fetchFeatureData(powerLineLayer);
+
+        await Promise.all([substationFeatureData, powerLineFeatureData]).then((allFeatureData) => {
+            MapVisualHelper.setLayers(allFeatureData);
+        });
+    }
+
+    static async fetchFeatureData(layerToFetch: GridLayer) {
+        try {
+            const response = await fetch(layerToFetch.endpoint);
+            if (!response.ok) throw new Error('API error');
+            const data = await response.json();
+            layerToFetch.data = data;
+            return layerToFetch;
+        } catch (err) {
+            console.error('Failed to load layers', err);
+        }
+    }
+
+    static setLayers(layers: (GridLayer | undefined)[]) {
+        const map = useMapStore.getState().mapRef?.getMap();
+        if (!map) return;
+
+        for (const layer of layers) {
+            if (!layer || !layer.data) continue;
+            if (!isLayerType(layer.type)) continue;
+            if (!map.getSource(layer.id)) {
+                const paint =
+                    layer.type === 'circle'
+                        ? { 'circle-radius': 8, 'circle-color': layer.color, 'circle-opacity': 0.8 }
+                        : { 'line-color': layer.color, 'line-width': 4, 'line-opacity': 0.8 };
+                const source: SourceSpecification = {
+                    type: 'geojson',
+                    data: layer.data,
+                };
+
+                map.addLayer({
+                    id: layer.id,
+                    type: layer.type as LayerType,
+                    source: source,
+                    paint: paint,
+                });
+
+                console.log(map.getSource(layer.id));
+            } else {
+                const source = map.getSource(layer.id) as GeoJSONSource;
+                source.setData(layer.data);
+            }
+        }
+    }
+
+    static removeGridLayers = () => {
+        MapVisualHelper.removeLayer(MapVisualHelper.connectionLineLayerId);
+        MapVisualHelper.removeLayer(MapVisualHelper.powerLineLayerId);
+        MapVisualHelper.removeLayer(MapVisualHelper.substationLayerId);
+    };
+
+    static removeLayer = (layerId: string) => {
+        const map = useMapStore.getState().mapRef?.getMap();
+        if (!map) return;
+
+        if (map.getSource(layerId) && map.getLayer(layerId)) {
+            map.removeLayer(layerId);
+            map.removeSource(layerId);
+        }
+    };
+
+    static renderGridConnectionLine() {
+        const map = useMapStore.getState().mapRef?.getMap();
+        const markerPosition = useMapStore.getState().markerPosition;
+        const selectedSubstation = useMapStore.getState().selectedSubstation;
+        if (!map || !markerPosition || !markerPosition.longitude || !markerPosition.latitude || !selectedSubstation || !selectedSubstation.coordinates) return;
+        const layerId = this.connectionLineLayerId;
+        const data: Feature<LineString> = {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+                type: 'LineString',
+                coordinates: [[markerPosition.longitude, markerPosition.latitude], selectedSubstation.coordinates],
+            },
+        };
+
+        if (map.getSource(layerId)) {
+            const source = map.getSource(layerId) as GeoJSONSource;
+            source.setData(data);
+        } else {
+            map.addSource(layerId, {
+                type: 'geojson',
+                data: data,
+            });
+
+            // Add a layer to display the path
+            map.addLayer({
+                id: this.connectionLineLayerId,
+                type: 'line',
+                source: this.connectionLineLayerId,
+                layout: {
+                    'line-join': 'round',
+                    'line-cap': 'round',
+                },
+                paint: {
+                    'line-color': this.powerLineColor,
+                    'line-width': 2,
+                    'line-dasharray': [2, 2],
+                },
+            });
+        }
     }
 
     /**

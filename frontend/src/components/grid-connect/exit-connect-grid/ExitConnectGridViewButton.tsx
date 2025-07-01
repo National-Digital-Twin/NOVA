@@ -10,32 +10,15 @@ const StyledContainer = styled(Box)({
 
 const ExitConnectGridViewButton = () => {
     const setGridConnectViewActive = useMapStore((s) => s.setGridConnectViewActive);
-    const mapRef = useMapStore((s) => s.mapRef);
-    const flyToLocation = useMapStore((s) => s.flyToLocation);
     const markerPosition = useMapStore((s) => s.markerPosition);
     const setMarkerStatus = useMapStore((s) => s.setMarkerStatus);
-
-    const removeGridLayers = () => {
-        removeLayer(MapVisualHelper.connectionLineLayerId);
-        removeLayer(MapVisualHelper.powerLineLayerId);
-        removeLayer(MapVisualHelper.substationLayerId);
-    };
-
-    const removeLayer = (layerId: string) => {
-        const map = mapRef?.getMap();
-        if (!map) return;
-
-        if (map.getSource(layerId) && map.getLayer(layerId)) {
-            map.removeLayer(layerId);
-            map.removeSource(layerId);
-        }
-    };
 
     const exitGridConnectView = () => {
         setGridConnectViewActive(false);
         setMarkerStatus(MarkerStatus.Final);
-        removeGridLayers();
-        if (markerPosition && markerPosition.latitude && markerPosition.longitude) flyToLocation(markerPosition.latitude, markerPosition.longitude, 7);
+        MapVisualHelper.removeGridLayers();
+        if (markerPosition && markerPosition.latitude && markerPosition.longitude)
+            MapVisualHelper.flyToLocation(markerPosition.latitude, markerPosition.longitude, 7);
     };
 
     return (

@@ -10,6 +10,7 @@ import SearchInput from './search-input/SearchInput';
 import { usePolygonHandlers } from '../../hooks/usePolygonHandlers';
 import AddAssetButton from './add-asset/AddAssetButton';
 import { useMapStore } from '../../stores/useMapStore';
+import { MapVisualHelper } from '../../utils/MapVisualHelper';
 
 const SearchContainer = styled(Box)({
     display: 'flex',
@@ -40,16 +41,12 @@ interface SearchPanelProps {
 
 const SearchPanel = ({ drawRef, mapRef, isPanelOpen, setIsPanelOpen }: SearchPanelProps) => {
     const cachedHeatmap = useMapStore((s) => s.cachedHeatmap);
-    const flyToLocation = useMapStore((s) => s.flyToLocation);
 
     const { handlePolygonDeleted, startPolygonDraw, startPolygonEdit } = usePolygonHandlers({ mapRef, drawRef });
 
-    const handleLocationSelect = useCallback(
-        (lat: number, long: number, zoom: number) => {
-            flyToLocation(lat, long, zoom);
-        },
-        [flyToLocation]
-    );
+    const handleLocationSelect = useCallback((lat: number, long: number, zoom: number) => {
+        MapVisualHelper.flyToLocation(lat, long, zoom);
+    }, []);
 
     return (
         <SearchContainer>

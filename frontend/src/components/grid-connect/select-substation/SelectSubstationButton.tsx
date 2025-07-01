@@ -6,7 +6,6 @@ const SelectSubstationButton = () => {
     const selected = useMapStore((s) => s.selectedSubstation);
     const setSelectedSubstationById = useMapStore((s) => s.setSelectedSubstationById);
     const substations = useMapStore((s) => s.substations);
-    const renderGridConnectionLine = useMapStore((s) => s.renderGridConnectionLine);
 
     const GridConnectMenuGroup = styled(Box)(({ theme }) => ({
         alignItems: 'center',
@@ -43,7 +42,7 @@ const SelectSubstationButton = () => {
 
     const handleSubstationChange = (id: number) => {
         setSelectedSubstationById(id);
-        renderGridConnectionLine(MapVisualHelper.connectionLineLayerId, MapVisualHelper.powerLineColor);
+        MapVisualHelper.renderGridConnectionLine();
     };
 
     return (

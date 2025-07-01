@@ -1,10 +1,10 @@
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
-import type { GeoJSONSource, MapLayerMouseEvent } from 'maplibre-gl';
+import type { MapLayerMouseEvent } from 'maplibre-gl';
 import type { Popup } from 'maplibre-gl';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { create } from 'zustand';
 import type { Asset, Variation } from '../components/search/add-asset/AddAsset';
-import type { Feature, FeatureCollection, LineString } from 'geojson';
+import type { FeatureCollection } from 'geojson';
 import type { Substation } from '../components/map-substations-list/SubstationsList';
 import { MarkerStatus } from '../components/asset-marker/AssetMarkerStatus';
 
@@ -40,8 +40,6 @@ export interface MapState {
     cachedHeatmap: FeatureCollection | null;
     setCachedHeatmap: (featureCollection: FeatureCollection | null) => void;
 
-    flyToLocation: (lat: number, lng: number, zoom: number, duration?: number) => void;
-
     gridConnectViewActive: boolean;
     setGridConnectViewActive: (active: boolean) => void;
 
@@ -52,7 +50,6 @@ export interface MapState {
     substations: Substation[];
     setSubstations: (substations: Substation[]) => void;
 
-    renderGridConnectionLine: (connectionLineLayerId: string, lineColor: string) => void;
     cachedAssets: Asset[] | null;
     setCachedAssets: (assets: Asset[] | null) => void;
 
@@ -112,65 +109,6 @@ export const useMapStore = create<MapState>((set, get) => ({
     setPolygonStatus: (status) => set({ polygonStatus: status }),
 
     clearMarkerValues: () => set({ markerBearing: null, markerVariant: null, markerPosition: null }),
-
-    renderGridConnectionLine: (connectionLineLayerId: string, lineColor: string) => {
-        const map = get().mapRef?.getMap();
-        const markerPosition = get().markerPosition;
-        const selectedSubstation = get().selectedSubstation;
-        if (!map || !markerPosition || !markerPosition.longitude || !markerPosition.latitude || !selectedSubstation || !selectedSubstation.coordinates) return;
-        const layerId = connectionLineLayerId;
-        const data: Feature<LineString> = {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-                type: 'LineString',
-                coordinates: [[markerPosition.longitude, markerPosition.latitude], selectedSubstation.coordinates],
-            },
-        };
-
-        if (map.getSource(layerId)) {
-            const source = map.getSource(layerId) as GeoJSONSource;
-            source.setData(data);
-        } else {
-            map.addSource(layerId, {
-                type: 'geojson',
-                data: data,
-            });
-
-            // Add a layer to display the path
-            map.addLayer({
-                id: connectionLineLayerId,
-                type: 'line',
-                source: connectionLineLayerId,
-                layout: {
-                    'line-join': 'round',
-                    'line-cap': 'round',
-                },
-                paint: {
-                    'line-color': lineColor,
-                    'line-width': 2,
-                    'line-dasharray': [2, 2],
-                },
-            });
-        }
-    },
-
-    /**
-     * Flies the map to a specific location with a smooth animation.
-     *
-     * @param mapRef - A React ref to the MapLibre map instance
-     * @param lat - Latitude of the target location
-     * @param lng - Longitude of the target location
-     * @param zoom - Zoom level for the target location
-     * @param duration - Duration of the flyTo animation in milliseconds (default is 2000ms)
-     */
-    flyToLocation(lat: number, lng: number, zoom: number, duration = 2000) {
-        const mapRef = get().mapRef;
-        const map = mapRef?.getMap();
-
-        if (!map) return;
-        map.flyTo({ center: [lng, lat], zoom, duration });
-    },
 
     preventPolygonEdit: (e: MouseEvent | ({ point?: { x: number; y: number } } & MouseEvent)) => {
         let x: number;

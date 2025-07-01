@@ -38,8 +38,6 @@ const createMockMapState = (overrides: Partial<MapState> = {}): MapState => ({
     cachedHeatmap: null,
     setCachedHeatmap: vi.fn(),
     
-    flyToLocation: vi.fn(),
-
     gridConnectViewActive: false,
     setGridConnectViewActive: vi.fn(),
     
@@ -49,8 +47,6 @@ const createMockMapState = (overrides: Partial<MapState> = {}): MapState => ({
 
     substations: [],
     setSubstations: vi.fn(),
-
-    renderGridConnectionLine: vi.fn(),
 
     cachedAssets: null,
     setCachedAssets: vi.fn(),
