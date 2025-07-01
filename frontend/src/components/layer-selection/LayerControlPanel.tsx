@@ -400,7 +400,7 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
                             mb: 2,
                         }}
                     >
-                        <Typography variant="h6">Properties panel</Typography>
+                        <Typography variant="h6">Properties</Typography>
                         <IconButton onClick={closeProps}>
                             <HighlightOffIcon />
                         </IconButton>
