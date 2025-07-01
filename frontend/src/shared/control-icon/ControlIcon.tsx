@@ -59,6 +59,8 @@ interface ControlIconProps {
 }
 
 const ControlIcon = ({ onClick, children, 'aria-label': ariaLabel, isActive, disabled, 'aria-pressed': ariaPressed, showTooltip }: ControlIconProps) => {
+    const pressedState = ariaPressed !== undefined ? ariaPressed : isActive;
+
     return (
         <Box>
             {showTooltip ? (
@@ -68,7 +70,7 @@ const ControlIcon = ({ onClick, children, 'aria-label': ariaLabel, isActive, dis
                             onClick={onClick}
                             isActive={isActive}
                             disabled={disabled}
-                            aria-pressed={ariaPressed}
+                            aria-pressed={pressedState}
                             aria-label={ariaLabel + ' button'}
                         >
                             {children}
@@ -76,7 +78,7 @@ const ControlIcon = ({ onClick, children, 'aria-label': ariaLabel, isActive, dis
                     </span>
                 </StyledTooltip>
             ) : (
-                <StyledIconButton onClick={onClick} aria-label={ariaLabel} isActive={isActive} disabled={disabled} aria-pressed={ariaPressed}>
+                <StyledIconButton onClick={onClick} aria-label={ariaLabel} isActive={isActive} disabled={disabled} aria-pressed={pressedState}>
                     {children}
                 </StyledIconButton>
             )}

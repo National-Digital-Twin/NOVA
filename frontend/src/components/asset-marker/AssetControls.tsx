@@ -1,8 +1,8 @@
-import { Box, styled } from '@mui/material';
 import BoltIcon from '@mui/icons-material/Bolt';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import EditIcon from '@mui/icons-material/Edit';
 import OpenWithIcon from '@mui/icons-material/OpenWith';
+import { Box, styled } from '@mui/material';
 import ControlIcon from '../../shared/control-icon/ControlIcon';
 
 const ControlsContainer = styled(Box)(() => ({
@@ -21,18 +21,19 @@ interface AssetControlsProps {
     onDeleteClick: () => void;
     onEditClick: () => void;
     onMoveClick: () => void;
+    isSubstationsListOpen?: boolean;
 }
 
 /**
  * A component for displaying control buttons for an asset marker
  */
-const AssetControls: React.FC<AssetControlsProps> = ({ onBoltClick, onDeleteClick, onEditClick, onMoveClick }) => {
+const AssetControls: React.FC<AssetControlsProps> = ({ onBoltClick, onDeleteClick, onEditClick, onMoveClick, isSubstationsListOpen = false }) => {
     return (
         <ControlsContainer onClick={(e) => e.stopPropagation()}>
             <ControlIcon onClick={onEditClick} aria-label="Edit" showTooltip>
                 <EditIcon />
             </ControlIcon>
-            <ControlIcon onClick={onBoltClick} aria-label="Connect to grid" showTooltip>
+            <ControlIcon onClick={onBoltClick} aria-label="Connect to grid" showTooltip isActive={isSubstationsListOpen}>
                 <BoltIcon />
             </ControlIcon>
             <ControlIcon onClick={onDeleteClick} aria-label="Delete Asset" showTooltip>
