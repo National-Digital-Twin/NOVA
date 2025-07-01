@@ -4,9 +4,9 @@ import SubstationsList, { type Substation } from './SubstationsList';
 import { fetchSubstations } from './substationsApi';
 import { useMapStore } from '../../stores/useMapStore';
 import { MapVisualHelper } from '../../utils/MapVisualHelper';
-import type { GeoJSONSource } from 'maplibre-gl';
+import type { GeoJSONSource, SourceSpecification } from 'maplibre-gl';
 import type { FeatureCollection } from 'geojson';
-import { MarkerStatus } from '../asset-marker/AssetMarker';
+import { MarkerStatus } from '../asset-marker/AssetMarkerStatus';
 
 interface SubstationsListContainerProps {
     setShowSubstationsList: (showSubstationsList: boolean) => void;
@@ -16,8 +16,14 @@ interface SubstationsListContainerProps {
 interface GridLayer {
     id: string;
     endpoint: string;
-    type: string;
+    type: LayerType;
     data?: FeatureCollection;
+}
+
+type LayerType = 'symbol' | 'fill' | 'circle' | 'line' | 'raster' | 'heatmap' | 'fill-extrusion' | 'hillshade' | 'color-relief' | 'background';
+
+function isLayerType(value: string): value is LayerType {
+    return ['symbol', 'fill', 'circle', 'line', 'raster', 'heatmap', 'fill-extrusion', 'hillshade', 'color-relief', 'background'].includes(value);
 }
 
 /**
@@ -81,16 +87,21 @@ const SubstationsListContainer: React.FC<SubstationsListContainerProps> = ({ set
         if (!map) return;
         for (const layer of layers) {
             if (!layer || !layer.data) continue;
+            if (!isLayerType(layer.type)) continue;
             if (!map.getSource(layer.id)) {
                 const paint =
                     layer.type === 'circle'
                         ? { 'circle-radius': 8, 'circle-color': '#CF9FFF', 'circle-opacity': 0.8 }
                         : { 'line-color': MapVisualHelper.powerLineColor, 'line-width': 4, 'line-opacity': 0.8 };
-                map.addSource(layer.id, { type: 'geojson', data: layer.data });
+                const source: SourceSpecification = {
+                    type: 'geojson',
+                    data: layer.data,
+                };
+
                 map.addLayer({
                     id: layer.id,
-                    type: layer.type,
-                    source: layer.id,
+                    type: layer.type as LayerType,
+                    source: source,
                     paint: paint,
                 });
 

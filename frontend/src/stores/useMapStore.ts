@@ -4,7 +4,7 @@ import type { Popup } from 'maplibre-gl';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { create } from 'zustand';
 import type { Asset, Variation } from '../components/search/add-asset/AddAsset';
-import type { FeatureCollection } from 'geojson';
+import type { Feature, FeatureCollection, LineString } from 'geojson';
 import type { Substation } from '../components/map-substations-list/SubstationsList';
 import { MarkerStatus } from '../components/asset-marker/AssetMarkerStatus';
 
@@ -119,7 +119,7 @@ export const useMapStore = create<MapState>((set, get) => ({
         const selectedSubstation = get().selectedSubstation;
         if (!map || !markerPosition || !markerPosition.longitude || !markerPosition.latitude || !selectedSubstation || !selectedSubstation.coordinates) return;
         const layerId = connectionLineLayerId;
-        const data = {
+        const data: Feature<LineString> = {
             type: 'Feature',
             properties: {},
             geometry: {
