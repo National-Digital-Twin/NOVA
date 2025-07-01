@@ -33,7 +33,7 @@ const StyledLogoutIcon = styled(LogoutIcon)(({ theme }) => ({
 }));
 
 const SignOutTypography = styled(Typography)(({ theme }) => ({
-    color: theme.palette.secondary.main,
+    color: theme.palette.primary.main,
 }));
 
 const UserMenu = () => {
