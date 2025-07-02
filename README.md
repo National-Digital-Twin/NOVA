@@ -6,8 +6,6 @@
 
 ## Overview  
 
-Trigger test.
-
 While initially this repositories focus has been on creating a set of base template documentation files, the intent is to continue expanding this to include pipeline checks, that could help ensure documentation follows basic rules and checks through standard continuous integration (CI) validation examples in the future.   
 
 <!--
