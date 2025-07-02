@@ -7,14 +7,14 @@ global.fetch = vi.fn();
 
 describe('substationsApi', () => {
     const mockCoordinates = [
-            parseFloat((Math.random() * 360 - 180).toFixed(6)), // longitude
-            parseFloat((Math.random() * 180 - 90).toFixed(6)),  // latitude
-            ];
+        parseFloat((Math.random() * 360 - 180).toFixed(6)), // longitude
+        parseFloat((Math.random() * 180 - 90).toFixed(6)), // latitude
+    ];
     const mockLocation = {
         geometry: {
             type: 'Point',
             coordinates: mockCoordinates,
-        } as Point  
+        } as Point,
     };
     beforeEach(() => {
         vi.clearAllMocks();

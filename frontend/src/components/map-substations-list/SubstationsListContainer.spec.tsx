@@ -12,22 +12,22 @@ vi.mock('./substationsApi', () => ({
 describe('SubstationsListContainer', () => {
     const longitude = 12.34;
     const latitude = 56.78;
-    
+
     const mockCoordinates = [
-            parseFloat((Math.random() * 360 - 180).toFixed(6)), // longitude
-            parseFloat((Math.random() * 180 - 90).toFixed(6)),  // latitude
-            ];
+        parseFloat((Math.random() * 360 - 180).toFixed(6)), // longitude
+        parseFloat((Math.random() * 180 - 90).toFixed(6)), // latitude
+    ];
     const mockItems = [
         { id: 0, name: 'Test Substation 1', distanceFromTurbine: '150km', coordinates: mockCoordinates },
         { id: 1, name: 'Test Substation 2', distanceFromTurbine: '250km', coordinates: mockCoordinates },
     ];
 
     vi.spyOn(MapStore, 'useMapStore').mockImplementation((selector) =>
-      selector({
-        markerPosition: { longitude, latitude },
-        setSubstations: vi.fn(),
-        substations: mockItems,
-      } as unknown as MapStore.MapState)
+        selector({
+            markerPosition: { longitude, latitude },
+            setSubstations: vi.fn(),
+            substations: mockItems,
+        } as unknown as MapStore.MapState)
     );
 
     const setShowSubstationsList = vi.fn();

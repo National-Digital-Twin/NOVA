@@ -90,7 +90,7 @@ describe('SearchInput', () => {
         await user.type(input, 'Ab');
 
         await waitFor(() => screen.getByText('Aberdeen'));
-        
+
         // Click outside to lose focus
         await user.click(document.body);
 
@@ -108,7 +108,7 @@ describe('SearchInput', () => {
 
         const input = screen.getByRole('combobox');
         await user.type(input, 'Aberdeen');
-        
+
         // Click outside to lose focus
         await user.click(document.body);
 
@@ -127,9 +127,12 @@ describe('SearchInput', () => {
         });
 
         vi.spyOn(window, 'fetch').mockReturnValueOnce(
-            delayedPromise.then(() => ({
-                json: async () => [{ name: 'Aberdeen', latitude: 57.1497, longitude: -2.0943, zoom: 10 }],
-            } as Response))
+            delayedPromise.then(
+                () =>
+                    ({
+                        json: async () => [{ name: 'Aberdeen', latitude: 57.1497, longitude: -2.0943, zoom: 10 }],
+                    }) as Response
+            )
         );
 
         render(<SearchInput onSearchResultClick={mockOnSearchResultClick} />);
