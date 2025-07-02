@@ -146,13 +146,13 @@ describe('LayerControlPanel', () => {
         render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
         const searchInput = await screen.findByPlaceholderText('Search for layers');
         await userEvent.type(searchInput, 'Wind');
-    
+
         const clearBtn = await screen.findByLabelText('Clear search');
         await userEvent.click(clearBtn);
-    
+
         expect(searchInput).toHaveValue('');
         expect(await screen.findByText('Wind speed')).toBeInTheDocument();
-    
+
         // Check that all categories are visible again
         expect(screen.getByText('Environmental protected sites')).toBeInTheDocument();
         expect(screen.getByText('Weather')).toBeInTheDocument();
