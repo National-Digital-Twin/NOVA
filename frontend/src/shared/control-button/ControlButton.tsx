@@ -13,7 +13,7 @@ const StyledButton = styled(Button, { shouldForwardProp: (prop) => prop !== 'isA
     textTransform: 'none',
     width: '100%',
     '&:hover': {
-        backgroundColor: isActive ? theme.palette.secondary.dark : theme.palette.action.hover,
+        backgroundColor: isActive ? theme.palette.secondary.dark : '#f0f2f2',
     },
 }));
 

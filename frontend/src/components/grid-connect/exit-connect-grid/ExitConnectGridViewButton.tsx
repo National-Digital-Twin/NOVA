@@ -12,18 +12,21 @@ const ExitConnectGridViewButton = () => {
     const setGridConnectViewActive = useMapStore((s) => s.setGridConnectViewActive);
     const markerPosition = useMapStore((s) => s.markerPosition);
     const setMarkerStatus = useMapStore((s) => s.setMarkerStatus);
+    const mapRef = useMapStore((s) => s.mapRef);
+    const drawRef = useMapStore((s) => s.drawRef);
 
     const exitGridConnectView = () => {
         setGridConnectViewActive(false);
         setMarkerStatus(MarkerStatus.Final);
         MapVisualHelper.removeGridLayers();
-        if (markerPosition && markerPosition.latitude && markerPosition.longitude)
-            MapVisualHelper.flyToLocation(markerPosition.latitude, markerPosition.longitude, 7);
+        if (markerPosition && mapRef && drawRef) {
+            MapVisualHelper.panToPolygon(mapRef.getMap(), drawRef);
+        }
     };
 
     return (
         <StyledContainer>
-            <ControlButton onClick={exitGridConnectView} aria-label="Exit connect grid view">
+            <ControlButton onClick={exitGridConnectView} aria-label="Exit grid connection view">
                 <span style={{ marginRight: '8px', color: '#e60000', fontWeight: 'bold' }}>Exit connect grid view</span>
                 <img src="/icons/delete-polygon.svg" alt="Exit icon" width={24} height={24} />
             </ControlButton>
