@@ -78,6 +78,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ onSearchResultClick }) => {
             clearIcon={<ClearIcon />}
             disableClearable={false}
             noOptionsText={input.trim().length < MIN_INPUT_LENGTH ? '' : 'No options'}
+            popupIcon={options.length > 0 ? undefined : null}
             filterOptions={(opts) => (input.trim().length >= MIN_INPUT_LENGTH ? opts : [])}
             slotProps={{
                 popper: {
