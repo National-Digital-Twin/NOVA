@@ -142,7 +142,7 @@ describe('LayerControlPanel', () => {
         expect(await screen.findByText('No results')).toBeInTheDocument();
     });
 
-    it('clears search when clear button is clicked', async () => {
+    it('clears search when clear button is clicked and re-expands all categories', async () => {
         render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
         const searchInput = await screen.findByPlaceholderText('Search for layers');
         await userEvent.type(searchInput, 'Wind');
@@ -152,6 +152,11 @@ describe('LayerControlPanel', () => {
 
         expect(searchInput).toHaveValue('');
         expect(await screen.findByText('Wind speed')).toBeInTheDocument();
+
+        // Check that all categories are visible again
+        expect(screen.getByText('Environmental protected sites')).toBeInTheDocument();
+        expect(screen.getByText('Weather')).toBeInTheDocument();
+        expect(screen.getByText('Residential')).toBeInTheDocument();
     });
 
     it('shows no results when search is only spaces', async () => {
