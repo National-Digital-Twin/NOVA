@@ -102,21 +102,7 @@ export class MapVisualHelper {
             });
         }
 
-        const coords = polygon.coordinates[0];
-        const lats = coords.map(([, lat]) => lat);
-        const lngs = coords.map(([lng]) => lng);
-
-        map.fitBounds(
-            [
-                [Math.min(...lngs), Math.min(...lats)],
-                [Math.max(...lngs), Math.max(...lats)],
-            ],
-            {
-                padding: { top: 50, bottom: 50, left: 450, right: 66 },
-                duration: 2000,
-                bearing: map.getBearing(),
-            }
-        );
+        this.panToPolygon(map, undefined, polygon);
     }
 
     /**
@@ -261,6 +247,30 @@ export class MapVisualHelper {
         const id = this.heatmapLayerId;
         if (map.getLayer(id)) map.removeLayer(id);
         if (map.getSource(id)) map.removeSource(id);
+    }
+
+    static panToPolygon(map: Map, draw?: MapboxDraw, polygon?: Polygon | null) {
+        if (!map || (!polygon && !draw)) return;
+
+        if (!polygon) polygon = MapVisualHelper.getFirstPolygon(draw!);
+
+        if (!polygon) return;
+
+        const coords = polygon.coordinates[0];
+        const lats = coords.map(([, lat]) => lat);
+        const lngs = coords.map(([lng]) => lng);
+
+        map.fitBounds(
+            [
+                [Math.min(...lngs), Math.min(...lats)],
+                [Math.max(...lngs), Math.max(...lats)],
+            ],
+            {
+                padding: { top: 50, bottom: 50, left: 450, right: 66 },
+                duration: 2000,
+                bearing: map.getBearing(),
+            }
+        );
     }
 
     /**

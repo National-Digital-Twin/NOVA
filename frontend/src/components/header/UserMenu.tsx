@@ -28,7 +28,7 @@ const UsernameTypography = styled(Typography)(({ theme }) => ({
 }));
 
 const StyledLogoutIcon = styled(LogoutIcon)(({ theme }) => ({
-    color: theme.palette.secondary.main,
+    color: theme.palette.primary.main,
     marginRight: theme.spacing(1),
 }));
 
