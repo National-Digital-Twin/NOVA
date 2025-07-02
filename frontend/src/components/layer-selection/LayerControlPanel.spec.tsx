@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach, afterEach, type MockInstance } from 'vitest';
+import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { MapRef } from 'react-map-gl/maplibre';
-import type MapboxDraw from '@mapbox/mapbox-gl-draw';
+import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest';
 import * as mapStore from '../../stores/useMapStore';
 import { MapVisualHelper } from '../../utils/MapVisualHelper';
 import LayerControlPanel from './LayerControlPanel';
@@ -59,19 +59,29 @@ const fakeGeoJSON = {
 
 describe('LayerControlPanel', () => {
     let fetchSpy: MockInstance;
+    let mockLayersPanelOpen = true;
+    let mockSetLayersPanelOpen: ReturnType<typeof vi.fn>;
 
     beforeEach(() => {
         vi.clearAllMocks();
+        mockLayersPanelOpen = true;
+        mockSetLayersPanelOpen = vi.fn((open: boolean) => {
+            mockLayersPanelOpen = open;
+        });
 
         vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) =>
             selector({
                 polygonStatus: 'confirmed',
+                layersPanelOpen: mockLayersPanelOpen,
+                setLayersPanelOpen: mockSetLayersPanelOpen,
                 setCachedHeatmap: vi.fn(),
             } as unknown as mapStore.MapState)
         );
 
         (mapStore.useMapStore as any).getState = () => ({
             polygonStatus: 'confirmed',
+            layersPanelOpen: mockLayersPanelOpen,
+            setLayersPanelOpen: mockSetLayersPanelOpen,
             setCachedHeatmap: vi.fn(),
         });
 
@@ -169,23 +179,29 @@ describe('LayerControlPanel', () => {
     });
 
     it('collapses and expands the panel with toggle button', async () => {
-        render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
+        const { rerender } = render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
         await screen.findByText('Layers');
 
         const toggleBtn = screen.getAllByRole('button').find((btn) => btn.querySelector('svg'));
         await userEvent.click(toggleBtn!);
+
+        rerender(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
         expect(screen.queryByText('Layers')).not.toBeInTheDocument();
 
         await userEvent.click(toggleBtn!);
+
+        rerender(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
         expect(await screen.findByText('Layers')).toBeInTheDocument();
     });
 
     it('rotates toggle icon when collapsed', async () => {
-        render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
+        const { rerender } = render(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
         await screen.findByText('Layers');
 
         const toggleBtn = screen.getAllByRole('button').find((btn) => btn.querySelector('svg'));
         await userEvent.click(toggleBtn!);
+
+        rerender(<LayerControlPanel mapRef={mockMapRef} drawRef={mockDrawRef} />);
 
         const icon = toggleBtn!.querySelector('svg');
         const styles = window.getComputedStyle(icon as Element);

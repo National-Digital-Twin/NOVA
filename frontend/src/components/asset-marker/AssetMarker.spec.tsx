@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import AssetMarker from './AssetMarker';
 import * as mapStore from '../../stores/useMapStore';
+import AssetMarker from './AssetMarker';
 import { MarkerStatus } from './AssetMarkerStatus';
 
 vi.mock('react-map-gl/maplibre', async () => {
@@ -36,9 +36,9 @@ vi.mock('../map-substations-list/substationsApi', () => ({
 }));
 
 vi.mock('./AssetControls', () => ({
-    default: ({ onBoltClick, onDeleteClick, onMoveClick, onEditClick }: any) => (
+    default: ({ onBoltClick, onDeleteClick, onMoveClick, onEditClick, isSubstationsListOpen }: any) => (
         <>
-            <button aria-label="Connect to grid" onClick={onBoltClick}>
+            <button aria-label="Connect to grid" onClick={onBoltClick} aria-pressed={isSubstationsListOpen ? 'true' : 'false'}>
                 Connect
             </button>
             <button aria-label="Delete Asset" onClick={onDeleteClick}>
@@ -64,9 +64,9 @@ describe('AssetMarker', () => {
         vi.clearAllMocks();
         vi.spyOn(mapStore, 'useMapStore').mockImplementation((selector) =>
             selector({
-            setPlacing: setPlacingMock,
-            setMarkerPosition: setMarkerPositionMock,
-            markerStatus: MarkerStatus.Draft,
+                setPlacing: setPlacingMock,
+                setMarkerPosition: setMarkerPositionMock,
+                markerStatus: MarkerStatus.Draft,
             } as unknown as mapStore.MapState)
         );
     });

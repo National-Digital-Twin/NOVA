@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react';
-import unselected_turbine_icon from '../../assets/Windturbine_blue_unselected.svg';
-import selected_turbine_icon from '../../assets/Windturbine_blue_selected.svg';
-import white_turbine_icon from '../../assets/white_turbine.svg';
 import { Marker } from 'react-map-gl/maplibre';
+import selected_turbine_icon from '../../assets/Windturbine_blue_selected.svg';
+import unselected_turbine_icon from '../../assets/Windturbine_blue_unselected.svg';
+import white_turbine_icon from '../../assets/white_turbine.svg';
 import { useMapStore } from '../../stores/useMapStore';
 import { SubstationsListContainer } from '../map-substations-list';
 import AssetControls from './AssetControls';
@@ -33,7 +33,6 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
         setShowControls((v) => !v);
     };
 
-    // Only render if valid coordinates
     if (longitude === undefined || latitude === undefined) return null;
 
     if (!hasOpened) {
@@ -85,6 +84,7 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
                                 if (setMarkerPosition) setMarkerPosition(null);
                                 if (setPlacing) setPlacing(true);
                             }}
+                            isSubstationsListOpen={showSubstationsList}
                         />
                         {showPopup && <AssetSpecificationPopup />}
                     </div>

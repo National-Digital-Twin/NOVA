@@ -30,4 +30,50 @@ describe('AssetControls', () => {
         expect(screen.getByLabelText('Delete Asset')).toBeInTheDocument();
         expect(screen.getByLabelText('Move')).toBeInTheDocument();
     });
+
+    it('highlights connect to grid button when substations list is open', () => {
+        render(
+            <AssetControls
+                onBoltClick={function (): void {
+                    throw new Error('Function not implemented.');
+                }}
+                onDeleteClick={function (): void {
+                    throw new Error('Function not implemented.');
+                }}
+                onEditClick={function (): void {
+                    throw new Error('Function not implemented.');
+                }}
+                onMoveClick={function (): void {
+                    throw new Error('Function not implemented.');
+                }}
+                isSubstationsListOpen={true}
+            />
+        );
+
+        const connectButton = screen.getByLabelText('Connect to grid button');
+        expect(connectButton).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    it('does not highlight connect to grid button when substations list is closed', () => {
+        render(
+            <AssetControls
+                onBoltClick={function (): void {
+                    throw new Error('Function not implemented.');
+                }}
+                onDeleteClick={function (): void {
+                    throw new Error('Function not implemented.');
+                }}
+                onEditClick={function (): void {
+                    throw new Error('Function not implemented.');
+                }}
+                onMoveClick={function (): void {
+                    throw new Error('Function not implemented.');
+                }}
+                isSubstationsListOpen={false}
+            />
+        );
+
+        const connectButton = screen.getByLabelText('Connect to grid button');
+        expect(connectButton).toHaveAttribute('aria-pressed', 'false');
+    });
 });

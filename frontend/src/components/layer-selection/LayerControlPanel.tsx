@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import React, { useEffect, useId, useMemo, useState } from 'react';
 
+import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
@@ -24,9 +25,8 @@ import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SearchIcon from '@mui/icons-material/Search';
 import type { MapRef } from 'react-map-gl/maplibre';
-import { MapVisualHelper } from '../../utils/MapVisualHelper';
-import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { useMapStore } from '../../stores/useMapStore';
+import { MapVisualHelper } from '../../utils/MapVisualHelper';
 
 interface LayerControlPanelProps {
     mapRef: React.RefObject<MapRef>;
@@ -56,10 +56,11 @@ interface LayerApiResponse {
 
 const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
     const polygonStatus = useMapStore((s) => s.polygonStatus);
+    const layersPanelOpen = useMapStore((s) => s.layersPanelOpen);
+    const setLayersPanelOpen = useMapStore((s) => s.setLayersPanelOpen);
     const idPrefix = useId();
     const [layers, setLayers] = useState<Record<string, LayerItem[]>>({});
     const [searchTerm, setSearchTerm] = useState('');
-    const [open, setOpen] = useState(true);
     const [loading, setLoading] = useState(false);
     const [checkedLayers, setCheckedLayers] = useState<Record<string, boolean>>({});
     const [layerSettings, setLayerSettings] = useState<Record<string, Record<string, number>>>({});
@@ -201,7 +202,6 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
         }
         const featureCollection = MapVisualHelper.getFeatureCollection(drawRef.current);
 
-        // Fetch user selected layers and attributes
         const allLayers: LayerItem[] = Object.values(layers).flat();
 
         const dataLayers = allLayers.map((layer) => {
@@ -240,7 +240,7 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
 
             setCachedHeatmap(geojson);
             MapVisualHelper.addOrUpdateHeatmapLayer(mapRef, geojson);
-            setOpen(false);
+            setLayersPanelOpen(false);
         } catch (err) {
             console.error('Analysis request failed', err);
         } finally {
@@ -324,13 +324,13 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
 
     return (
         <>
-            <Box className="layer-panel-toggle" sx={{ left: open ? '430px' : '1rem' }}>
-                <IconButton onClick={() => setOpen((o) => !o)}>
-                    <ArrowBackIosNewIcon fontSize="small" sx={{ transform: !open ? 'rotate(180deg)' : 'none' }} />
+            <Box className="layer-panel-toggle" sx={{ left: layersPanelOpen ? '430px' : '1rem' }}>
+                <IconButton onClick={() => setLayersPanelOpen(!layersPanelOpen)}>
+                    <ArrowBackIosNewIcon fontSize="small" sx={{ transform: !layersPanelOpen ? 'rotate(180deg)' : 'none' }} />
                 </IconButton>
             </Box>
 
-            {open && (
+            {layersPanelOpen && (
                 <Paper className="layer-panel" elevation={4}>
                     <Box className="layer-panel-header">
                         <LayersOutlinedIcon color="primary" sx={{ mr: 1 }} />
@@ -400,7 +400,7 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
                             mb: 2,
                         }}
                     >
-                        <Typography variant="h6">Properties panel</Typography>
+                        <Typography variant="h6">Properties</Typography>
                         <IconButton onClick={closeProps}>
                             <HighlightOffIcon />
                         </IconButton>

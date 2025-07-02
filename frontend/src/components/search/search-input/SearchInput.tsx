@@ -1,5 +1,5 @@
-import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
+import SearchIcon from '@mui/icons-material/Search';
 import { Autocomplete, CircularProgress, InputAdornment, styled, TextField } from '@mui/material';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { SearchResponse } from '../../../types/searchResponse';
@@ -55,9 +55,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ onSearchResultClick }) => {
         };
     }, [input]);
 
-    const handleInputChange = useCallback((_e: unknown, value: string, reason: string) => {
-        if (reason !== 'reset') setInput(value);
-    }, []);
+    const handleInputChange = useCallback((_e: unknown, value: string) => setInput(value), []);
 
     const handleChange = useCallback(
         (_e: unknown, value: SearchResponse | null) => {
@@ -80,7 +78,6 @@ const SearchInput: React.FC<SearchInputProps> = ({ onSearchResultClick }) => {
             clearIcon={<ClearIcon />}
             disableClearable={false}
             noOptionsText={input.trim().length < MIN_INPUT_LENGTH ? '' : 'No options'}
-            open={input.trim().length >= MIN_INPUT_LENGTH}
             filterOptions={(opts) => (input.trim().length >= MIN_INPUT_LENGTH ? opts : [])}
             slotProps={{
                 popper: {
@@ -90,12 +87,12 @@ const SearchInput: React.FC<SearchInputProps> = ({ onSearchResultClick }) => {
             renderInput={(params) => (
                 <StyledTextField
                     {...params}
-                    placeholder="Search by region"
+                    placeholder="Search"
                     variant="outlined"
                     fullWidth
                     slotProps={{
                         input: {
-                            'aria-label': 'Search by region',
+                            'aria-label': 'Search',
                             ...params.InputProps,
                             inputProps: { ...params.inputProps },
                             startAdornment: (

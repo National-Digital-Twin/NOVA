@@ -29,6 +29,7 @@ export function usePolygonHandlers({ mapRef, drawRef }: UsePolygonHandlersProps)
     const setPolygonStatus = useMapStore((s) => s.setPolygonStatus);
     const setCachedHeatmap = useMapStore((s) => s.setCachedHeatmap);
     const clearMarkerValues = useMapStore((s) => s.clearMarkerValues);
+    const setLayersPanelOpen = useMapStore((s) => s.setLayersPanelOpen);
 
     const eventHandlersRef = useRef<{
         updatePopupPosition?: () => void;
@@ -200,6 +201,7 @@ export function usePolygonHandlers({ mapRef, drawRef }: UsePolygonHandlersProps)
         setPolygonStatus('none');
         clearMarkerValues();
         setCachedHeatmap(null);
+        setLayersPanelOpen(true);
 
         const draw = drawRef.current;
         if (draw) {
@@ -226,7 +228,7 @@ export function usePolygonHandlers({ mapRef, drawRef }: UsePolygonHandlersProps)
 
             map.getCanvas().style.cursor = '';
         }
-    }, [mapRef, setPolygonStatus, clearMarkerValues, setCachedHeatmap, drawRef]);
+    }, [mapRef, setPolygonStatus, clearMarkerValues, setCachedHeatmap, setLayersPanelOpen, drawRef]);
 
     return {
         handlePolygonDrawn,

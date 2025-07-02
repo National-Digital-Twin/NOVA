@@ -26,6 +26,7 @@ vi.mock('../stores/useMapStore', () => {
     const mockSetPolygonStatus = vi.fn();
     const mockSetCachedHeatmap = vi.fn();
     const mockClearMarkerValues = vi.fn();
+    const mockSetLayersPanelOpen = vi.fn();
 
     const mockStore = {
         polygonStatus: 'none',
@@ -33,6 +34,7 @@ vi.mock('../stores/useMapStore', () => {
         setPolygonStatus: mockSetPolygonStatus,
         setCachedHeatmap: mockSetCachedHeatmap,
         clearMarkerValues: mockClearMarkerValues,
+        setLayersPanelOpen: mockSetLayersPanelOpen,
     };
 
     const mockGetState = () => ({
@@ -45,6 +47,7 @@ vi.mock('../stores/useMapStore', () => {
 
     return {
         useMapStore: mockUseMapStore,
+        mockSetLayersPanelOpen,
     };
 });
 

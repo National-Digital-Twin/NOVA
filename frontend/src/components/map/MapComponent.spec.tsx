@@ -37,10 +37,10 @@ const createMockMapState = (overrides: Partial<MapState> = {}): MapState => ({
 
     cachedHeatmap: null,
     setCachedHeatmap: vi.fn(),
-    
+
     gridConnectViewActive: false,
     setGridConnectViewActive: vi.fn(),
-    
+
     selectedSubstation: null,
     setSelectedSubstation: vi.fn(),
     setSelectedSubstationById: vi.fn(),
@@ -55,6 +55,9 @@ const createMockMapState = (overrides: Partial<MapState> = {}): MapState => ({
     setPolygonStatus: vi.fn(),
 
     clearMarkerValues: vi.fn(),
+
+    layersPanelOpen: false, // add this line to satisfy MapState
+    setLayersPanelOpen: vi.fn(), // add this line to satisfy MapState
 
     ...overrides,
 });

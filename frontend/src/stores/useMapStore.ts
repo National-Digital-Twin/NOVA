@@ -1,12 +1,11 @@
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
-import type { MapLayerMouseEvent } from 'maplibre-gl';
-import type { Popup } from 'maplibre-gl';
+import type { FeatureCollection } from 'geojson';
+import type { MapLayerMouseEvent, Popup } from 'maplibre-gl';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { create } from 'zustand';
-import type { Asset, Variation } from '../components/search/add-asset/AddAsset';
-import type { FeatureCollection } from 'geojson';
-import type { Substation } from '../components/map-substations-list/SubstationsList';
 import { MarkerStatus } from '../components/asset-marker/AssetMarkerStatus';
+import type { Substation } from '../components/map-substations-list/SubstationsList';
+import type { Asset, Variation } from '../components/search/add-asset/AddAsset';
 
 export type PolygonStatus = 'none' | 'drawing' | 'editing' | 'pendingConfirmation' | 'confirmed';
 
@@ -55,6 +54,9 @@ export interface MapState {
 
     polygonStatus: PolygonStatus;
     setPolygonStatus: (status: PolygonStatus) => void;
+
+    layersPanelOpen: boolean;
+    setLayersPanelOpen: (open: boolean) => void;
 
     clearMarkerValues: () => void;
 }
@@ -108,15 +110,16 @@ export const useMapStore = create<MapState>((set, get) => ({
     polygonStatus: 'none',
     setPolygonStatus: (status) => set({ polygonStatus: status }),
 
+    layersPanelOpen: true,
+    setLayersPanelOpen: (open) => set({ layersPanelOpen: open }),
+
     clearMarkerValues: () => set({ markerBearing: null, markerVariant: null, markerPosition: null }),
 
     handleMapClick: (e: MapLayerMouseEvent) => {
-        // handle state when asset is being placed
         if (get().placing) {
             const { lngLat } = e;
             get().setMarkerPosition({ longitude: lngLat.lng, latitude: lngLat.lat });
 
-            // set bearing
             const mapRef = get().mapRef;
             if (mapRef) {
                 get().setMarkerBearing(mapRef.getBearing());
