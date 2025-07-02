@@ -67,6 +67,18 @@ describe('AssetMarker', () => {
                 setPlacing: setPlacingMock,
                 setMarkerPosition: setMarkerPositionMock,
                 markerStatus: MarkerStatus.Draft,
+                markerVariant: { name: 'BasicVariant' },
+                cachedAssets: [
+                    {
+                        name: 'WindTurbine X',
+                        variations: [
+                            {
+                                name: 'BasicVariant',
+                                specification: [{ name: 'Power', value: '10MW' }],
+                            },
+                        ],
+                    },
+                ],
             } as unknown as mapStore.MapState)
         );
     });

@@ -62,6 +62,7 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
     return (
         <Marker longitude={longitude} latitude={latitude} anchor="bottom" draggable={false}>
             <div ref={markerRef} style={{ position: 'relative' }}>
+                {showPopup && <AssetSpecificationPopup />}
                 {showControls && (
                     <div
                         onClick={(e) => e.stopPropagation()}
@@ -86,7 +87,6 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
                             }}
                             isSubstationsListOpen={showSubstationsList}
                         />
-                        {showPopup && <AssetSpecificationPopup />}
                     </div>
                 )}
                 {showSubstationsList && (

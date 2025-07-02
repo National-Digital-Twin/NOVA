@@ -148,8 +148,8 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
 
     const clearSearch = () => {
         setSearchTerm('');
-        const firstCategory = Object.keys(layers)[0];
-        setExpandedPanels(firstCategory ? [firstCategory] : []);
+        const allCategories = Object.keys(layers);
+        setExpandedPanels(allCategories);
     };
 
     const openProps = (name: string) => {
