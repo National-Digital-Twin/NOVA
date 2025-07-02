@@ -27,7 +27,7 @@ const ExitConnectGridViewButton = () => {
     return (
         <StyledContainer>
             <ControlButton onClick={exitGridConnectView} aria-label="Exit grid connection view">
-                <span style={{ marginRight: '8px', color: '#e60000', fontWeight: 'bold' }}>Exit connect grid view</span>
+                <span style={{ marginRight: '8px', color: '#e60000', fontWeight: 'bold' }}>Exit grid connection view</span>
                 <img src="/icons/delete-polygon.svg" alt="Exit icon" width={24} height={24} />
             </ControlButton>
         </StyledContainer>
