@@ -24,6 +24,7 @@ const ViewToggleButton = ({ mapRef, onStyleChange, is3D, setIs3D, currentStyle }
     const markerPosition = useMapStore((s) => s.markerPosition);
     const markerBearing = useMapStore((s) => s.markerBearing);
     const markerVariant = useMapStore((s) => s.markerVariant);
+    const drawRef = useMapStore((s) => s.drawRef);
 
     const reapplyHeatmap = () => {
         if (cachedHeatmap) {
@@ -47,6 +48,13 @@ const ViewToggleButton = ({ mapRef, onStyleChange, is3D, setIs3D, currentStyle }
         }
 
         map.once('styledata', () => {
+            if (drawRef) {
+                const polygon = MapVisualHelper.getFirstPolygon(drawRef);
+                if (polygon) {
+                    MapVisualHelper.applyDimmedMaskAndPanToPolygon(map, polygon);
+                }
+            }
+
             if (!changingTo3d) {
                 map.setTerrain(null);
                 MapVisualHelper.remove3DAssets(map);
