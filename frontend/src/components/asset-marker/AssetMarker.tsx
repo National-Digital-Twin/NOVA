@@ -41,14 +41,8 @@ const AssetMarker: React.FC<AssetMarkerProps> = ({ longitude, latitude, onBoltCl
     }
 
     const getMarkerImg = () => {
-        switch (markerStatus) {
-            case MarkerStatus.Draft:
-                return unselected_turbine_icon;
-            case MarkerStatus.Connecting:
-                return white_turbine_icon;
-            default:
-                return selected_turbine_icon;
-        }
+        if (markerStatus === MarkerStatus.Connecting) return white_turbine_icon;
+        return showControls ? selected_turbine_icon : unselected_turbine_icon;
     };
 
     const getMarkerSize = () => {
