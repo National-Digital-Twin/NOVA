@@ -22,7 +22,7 @@ const SelectSubstationButton = () => {
         height: 48,
         minHeight: 48,
         fontWeight: 600,
-        fontSize: 20,
+        fontSize: 14,
         color: '#1a2233',
         bgcolor: 'transparent',
         border: 'none',

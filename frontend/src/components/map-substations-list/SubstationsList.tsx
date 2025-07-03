@@ -64,7 +64,7 @@ const SubstationsList: React.FC<SubstationsListProps> = ({ items = [], onConfirm
             </List>
 
             <Box sx={{ p: 1, textAlign: 'center' }}>
-                <Button variant="contained" color="primary" onClick={handleConfirm} disabled={selectedIndex === null} size="medium">
+                <Button variant="contained" onClick={handleConfirm} disabled={selectedIndex === null} size="medium">
                     Confirm
                 </Button>
             </Box>
