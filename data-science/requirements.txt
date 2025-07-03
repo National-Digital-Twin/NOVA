@@ -1,0 +1,14 @@
+numpy
+pandas
+scipy
+Flask 
+flask-cors 
+geopy
+shapely
+pyproj
+geojson
+deap
+geopandas
+boto3
+s3fs
+pyswarm
