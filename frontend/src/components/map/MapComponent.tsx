@@ -37,6 +37,7 @@ const MapComponent = () => {
     const [is3D, setIs3D] = useState(false);
     const cachedHeatMap = useMapStore((s) => s.cachedHeatmap);
     const { handleMapClick, mousePos, isInsidePolygon, suitability } = useMarkerPlacement();
+    const [resetLayers, setResetLayers] = useState(false);
 
     const handleStyleChange = (newStyle: MapStyle) => {
         setMapStyle(newStyle);
@@ -61,6 +62,10 @@ const MapComponent = () => {
         setMapRef(mapRef.current);
     };
 
+    const handlePolygonDeleted = () => {
+        setResetLayers(true);
+    };
+
     return (
         <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
             <Map
@@ -75,12 +80,18 @@ const MapComponent = () => {
             >
                 {isMapInitialized && (
                     <>
-                        <SearchPanel drawRef={drawRef} isPanelOpen={isPanelOpen} mapRef={mapRef} setIsPanelOpen={setIsPanelOpen} />
+                        <SearchPanel
+                            drawRef={drawRef}
+                            isPanelOpen={isPanelOpen}
+                            mapRef={mapRef}
+                            setIsPanelOpen={setIsPanelOpen}
+                            onPolygonDeleted={handlePolygonDeleted}
+                        />
                         {gridConnectViewActive && <GridConnectPanel />}
                         <MapControls mapRef={mapRef} onStyleChange={handleStyleChange} currentStyle={mapStyle} is3D={is3D} setIs3D={setIs3D} />
                         {placing && mousePos && <PlacingMarkerOverlay mousePos={mousePos} isInsidePolygon={isInsidePolygon} suitability={suitability} />}
                         <AssetMarkerContainer is3D={is3D} setIsPanelOpen={setIsPanelOpen} />
-                        <LayerControlPanel mapRef={mapRef} drawRef={drawRef} />
+                        <LayerControlPanel mapRef={mapRef} drawRef={drawRef} resetLayers={resetLayers} setResetLayers={setResetLayers} />
                     </>
                 )}
             </Map>
