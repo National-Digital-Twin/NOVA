@@ -15,7 +15,7 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
-import React, { useEffect, useId, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
 
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
@@ -31,6 +31,8 @@ import { MapVisualHelper } from '../../utils/MapVisualHelper';
 interface LayerControlPanelProps {
     mapRef: React.RefObject<MapRef>;
     drawRef: React.RefObject<MapboxDraw | null>;
+    resetLayers: boolean;
+    setResetLayers: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 interface Attribute {
@@ -39,6 +41,7 @@ interface Attribute {
     defaultValue: string | number;
     valueType: 'number' | 'string';
     options?: string[];
+    maxValue: number;
 }
 
 interface LayerItem {
@@ -54,7 +57,7 @@ interface LayerApiResponse {
     }[];
 }
 
-const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
+const LayerControlPanel = ({ mapRef, drawRef, resetLayers, setResetLayers }: LayerControlPanelProps) => {
     const polygonStatus = useMapStore((s) => s.polygonStatus);
     const layersPanelOpen = useMapStore((s) => s.layersPanelOpen);
     const setLayersPanelOpen = useMapStore((s) => s.setLayersPanelOpen);
@@ -70,6 +73,7 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
     const [layersLoaded, setLayersLoaded] = useState(false);
     const [loadError, setLoadError] = useState(false);
     const setCachedHeatmap = useMapStore((s) => s.setCachedHeatmap);
+    const [tempLayerSettings, setTempLayerSettings] = useState<Record<string, Record<string, number>>>({});
 
     const fetchLayers = async () => {
         try {
@@ -117,8 +121,39 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
     };
 
     useEffect(() => {
+        if (resetLayers) {
+            const resetCheckedLayers: Record<string, boolean> = {};
+            const resetLayerSettings: Record<string, Record<string, number>> = {};
+
+            Object.entries(layers).forEach(([, items]) => {
+                items.forEach((item) => {
+                    resetCheckedLayers[item.name] = true;
+                    resetLayerSettings[item.name] = {};
+                    item.attributes.forEach((a) => {
+                        resetLayerSettings[item.name][a.description] = Number(a.defaultValue);
+                    });
+                });
+            });
+
+            setCheckedLayers(resetCheckedLayers);
+            setLayerSettings(resetLayerSettings);
+
+            setResetLayers(false);
+        }
+    }, [resetLayers, layers, setResetLayers]);
+
+    useEffect(() => {
         fetchLayers();
     }, []);
+
+    useEffect(() => {
+        if (propOpen && currentLayer && layerSettings[currentLayer]) {
+            setTempLayerSettings((prev) => ({
+                ...prev,
+                [currentLayer]: { ...layerSettings[currentLayer] },
+            }));
+        }
+    }, [layerSettings, currentLayer, propOpen]);
 
     const handleCheckboxChange = (name: string) => {
         setCheckedLayers((prev) => ({ ...prev, [name]: !prev[name] }));
@@ -152,10 +187,17 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
         setExpandedPanels(allCategories);
     };
 
-    const openProps = (name: string) => {
-        setCurrentLayer(name);
-        setPropOpen(true);
-    };
+    const openProps = useCallback(
+        (name: string) => {
+            setCurrentLayer(name);
+            setTempLayerSettings((prev) => ({
+                ...prev,
+                [name]: { ...layerSettings[name] },
+            }));
+            setPropOpen(true);
+        },
+        [layerSettings]
+    );
 
     const closeProps = () => {
         setPropOpen(false);
@@ -165,7 +207,7 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
     const handleParamChange = (label: string, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         if (!currentLayer) return;
         const raw = e.target.value;
-        setLayerSettings((prev) => ({
+        setTempLayerSettings((prev) => ({
             ...prev,
             [currentLayer]: {
                 ...prev[currentLayer],
@@ -176,10 +218,10 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
 
     const handleParamBlur = (label: string) => {
         if (!currentLayer) return;
-        const txt = layerSettings[currentLayer][label];
+        const txt = tempLayerSettings[currentLayer][label];
         const num = Number(txt);
         const final = isNaN(num) ? '' : String(num);
-        setLayerSettings((prev) => ({
+        setTempLayerSettings((prev) => ({
             ...prev,
             [currentLayer]: {
                 ...prev[currentLayer],
@@ -189,6 +231,15 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
     };
 
     const confirmProps = () => {
+        if (currentLayer) {
+            const updatedSettings = tempLayerSettings[currentLayer];
+            setLayerSettings((prev) => ({
+                ...prev,
+                [currentLayer]: {
+                    ...updatedSettings,
+                },
+            }));
+        }
         closeProps();
     };
 
@@ -284,7 +335,7 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
                 </Accordion>
             );
         });
-    }, [searchTerm, expandedPanels, checkedLayers, idPrefix, layers]);
+    }, [searchTerm, expandedPanels, checkedLayers, idPrefix, layers, openProps]);
 
     const hasSearchResults = filteredLayerEntries.some(Boolean);
 
@@ -408,33 +459,74 @@ const LayerControlPanel = ({ mapRef, drawRef }: LayerControlPanelProps) => {
 
                     <Box sx={{ px: 2 }}>
                         {currentLayer &&
-                            Object.values(layers)
-                                .flat()
-                                .find((li) => li.name === currentLayer)!
-                                .attributes.map((attr) => (
-                                    <TextField
-                                        key={attr.id}
-                                        label={attr.description}
-                                        type={attr.valueType === 'number' ? 'number' : 'text'}
-                                        InputProps={attr.valueType === 'number' ? { inputProps: { min: 0 } } : {}}
-                                        select={(attr.options?.length ?? 0) > 0}
-                                        fullWidth
-                                        value={layerSettings[currentLayer][attr.description]}
-                                        onChange={(e) => handleParamChange(attr.description, e)}
-                                        onBlur={() => handleParamBlur(attr.description)}
-                                        sx={{ mb: 3 }}
-                                    >
-                                        {attr.options?.map((option) => (
-                                            <MenuItem key={option} value={option}>
-                                                {option}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
-                                ))}
+                            (() => {
+                                const currentLayerItem = Object.values(layers)
+                                    .flat()
+                                    .find((li) => li.name === currentLayer);
 
-                        <Button variant="contained" fullWidth onClick={confirmProps}>
-                            CONFIRM
-                        </Button>
+                                if (!currentLayerItem) return null;
+
+                                let hasErrors = false;
+
+                                const attributeFields = currentLayerItem.attributes.map((attr) => {
+                                    const value = tempLayerSettings[currentLayer]?.[attr.description] ?? '';
+                                    const numericValue = Number(value);
+
+                                    const isError =
+                                        attr.valueType === 'number' && (numericValue < 0 || (attr.maxValue !== undefined && numericValue > attr.maxValue));
+
+                                    if (isError) hasErrors = true;
+
+                                    return (
+                                        <TextField
+                                            key={attr.id}
+                                            label={attr.description}
+                                            type={attr.valueType === 'number' ? 'number' : 'text'}
+                                            InputProps={
+                                                attr.valueType === 'number'
+                                                    ? {
+                                                          inputProps: {
+                                                              min: 0,
+                                                              ...(attr.maxValue !== undefined && { max: attr.maxValue }),
+                                                          },
+                                                      }
+                                                    : {}
+                                            }
+                                            select={(attr.options?.length ?? 0) > 0}
+                                            fullWidth
+                                            value={value}
+                                            onChange={(e) => handleParamChange(attr.description, e)}
+                                            onBlur={() => handleParamBlur(attr.description)}
+                                            sx={{ mb: 3 }}
+                                            error={isError}
+                                            helperText={
+                                                attr.valueType === 'number' &&
+                                                (numericValue < 0
+                                                    ? 'Must be ≥ 0'
+                                                    : attr.maxValue !== undefined && numericValue > attr.maxValue
+                                                      ? `Must be ≤ ${attr.maxValue}`
+                                                      : '')
+                                            }
+                                        >
+                                            {attr.options?.map((option) => (
+                                                <MenuItem key={option} value={option}>
+                                                    {option}
+                                                </MenuItem>
+                                            ))}
+                                        </TextField>
+                                    );
+                                });
+
+                                return (
+                                    <>
+                                        {attributeFields}
+
+                                        <Button variant="contained" fullWidth onClick={confirmProps} disabled={hasErrors}>
+                                            CONFIRM
+                                        </Button>
+                                    </>
+                                );
+                            })()}
                     </Box>
                 </Box>
             </Drawer>

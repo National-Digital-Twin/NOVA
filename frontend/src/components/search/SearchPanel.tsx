@@ -42,17 +42,23 @@ interface SearchPanelProps {
     mapRef: React.RefObject<MapRef>;
     isPanelOpen: boolean;
     setIsPanelOpen: (isPanelOpen: boolean) => void;
+    onPolygonDeleted: () => void;
 }
 
-const SearchPanel = ({ drawRef, mapRef, isPanelOpen, setIsPanelOpen }: SearchPanelProps) => {
+const SearchPanel = ({ drawRef, mapRef, isPanelOpen, setIsPanelOpen, onPolygonDeleted }: SearchPanelProps) => {
     const cachedHeatmap = useMapStore((s) => s.cachedHeatmap);
     const polygonStatus = useMapStore((s) => s.polygonStatus);
 
-    const { handlePolygonDeleted, startPolygonDraw, startPolygonEdit } = usePolygonHandlers({ mapRef, drawRef });
+    const { handlePolygonDeleted: baseDelete, startPolygonDraw, startPolygonEdit } = usePolygonHandlers({ mapRef, drawRef });
 
     const handleLocationSelect = useCallback((lat: number, long: number, zoom: number) => {
         MapVisualHelper.flyToLocation(lat, long, zoom);
     }, []);
+
+    const handleDeleteAndReset = useCallback(() => {
+        baseDelete();
+        onPolygonDeleted();
+    }, [baseDelete, onPolygonDeleted]);
 
     const drawingControls = useMemo(() => {
         const controls = [
@@ -61,7 +67,7 @@ const SearchPanel = ({ drawRef, mapRef, isPanelOpen, setIsPanelOpen }: SearchPan
                 visible: polygonStatus === 'none' || polygonStatus === 'drawing' || polygonStatus === 'pendingConfirmation',
             },
             {
-                component: <DeletePolygonButton key="delete" deletePolygon={handlePolygonDeleted} />,
+                component: <DeletePolygonButton key="delete" deletePolygon={handleDeleteAndReset} />,
                 visible: polygonStatus === 'drawing' || polygonStatus === 'pendingConfirmation' || polygonStatus === 'editing' || polygonStatus === 'confirmed',
             },
             {
@@ -85,7 +91,7 @@ const SearchPanel = ({ drawRef, mapRef, isPanelOpen, setIsPanelOpen }: SearchPan
         });
 
         return controlsWithDividers;
-    }, [startPolygonDraw, handlePolygonDeleted, startPolygonEdit, mapRef, cachedHeatmap, polygonStatus]);
+    }, [startPolygonDraw, handleDeleteAndReset, startPolygonEdit, mapRef, cachedHeatmap, polygonStatus]);
 
     return (
         <SearchContainer>
