@@ -6,6 +6,7 @@ import SearchPanel from './SearchPanel';
 
 const mockDrawRef = { current: {} } as unknown as React.RefObject<MapboxDraw>;
 const mockMapRef = createMockMapRef();
+const mockOnPolygonDeleted = vi.fn();
 
 let mockStore = {
     cachedHeatmap: { type: 'FeatureCollection', features: [] },
@@ -96,7 +97,7 @@ describe('SearchPanel', () => {
 
     it('renders confirmed state controls (delete, edit, hide buttons with dividers)', () => {
         setUseMapStoreMock('confirmed');
-        render(<SearchPanel mapRef={mockMapRef} drawRef={mockDrawRef} isPanelOpen={false} setIsPanelOpen={() => {}} />);
+        render(<SearchPanel mapRef={mockMapRef} drawRef={mockDrawRef} isPanelOpen={false} setIsPanelOpen={() => {}} onPolygonDeleted={mockOnPolygonDeleted} />);
         expect(screen.getByTestId('search-input')).toBeInTheDocument();
         expect(screen.queryByTestId('draw-polygon-button')).not.toBeInTheDocument();
         expect(screen.getByTestId('delete-polygon-button')).toBeInTheDocument();
@@ -108,7 +109,7 @@ describe('SearchPanel', () => {
 
     it('renders only draw and hide buttons with one divider', () => {
         setUseMapStoreMock('none');
-        render(<SearchPanel mapRef={mockMapRef} drawRef={mockDrawRef} isPanelOpen={false} setIsPanelOpen={() => {}} />);
+        render(<SearchPanel mapRef={mockMapRef} drawRef={mockDrawRef} isPanelOpen={false} setIsPanelOpen={() => {}} onPolygonDeleted={mockOnPolygonDeleted} />);
         expect(screen.getByTestId('draw-polygon-button')).toBeInTheDocument();
         expect(screen.getByTestId('hide-layers-button')).toBeInTheDocument();
         expect(screen.queryByTestId('delete-polygon-button')).not.toBeInTheDocument();
@@ -118,7 +119,7 @@ describe('SearchPanel', () => {
 
     it('renders only one button and no dividers', () => {
         setUseMapStoreMock('none', null);
-        render(<SearchPanel mapRef={mockMapRef} drawRef={mockDrawRef} isPanelOpen={false} setIsPanelOpen={() => {}} />);
+        render(<SearchPanel mapRef={mockMapRef} drawRef={mockDrawRef} isPanelOpen={false} setIsPanelOpen={() => {}} onPolygonDeleted={mockOnPolygonDeleted} />);
         expect(screen.getByTestId('draw-polygon-button')).toBeInTheDocument();
         expect(screen.queryByTestId('hide-layers-button')).not.toBeInTheDocument();
         expect(screen.queryByTestId('delete-polygon-button')).not.toBeInTheDocument();
@@ -128,7 +129,7 @@ describe('SearchPanel', () => {
 
     it('renders editing state controls (delete, edit, hide buttons with dividers)', () => {
         setUseMapStoreMock('editing');
-        render(<SearchPanel mapRef={mockMapRef} drawRef={mockDrawRef} isPanelOpen={false} setIsPanelOpen={() => {}} />);
+        render(<SearchPanel mapRef={mockMapRef} drawRef={mockDrawRef} isPanelOpen={false} setIsPanelOpen={() => {}} onPolygonDeleted={mockOnPolygonDeleted} />);
         expect(screen.queryByTestId('draw-polygon-button')).not.toBeInTheDocument();
         expect(screen.getByTestId('delete-polygon-button')).toBeInTheDocument();
         expect(screen.getByTestId('edit-polygon-button')).toBeInTheDocument();
