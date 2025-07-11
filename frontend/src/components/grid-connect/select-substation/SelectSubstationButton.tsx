@@ -55,7 +55,7 @@ const SelectSubstationButton = () => {
             >
                 {substations.map((s) => (
                     <MenuItem key={s.name} value={s.id}>
-                        {s.name} ({s.distanceFromTurbine})
+                        {s.name} ({s.distanceFromTurbine}km)
                     </MenuItem>
                 ))}
             </GridConnectSelect>
