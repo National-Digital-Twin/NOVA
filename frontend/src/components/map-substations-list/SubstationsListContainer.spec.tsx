@@ -18,8 +18,8 @@ describe('SubstationsListContainer', () => {
         parseFloat((Math.random() * 180 - 90).toFixed(6)), // latitude
     ];
     const mockItems = [
-        { id: 0, name: 'Test Substation 1', distanceFromTurbine: '150km', coordinates: mockCoordinates },
-        { id: 1, name: 'Test Substation 2', distanceFromTurbine: '250km', coordinates: mockCoordinates },
+        { id: 0, name: 'Test Substation 1', distanceFromTurbine: '150', coordinates: mockCoordinates },
+        { id: 1, name: 'Test Substation 2', distanceFromTurbine: '250', coordinates: mockCoordinates },
     ];
 
     vi.spyOn(MapStore, 'useMapStore').mockImplementation((selector) =>
@@ -72,8 +72,8 @@ describe('SubstationsListContainer', () => {
         await waitFor(() => {
             expect(screen.getByText('Test Substation 1')).toBeInTheDocument();
             expect(screen.getByText('Test Substation 2')).toBeInTheDocument();
-            expect(screen.getByText('distance: 150km')).toBeInTheDocument();
-            expect(screen.getByText('distance: 250km')).toBeInTheDocument();
+            expect(screen.getByText('Distance: 150km')).toBeInTheDocument();
+            expect(screen.getByText('Distance: 250km')).toBeInTheDocument();
         });
     });
 

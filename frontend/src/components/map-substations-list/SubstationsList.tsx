@@ -48,7 +48,7 @@ const SubstationsList: React.FC<SubstationsListProps> = ({ items = [], onConfirm
                             <ListItemButton selected={selectedIndex === index} onClick={() => handleItemClick(index)} sx={{ py: 0.5, px: 1 }}>
                                 <ListItemText
                                     primary={item.name}
-                                    secondary={`distance: ${item.distanceFromTurbine}`}
+                                    secondary={`Distance: ${item.distanceFromTurbine}km`}
                                     sx={{
                                         my: 0,
                                         ml: 0,

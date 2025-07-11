@@ -5,46 +5,46 @@ import SubstationsList, { type Substation } from './SubstationsList';
 describe('SubstationsList', () => {
     it('renders with default items', () => {
         const manyItems: Substation[] = [
-            { id: 1, name: 'Item 1', distanceFromTurbine: '100km', coordinates: [1, 2] },
-            { id: 1, name: 'Item 2', distanceFromTurbine: '200km', coordinates: [1, 2] },
-            { id: 1, name: 'Item 3', distanceFromTurbine: '300km', coordinates: [1, 2] },
-            { id: 1, name: 'Item 4', distanceFromTurbine: '400km', coordinates: [1, 2] },
-            { id: 1, name: 'Item 5', distanceFromTurbine: '500km', coordinates: [1, 2] },
+            { id: 1, name: 'Item 1', distanceFromTurbine: '100', coordinates: [1, 2] },
+            { id: 1, name: 'Item 2', distanceFromTurbine: '200', coordinates: [1, 2] },
+            { id: 1, name: 'Item 3', distanceFromTurbine: '300', coordinates: [1, 2] },
+            { id: 1, name: 'Item 4', distanceFromTurbine: '400', coordinates: [1, 2] },
+            { id: 1, name: 'Item 5', distanceFromTurbine: '500', coordinates: [1, 2] },
         ];
         render(<SubstationsList items={manyItems} />);
 
         expect(screen.getByText('Item 1')).toBeInTheDocument();
         expect(screen.getByText('Item 2')).toBeInTheDocument();
         expect(screen.getByText('Item 3')).toBeInTheDocument();
-        expect(screen.getByText('distance: 100km')).toBeInTheDocument();
-        expect(screen.getByText('distance: 200km')).toBeInTheDocument();
-        expect(screen.getByText('distance: 300km')).toBeInTheDocument();
+        expect(screen.getByText('Distance: 100km')).toBeInTheDocument();
+        expect(screen.getByText('Distance: 200km')).toBeInTheDocument();
+        expect(screen.getByText('Distance: 300km')).toBeInTheDocument();
         expect(screen.getByText('Confirm')).toBeInTheDocument();
     });
 
     it('renders with custom items', () => {
         const customItems: Substation[] = [
-            { id: 1, name: 'Custom 1', distanceFromTurbine: '150km', coordinates: [1, 2] },
-            { id: 1, name: 'Custom 2', distanceFromTurbine: '250km', coordinates: [1, 2] },
-            { id: 1, name: 'Custom 3', distanceFromTurbine: '350km', coordinates: [1, 2] },
+            { id: 1, name: 'Custom 1', distanceFromTurbine: '150', coordinates: [1, 2] },
+            { id: 1, name: 'Custom 2', distanceFromTurbine: '250', coordinates: [1, 2] },
+            { id: 1, name: 'Custom 3', distanceFromTurbine: '350', coordinates: [1, 2] },
         ];
         render(<SubstationsList items={customItems} />);
 
         expect(screen.getByText('Custom 1')).toBeInTheDocument();
         expect(screen.getByText('Custom 2')).toBeInTheDocument();
         expect(screen.getByText('Custom 3')).toBeInTheDocument();
-        expect(screen.getByText('distance: 150km')).toBeInTheDocument();
-        expect(screen.getByText('distance: 250km')).toBeInTheDocument();
-        expect(screen.getByText('distance: 350km')).toBeInTheDocument();
+        expect(screen.getByText('Distance: 150km')).toBeInTheDocument();
+        expect(screen.getByText('Distance: 250km')).toBeInTheDocument();
+        expect(screen.getByText('Distance: 350km')).toBeInTheDocument();
     });
 
     it('renders all items provided', () => {
         const manyItems: Substation[] = [
-            { id: 1, name: 'Item 1', distanceFromTurbine: '100km', coordinates: [1, 2] },
-            { id: 1, name: 'Item 2', distanceFromTurbine: '200km', coordinates: [1, 2] },
-            { id: 1, name: 'Item 3', distanceFromTurbine: '300km', coordinates: [1, 2] },
-            { id: 1, name: 'Item 4', distanceFromTurbine: '400km', coordinates: [1, 2] },
-            { id: 1, name: 'Item 5', distanceFromTurbine: '500km', coordinates: [1, 2] },
+            { id: 1, name: 'Item 1', distanceFromTurbine: '100', coordinates: [1, 2] },
+            { id: 1, name: 'Item 2', distanceFromTurbine: '200', coordinates: [1, 2] },
+            { id: 1, name: 'Item 3', distanceFromTurbine: '300', coordinates: [1, 2] },
+            { id: 1, name: 'Item 4', distanceFromTurbine: '400', coordinates: [1, 2] },
+            { id: 1, name: 'Item 5', distanceFromTurbine: '500', coordinates: [1, 2] },
         ];
         render(<SubstationsList items={manyItems} />);
 
@@ -53,20 +53,20 @@ describe('SubstationsList', () => {
         expect(screen.getByText('Item 3')).toBeInTheDocument();
         expect(screen.getByText('Item 4')).toBeInTheDocument();
         expect(screen.getByText('Item 5')).toBeInTheDocument();
-        expect(screen.getByText('distance: 100km')).toBeInTheDocument();
-        expect(screen.getByText('distance: 200km')).toBeInTheDocument();
-        expect(screen.getByText('distance: 300km')).toBeInTheDocument();
-        expect(screen.getByText('distance: 400km')).toBeInTheDocument();
-        expect(screen.getByText('distance: 500km')).toBeInTheDocument();
+        expect(screen.getByText('Distance: 100km')).toBeInTheDocument();
+        expect(screen.getByText('Distance: 200km')).toBeInTheDocument();
+        expect(screen.getByText('Distance: 300km')).toBeInTheDocument();
+        expect(screen.getByText('Distance: 400km')).toBeInTheDocument();
+        expect(screen.getByText('Distance: 500km')).toBeInTheDocument();
     });
 
     it('disables confirm button until an item is selected', () => {
         const manyItems: Substation[] = [
-            { id: 1, name: 'Item 1', distanceFromTurbine: '100km', coordinates: [1, 2] },
-            { id: 1, name: 'Item 2', distanceFromTurbine: '200km', coordinates: [1, 2] },
-            { id: 1, name: 'Item 3', distanceFromTurbine: '300km', coordinates: [1, 2] },
-            { id: 1, name: 'Item 4', distanceFromTurbine: '400km', coordinates: [1, 2] },
-            { id: 1, name: 'Item 5', distanceFromTurbine: '500km', coordinates: [1, 2] },
+            { id: 1, name: 'Item 1', distanceFromTurbine: '100', coordinates: [1, 2] },
+            { id: 1, name: 'Item 2', distanceFromTurbine: '200', coordinates: [1, 2] },
+            { id: 1, name: 'Item 3', distanceFromTurbine: '300', coordinates: [1, 2] },
+            { id: 1, name: 'Item 4', distanceFromTurbine: '400', coordinates: [1, 2] },
+            { id: 1, name: 'Item 5', distanceFromTurbine: '500', coordinates: [1, 2] },
         ];
         render(<SubstationsList items={manyItems} />);
 
@@ -79,11 +79,11 @@ describe('SubstationsList', () => {
 
     it('calls onConfirm with the selected item when confirm button is clicked', () => {
         const manyItems: Substation[] = [
-            { id: 1, name: 'Item 1', distanceFromTurbine: '100km', coordinates: [1, 2] },
-            { id: 1, name: 'Item 2', distanceFromTurbine: '200km', coordinates: [1, 2] },
-            { id: 1, name: 'Item 3', distanceFromTurbine: '300km', coordinates: [1, 2] },
-            { id: 1, name: 'Item 4', distanceFromTurbine: '400km', coordinates: [1, 2] },
-            { id: 1, name: 'Item 5', distanceFromTurbine: '500km', coordinates: [1, 2] },
+            { id: 1, name: 'Item 1', distanceFromTurbine: '100', coordinates: [1, 2] },
+            { id: 1, name: 'Item 2', distanceFromTurbine: '200', coordinates: [1, 2] },
+            { id: 1, name: 'Item 3', distanceFromTurbine: '300', coordinates: [1, 2] },
+            { id: 1, name: 'Item 4', distanceFromTurbine: '400', coordinates: [1, 2] },
+            { id: 1, name: 'Item 5', distanceFromTurbine: '500', coordinates: [1, 2] },
         ];
         const mockOnConfirm = vi.fn();
         render(<SubstationsList items={manyItems} onConfirm={mockOnConfirm} />);
@@ -95,7 +95,7 @@ describe('SubstationsList', () => {
         fireEvent.click(screen.getByText('Confirm'));
 
         expect(mockOnConfirm).toHaveBeenCalledTimes(1);
-        expect(mockOnConfirm).toHaveBeenCalledWith({ id: 1, name: 'Item 1', distanceFromTurbine: '100km', coordinates: [1, 2] });
+        expect(mockOnConfirm).toHaveBeenCalledWith({ id: 1, name: 'Item 1', distanceFromTurbine: '100', coordinates: [1, 2] });
     });
 
     it('does not call onConfirm when confirm button is clicked without selection', () => {
