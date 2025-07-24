@@ -1,0 +1,20 @@
+FROM node:23-alpine
+
+# Create app directory
+WORKDIR /home/node
+
+# Copy package.json and install dependencies
+COPY --chown=root:root ./api/package*.json ./
+RUN npm install --omit=dev
+
+# Copy built source code
+COPY --chown=root:root --chmod=755 ./api/dist ./dist
+
+# Switch to non-root user
+USER node
+
+# Expose and run
+EXPOSE 3000
+ENV HOST=0.0.0.0
+
+CMD [ "node", "--enable-source-maps", "dist/src/server.js" ]

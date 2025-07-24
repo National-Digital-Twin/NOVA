@@ -8,3 +8,5 @@ const ResizeObserverMock = vi.fn(() => ({
 }));
 
 vi.stubGlobal('ResizeObserver', ResizeObserverMock);
+
+global.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
