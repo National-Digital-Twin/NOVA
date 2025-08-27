@@ -2,15 +2,14 @@
 
 **Repository:** `NOVA`  
 **Description:** `Guidelines for issue reporting, documentation suggestions, and NDTP’s controlled contribution model.`  
-**SPDX-License-Identifier:** `OGL-UK-3.0`  
 
 Thank you for your interest in this repository.  
 
 The National Digital Twin Programme (NDTP) develops and maintains this repository in collaboration with suppliers and partner organisations, including other parts of government and their suppliers.  
 
-NDTP follows an **open-source governance model** where all code is **publicly available** under open-source licences, and collaboration is invited from **approved partners**. Contributions from the general public are not currently accepted, but **feedback, issue reporting, and documentation suggestions are encouraged**.  
+NDTP follows a **Cathedral open-source governance model** where code may be made **publicly available** under open-source licences, and collaboration is invited from **approved partners**. Contributions from the general public are not currently accepted, but **feedback, issue reporting, and documentation suggestions are encouraged**.  
 
-If you want to see which suppliers and organisations have contributed to this repository in the past, refer to [ACKNOWLEDGEMENTS.md](./ACKNOWLEDGEMENTS.md) and the GitHub contributor insights page at [Contributors](https://github.com/National-Digital-Twin/archetypes/graphs/contributors).  
+If you want to see which suppliers and organisations have contributed to this repository in the past, refer to [ACKNOWLEDGEMENTS.md](./ACKNOWLEDGEMENTS.md) and the GitHub contributor insights page at [Contributors](../../graphs/contributors).
 
 ---
 
@@ -34,7 +33,7 @@ For details on repository maintainers and how to contact them, refer to [MAINTAI
 
 If you encounter a bug, error, or inconsistency, please follow these steps:  
 
-1. Check for an existing issue under [Issues](https://github.com/National-Digital-Twin/archetypes/issues).  
+1. Check for an existing issue under [Issues](../../issues).  
 2. Open a new issue if no one has reported it yet. Use one of the provided issue templates.  
 3. Provide a clear, detailed description of the issue, including steps to reproduce it if applicable.  
 4. Label the issue appropriately (bug, documentation, enhancement, etc.).  
@@ -57,11 +56,10 @@ We prioritise documentation updates based on user impact and alignment with prog
 
 ## NDTP's Approach to Open-Source Development  
 
-- **All NDTP code is publicly available under open-source licences.**  
 - **Development is led by approved suppliers and partners** who have been engaged through a formal process.  
 - **We welcome feedback and ideas**, but implementation is subject to programme priorities.  
 
-To see what we’re working on, check out our [Project Roadmap](https://github.com/National-Digital-Twin/archetypes/projects). If no roadmap is currently available, please note that it is being actively developed and will be published in due course.  
+To see what we’re working on, check out our [Project Roadmap](../../projects). If no roadmap is currently available, please note that it is being actively developed and will be published in due course.  
 
 ---
 
@@ -84,17 +82,15 @@ For more details, refer to [GitFlow Workflow](https://www.atlassian.com/git/tuto
 
 To maintain high-quality contributions, NDTP enforces the following **minimum pull request (PR) requirements** for approved contributors:  
 
-- **All PRs must be reviewed by at least one maintainer** before merging.  
-- **PRs should reference a corresponding issue** where applicable.  
-- **Code changes must include relevant tests** to ensure stability.  
-- **Commit messages should follow best practices**, including referencing issue numbers when relevant.  
-- **Documentation updates should accompany PRs that impact functionality.**  
-- **PRs should use "squash and merge" as the preferred merge strategy**, ensuring a clean history.  
-- **Feature and bugfix branches should be deleted after merge** to keep the repository tidy.  
-- **Force pushing to the `main` branch is strictly prohibited** to protect repository integrity.  
-- **CI builds must pass before merging** to enforce basic validation checks.  
-
-For further details, see [CONTRIBUTING.md](./CONTRIBUTING.md).   
+- **All PRs must be reviewed by at least one maintainer** before merging.
+- **PRs should reference a corresponding issue** where applicable.
+- **Code changes must include relevant tests** to ensure stability.
+- **Commit messages should follow best practices**, including referencing issue numbers when relevant.
+- **Documentation updates should accompany PRs that impact functionality.**
+- **PRs should use "squash and merge" as the preferred merge strategy**, ensuring a clean history.
+- **Feature and bugfix branches should be deleted after merge** to keep the repository tidy.
+- **Force pushing to the `main` branch is strictly prohibited** to protect repository integrity.
+- **CI builds must pass before merging** to enforce basic validation checks.
 
 ---
 
@@ -117,8 +113,11 @@ NDTP repository maintainers review reported issues, evaluate documentation sugge
 
 ---
 
-Maintained by the National Digital Twin Programme (NDTP).  
+**Maintained by the National Digital Twin Programme (NDTP).**
 
 © Crown Copyright 2025. This work has been developed by the National Digital Twin Programme and is legally attributed to the Department for Business and Trade (UK) as the governing entity.  
-Licensed under the Open Government Licence v3.0.  
-For full licensing terms, see [OGL_LICENCE.md](./OGL_LICENCE.md)
+
+Licensed under the NDTP InnerSource Licence – Version 1.0.
+
+For full licensing terms, see [LICENSE.md](LICENSE.md).
+

@@ -1,184 +1,166 @@
-# README  
+# NOVA
 
-**Repository:** `NOVA`  
-**Description:** `[This repository has been put together to as a template repository, to support new repository creation]`  
-**SPDX-License-Identifier:** `Apache-2.0 AND OGL-UK-3.0 `  
+**Repository:** `NOVA`
+**Description:** Monorepo for the Nova application containing a React/Vite frontend and a TypeScript/Express API service.
+**Repository Status:** `Private – NDTP InnerSource`
 
-## Overview  
+---
 
-Trigger test.
+## Overview
 
-While initially this repositories focus has been on creating a set of base template documentation files, the intent is to continue expanding this to include pipeline checks, that could help ensure documentation follows basic rules and checks through standard continuous integration (CI) validation examples in the future.   
+This repository is part of the National Digital Twin Programme (NDTP). It provides:
+- A geospatial web frontend (React + Vite) for interactive 2D/3D map visualisation and analysis.
+- A REST API (Express) for geospatial data processing, asset/layer access, and location analysis, with Swagger docs.
 
-<!--
+> This repository is private and governed by the NDTP InnerSource Licence – Version 1.0.
+> It is intended solely for collaboration among NDTP teams and authorised suppliers.
+> It is not open source and must not be disclosed, redistributed, or published externally.
 
-GUIDANCE: IN PLACE OF THE ABOVE, PROVIDE THE OVERVIEW DETAILS THAT ARE RELEVANT TO THE REPOSITORY
+---
 
-EXAMPLE:
+## Prerequisites
+- Node.js 18+ (LTS recommended) and npm 9+
+- Git access to the NDTP internal Git service hosting this repo
+- Optional: Docker 24+ (for container builds)
+- Optional: Kubernetes tooling (kubectl ≥1.26, Kustomize/Helm as per your environment)
 
-This repository has been put together to support with new repository creation. When you create a new repository you can use this template, as a base to ensure you include all the standard documentation, folder structure and a few base build pipelines. 
+System requirements depend on dataset sizes; 8 GB RAM is recommended for local development.
 
-While initially this repositories focus has been on creating a set of base template documentation files, the intent is to continue expanding this to include pipeline checks, that could help ensure documentation follows basic rules and checks through standard continuous integration (CI) validation examples in the future.  
- 
- -->
+## Quick Start
 
-## Prerequisites  
+### 1) Clone and install
+```sh
+# Clone using your internal Git URL
+git clone https://github.com/National-Digital-Twin/NOVA.git
+cd NOVA
 
-As this is just a template example repository the only prerequisites are to have a github account.
-
-<!--
-
-GUIDANCE: IN PLACE OF THE ABOVE, PROVIDE THE PREREQUISITES THAT ARE RELEVANT TO THE REPOSITORY
-
-EXAMPLE:
-
-Before using this repository, ensure you have the following dependencies installed:  
-
-- **Required Tooling:** [List required CLI tools, SDKs, or dependencies]  
-- **Pipeline Requirements:** [Describe CI/CD pipeline compatibility]  
-- **Supported Kubernetes Versions:** [List supported Kubernetes versions, if applicable]  
-- **System Requirements:** [Minimum hardware/software requirements]  
- 
- -->
-
-## Quick Start  
-
-> [!IMPORTANT]  
-> Before using this repository, please keep in mind, these are just example files and everything has been outlined based on setting up a "new repository" and you are still expected to review any official guidance alongside using this content. If you are using these as a reference to help update an "existing repository" that may have been forked, you should also ensure original contributions are properly acknowledged, while also reflecting NDTP’s role as the maintainer and contributor of the fork as outlined by the official guidance. 
-
-### 1. Create new Repository from Template
-
-Create a new repository from template using the `archetypes` as the template repository
-
-### 3. Update Repository Name
-
-All references throughout the files, that refer to the repository name `archetypes` should be replaced with the new target repository name
-
-### 3. Update/Remove all GUIDANCE/EXAMPLE sections
-
-Throughout all the `.md` files are some `GUIDANCE` blocks sometimes also including `EXAMPLE` sections similar that below. 
-
-```md
-<!-- 
-GUIDANCE: 
- -->
-```
-These blocks don't appear on previews, the are just intended to help support updating the markdown file content when you first create a new repository and should be fully removed after content has been updated. 
-
-### 4. Pull Requests
-
-Included in this repository is an example [PULL_REQUEST_TEMPLATE.md](./.github/PULL_REQUEST_TEMPLATE.md), which can be used to help prompt specific content to include in pull requests by contributors. 
-
-There are also two basic example rulesets [pr_ruleset_example_default_main.json](./.github/codepolicyexamples/pr_ruleset_example_default_main.json) and [pr_ruleset_example_develop.json](./.github/codepolicyexamples/pr_ruleset_example_default_main.json) that can be used to configure a minimal basic policy for you pull requests. The folder containing these files should be removed on any repositories as these are just for reference examples only. 
-
-<!--
-
-GUIDANCE: IN PLACE OF THE ABOVE, PROVIDE QUICK START STEPS THAT ARE RELEVANT TO THE REPOSITORY
-
-EXAMPLE:
-
-Follow these steps to get started quickly with this repository. For detailed installation, configuration, and deployment, refer to the relevant MD files.  
-
-### 1. Download and Build  
-```sh  
-git clone https://github.com/NOVA.git  
-cd NOVA  
+# Install workspace dependencies (frontend + api)
+npm install
 ```
 
-### 2. Run Build Version  
-```sh  
-[build-command] --version  
+### 2) Configure environment
+- Frontend requires a MapTiler token:
+  - Create frontend/.env.local with:
+    - `VITE_MAPTILER_API_KEY=<your_maptiler_access_token>`
+- Backend optional variables (api/src/config/env.ts):
+  - `PORT` (default: 3000)
+  - `IDENTITY_API_URL` (default: http://localhost:3001)
+  - `LANDING_PAGE_URL` (default: http://localhost:3002)
+
+### 3) Run in development
+```sh
+# Runs API (dev) and Frontend (dev) concurrently
+npm run start
+```
+Access:
+- Frontend: http://localhost:5173
+- API base: http://localhost:3000/api
+- Swagger UI: http://localhost:3000/api/docs
+
+Notes:
+- CORS is preconfigured to allow the frontend origin http://localhost:5173.
+
+### 4) Build for production
+```sh
+npm run build
+```
+This builds both workspaces (frontend and api).
+
+## Features
+- Frontend
+  - Full-screen 2D/3D map (MapLibre GL), layers, asset visualisation, searches, analysis tools
+  - React 19 + Vite 6 toolchain, testing with Vitest and Testing Library
+- API
+  - Express 5 + TypeScript, Swagger OpenAPI 3 docs at /api/docs
+  - Endpoints for health, auth, UI data (layers, assets), GeoJSON processing, and location/asset analysis
+  - Configurable via environment variables; CORS enabled for local dev
+
+## API Documentation
+When the API is running, Swagger UI is available at:
+- http://localhost:3000/api/docs
+
+Illustrative routes (mounted under /api):
+- GET /health – service health
+- GET /auth/user – current user details
+- POST /auth/logout – logout
+- GET /ui/search – location search
+- GET /ui/layers – available layers
+- GET /ui/assets – available assets
+- GET /ui/substation-geojson, GET /ui/power-line-geojson – sample GeoJSON
+- POST /ui/layer/:layerId – process layer GeoJSON
+- POST /ui/location/analyse, POST /ui/asset/analyse – analysis endpoints
+
+## Testing
+- Backend (API):
+  ```sh
+  cd api
+  npm test          # run Jest tests
+  npm run test:coverage
+  ```
+- Frontend:
+  ```sh
+  cd frontend
+  npm test          # run Vitest tests
+  npm run test:coverage
+  ```
+
+## Docker
+Pre-build the applications, then build the images:
+```sh
+# Build workspaces
+npm --workspace api run build
+npm --workspace frontend run build
+
+# Build images
+docker build -f Dockerfile.backend -t nova-backend .
+docker build -f Dockerfile.frontend -t nova-frontend .
+```
+Run containers locally:
+```sh
+# API (listens on 3000 in the container)
+docker run -p 3000:3000 --rm nova-backend
+
+# Frontend (served by nginx on 8080)
+docker run -p 8080:8080 --rm nova-frontend
 ```
 
-### 3. Full Installation  
-Refer to [INSTALLATION.md](./INSTALLATION.md) for detailed installation steps, including required dependencies 
-and setup configurations.  
+## Kubernetes (manifests provided)
+Kustomize bases are provided under deployment/k8s for backend and frontend. Update image references (placeholders like `nova-*-image:template`) via your pipeline or overlays.
+- Backend deployment exposes containerPort 80 (map from service/ingress to your backend image’s port as applicable).
+- Frontend deployment exposes containerPort 8080.
 
+## Public Funding Acknowledgment
+This repository has been developed with public funding as part of the National Digital Twin Programme (NDTP), a UK Government initiative. NDTP, alongside its partners, has invested in this work to advance open, secure, and reusable digital twin technologies for any organisation, whether from the public or private sector, irrespective of size.
 
-### 4. Uninstallation  
-For steps to remove this repository and its dependencies, see [UNINSTALL.md](./UNINSTALL.md).  
+## Licensing
+This repository, including all source code, documentation, configuration files, and related materials, is licensed under the:
 
- -->
+**NDTP InnerSource Licence – Version 1.0**
+See [LICENSE.md](LICENSE.md) for the full licence text.
 
- <!--
+> ⚠️ This repository is not open source.
+> Redistribution, disclosure, or publication of any part of this repository is prohibited without the explicit, written approval of the NDTP Management Team.
 
-GUIDANCE: UPDATE THE FOLLOWING SECTIONS WITH WITH REPOSITORY SPECIFIC DETAIL 
+All intellectual property rights are held by the Department for Business and Trade (UK) as the governing entity for the National Digital Twin Programme (NDTP).
 
-Installation
-Add setup instructions, dependencies, or package managers.
+## Security and Responsible Disclosure
+We take security seriously. If you believe you have found a security vulnerability in this repository, please follow our responsible disclosure process outlined in SECURITY.md.
 
-Configuration 
-List any required settings, such as environment variables.
+## Software Bill of Materials (SBOM)
+This project provides a Software Bill of Materials (SBOM) to help users and integrators understand its dependencies.
 
-Build
-Include instructions to compile/build the project.
+### Current SBOM
+Download the latest SBOM for this codebase from your platform’s dependency graph (e.g., GitHub: ../../dependency-graph/sbom).
 
-Usage
-Explain how the repository should be used, including examples.
+## Contributing
+We welcome contributions that align with the Programme’s objectives. Please read our CONTRIBUTING.md guidelines before submitting pull requests.
 
-Example
-Provide a sample command, API request, or function call.
+## Acknowledgements
+This repository has benefited from collaboration with various organisations. For a list of acknowledgments, see ACKNOWLEDGEMENTS.md.
 
-Modules
-List key components included in the repository
+## Support and Contact
+For questions or support, check our Issues or contact the NDTP team by emailing ndtp@businessandtrade.gov.uk.
 
-Run
-Indicate whether the repository contains executable code, debugging tools, or is a
-dependency for other projects
-
--->
-
-## Features  
-
-- **Base Document Templates** 
-- **Pull Request Template Example** 
-- **Dependabot Example** 
-- **Default Repository Structure Example** 
-
-<!--
-
-GUIDANCE: IN PLACE OF THE ABOVE, PROVIDE FEATURE DETAILS THAT ARE RELEVANT TO THE REPOSITORY
-
-EXAMPLE:
-
-Include a brief list of key features provided by this repository. These should highlight what makes the project valuable to users and contributors. Examples of features might include:  
-- **Core functionality** (e.g., "Supports secure and federated data-sharing")  
-- **Key integrations** (e.g., "Provides REST and GraphQL API interfaces")  
-- **Scalability & performance** (e.g., "Optimized for high-throughput environments")  
-- **Modularity** (e.g., "Designed with a plugin-based architecture for extensibility")  
-
- -->
-
-<!--
-
-GUIDANCE: IF THIS REPOSITORY USES AN API, INCLUDE THE SECTION BELOW WITH THE DETAILS RELEVANT TO THE REPOSITORY
- 
-## API Documentation  
-[If this repository exposes an API, link to API documentation or describe the endpoints.]  
-
- -->
-
-## Public Funding Acknowledgment  
-This repository has been developed with public funding as part of the National Digital Twin Programme (NDTP), a UK Government initiative. NDTP, alongside its partners, has invested in this work to advance open, secure, and reusable digital twin technologies for any organisation, whether from the public or private sector, irrespective of size.  
-
-## License  
-This repository contains both source code and documentation, which are covered by different licenses:  
-- **Code:** Originally developed by [Original Developer, if applicable], now maintained by National Digital Twin Programme. Licensed under the [Apache License 2.0](./LICENSE.md).  
-- **Documentation:** Licensed under the [Open Government Licence v3.0](./OGL_LICENCE.md).  
-See `LICENSE.md`, `OGL_LICENCE.md`, and `NOTICE.md` for details.  
-
-## Security and Responsible Disclosure  
-We take security seriously. If you believe you have found a security vulnerability in this repository, please follow our responsible disclosure process outlined in [`SECURITY.md`](./SECURITY.md).  
-
-## Contributing  
-We welcome contributions that align with the Programme’s objectives. Please read our [`CONTRIBUTING.md`](./CONTRIBUTING.md) guidelines before submitting pull requests.  
-
-## Acknowledgements  
-This repository has benefited from collaboration with various organisations. For a list of acknowledgments, see [`ACKNOWLEDGEMENTS.md`](./ACKNOWLEDGEMENTS.md).  
-
-## Support and Contact  
-For questions or support, check our Issues or contact the NDTP team on ndtp@businessandtrade.gov.uk.
-
-**Maintained by the National Digital Twin Programme (NDTP).**  
+Maintained by the National Digital Twin Programme (NDTP).
 
 © Crown Copyright 2025. This work has been developed by the National Digital Twin Programme and is legally attributed to the Department for Business and Trade (UK) as the governing entity.
