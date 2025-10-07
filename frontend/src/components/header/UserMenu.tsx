@@ -1,5 +1,6 @@
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { Divider, IconButton, Menu, MenuItem, Typography, styled } from '@mui/material';
 import { useEffect, useState } from 'react';
@@ -32,11 +33,20 @@ const StyledLogoutIcon = styled(LogoutIcon)(({ theme }) => ({
     marginRight: theme.spacing(1),
 }));
 
-const SignOutTypography = styled(Typography)(({ theme }) => ({
+const StyledPrivacyIcon = styled(LockOutlinedIcon)(({ theme }) => ({
+    color: theme.palette.primary.main,
+    marginRight: theme.spacing(1),
+}));
+
+const MenuTypography = styled(Typography)(({ theme }) => ({
     color: theme.palette.primary.main,
 }));
 
-const UserMenu = () => {
+type UserMenuProps = {
+    onOpenPrivacy?: () => void;
+};
+
+const UserMenu = ({ onOpenPrivacy }: Readonly<UserMenuProps>) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [username, setUsername] = useState<string>('Anonymous');
     const open = Boolean(anchorEl);
@@ -69,6 +79,11 @@ const UserMenu = () => {
         }
     };
 
+    const handlePrivacyNotice = () => {
+        onOpenPrivacy?.();
+        handleClose();
+    };
+
     return (
         <>
             <UserMenuButton aria-label="account of current user" aria-controls="menu-appbar" aria-haspopup="true" onClick={handleClick} isActive={open}>
@@ -85,9 +100,13 @@ const UserMenu = () => {
             >
                 <UsernameTypography>{username}</UsernameTypography>
                 <StyledDivider />
+                <MenuItem onClick={handlePrivacyNotice}>
+                    <StyledPrivacyIcon />
+                    <MenuTypography>Privacy notice</MenuTypography>
+                </MenuItem>
                 <MenuItem onClick={handleSignOut}>
                     <StyledLogoutIcon />
-                    <SignOutTypography>Sign out</SignOutTypography>
+                    <MenuTypography>Sign out</MenuTypography>
                 </MenuItem>
             </StyledMenu>
         </>
