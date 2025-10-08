@@ -1,4 +1,3 @@
-// components/privacy/PrivacyNotice.tsx
 import { Box, IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
@@ -31,7 +30,7 @@ export default function PrivacyNotice({ onClose }: Readonly<Props>) {
                     boxSizing: 'border-box',
                 }}
             >
-                <IconButton aria-label="Back" onClick={onClose} sx={{ mb: 0.5 }}>
+                <IconButton aria-label="Back" onClick={onClose} sx={{ mb: 0.5, color: 'primary.main' }}>
                     <ArrowBackIcon />
                 </IconButton>
 
