@@ -4,6 +4,7 @@ import Header from './components/header/Header';
 import MapComponent from './components/map/MapComponent';
 import PrivacyNotice from './components/privacy-notice/PrivacyNotice';
 import theme from './theme';
+import './App.scss';
 
 const App: React.FC = () => {
     const [showPrivacy, setShowPrivacy] = useState(false);
