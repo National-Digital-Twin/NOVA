@@ -13,11 +13,15 @@ const Toolbar = styled(AppBar)(({ theme }) => ({
     paddingRight: theme.spacing(2),
 }));
 
-const Header: React.FC = () => {
+type HeaderProps = {
+    onOpenPrivacy: () => void;
+};
+
+const Header: React.FC<HeaderProps> = ({ onOpenPrivacy }) => {
     return (
         <Toolbar position="relative">
             <Box component="img" src={novaLogo} alt="NOVA Logo" sx={{ height: '1.5rem' }} />
-            <UserMenu />
+            <UserMenu onOpenPrivacy={onOpenPrivacy} />
         </Toolbar>
     );
 };

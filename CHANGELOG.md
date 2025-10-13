@@ -2,10 +2,10 @@
 
 **Repository:** `NOVA`  
 **Description:** `Tracks all notable changes, version history, and roadmap toward 1.0.0 following Semantic Versioning.`  
-**SPDX-License-Identifier:** `OGL-UK-3.0`  
 
-All notable changes to this repository will be documented in this file. 
-This project follows **Semantic Versioning (SemVer)** ([semver.org](https://semver.org/)), using the format: 
+All notable changes to this repository will be documented in this file.
+
+This project follows **Semantic Versioning (SemVer)** ([semver.org](https://semver.org/)), using the format:
 
 
 `[MAJOR].[MINOR].[PATCH]` 
@@ -17,52 +17,46 @@ This project follows **Semantic Versioning (SemVer)** ([semver.org](https://semv
 
 ---
 
-## [Unreleased] 
+## [0.90.3] - 2025-10-08
 
-### Added 
-- Placeholder for upcoming features and enhancements. 
+### Added
+- Privacy notice
 
-### Fixed 
-- Placeholder for bug fixes and security updates. 
 
-### Changed 
-- Placeholder for changes to existing functionality. 
+## [0.90.2] - 2025-07-24
 
----
+### Added
+- Power grid connectivity feature enabling substation selection and connectivity distance display (API + UI) (DPAV-1158).
+- Base 3D mapping support and 3D asset view; asset panel; popups and properties panel.
+- Heatmap functionality sourced from API data layers; limits and user parameter support for data layers (DPAV-1000, DPAV-994).
+- Search bar (top-left) with initial behavior and refactored data-provider logic (DPAV-1129, DPAV-998).
+- API services/endpoints for layers and search; associated unit tests and coverage improvements.
+- UI enhancements: asset details hover popover and asset suitability hover icon (DPAV-1002).
+- Data science module with initial ML algorithm for optimal location and docs/templates.
 
-## [0.90.0] – YYYY-MM-DD 
+### Fixed
+- Multiple UI defect batches including asset marker hover/expansion, panel wording, button display and heights, theme/styling cleanup, and exit view tweaks.
+- Functional fixes: heatmap algorithm adjustments based on feedback, polygon delete button behavior, retain 3D asset bearing on placement, reapply heatmap after style change, confirmation popup placement, dimmed mask persistence, prevent wind turbine stats re-rolling, prevent asset marker loss on canceled edit.
+- Visual fixes: NOVA logo, asset marker styling.
+- Test stability: numerous frontend specs and non-running tests corrected.
 
-### Initial Public Release (Pre-Stable) 
-
-This is the first public release of this repository under NDTP's open-source governance model. 
-Since this release is **pre-1.0.0**, changes may still occur that are **not fully backward-compatible**. 
-
-#### Initial Features 
-- Key functionality for [feature/module name]. 
-- Implementation of [API/component name]. 
-- Documentation and onboarding guidance. 
-
-#### Known Limitations 
-- Some components are subject to change before `1.0.0`. 
-- APIs may evolve based on partner feedback and internal testing. 
-
----
-
-## [0.90.1] – YYYY-MM-DD 
-
-### Fixed 
-- Security patch addressing [issue]. 
-- Minor bug fix in [module]. 
+### Changed
+- UI cleanup and theme updates across components.
+- CI/CD and OSPO workflows synchronized; added SBOM generation and changelog pointer to releases; removed obsolete OSS file checker workflow.
+- Kubernetes and Docker deployment adjustments (manifests, config maps/secrets, Dockerfiles, path tweaks) including backend API deployment fixes; minor docs updates (README spacing).
 
 ---
 
-## [0.91.0] – YYYY-MM-DD 
+## [0.90.0] - 2025-06-10
 
-### Added 
-- New feature: [Feature name]. 
+### Added
+- Initial pre-stable release of NOVA with baseline frontend application and API skeleton, including production deployment scripts and release pipelines.
 
-### Changed 
-- Adjusted API contracts for [component]. 
+### Fixed
+-  NA
+
+### Changed
+- 
 
 ---
 
@@ -99,6 +93,9 @@ Once `1.0.0` is reached, future versions will follow **strict SemVer rules**.
 
 **Maintained by the National Digital Twin Programme (NDTP).** 
 
-© Crown Copyright 2025. This work has been developed by the National Digital Twin Programme and is legally attributed to the Department for Business and Trade (UK) as the governing entity. 
-Licensed under the Open Government Licence v3.0. 
-For full licensing terms, see [OGL_LICENCE.md](OGL_LICENCE.md).
+© Crown Copyright 2025. This work has been developed by the National Digital Twin Programme and is legally attributed to the Department for Business and Trade (UK) as the governing entity.
+
+Licensed under the NDTP InnerSource Licence – Version 1.0.
+
+For full licensing terms, see [LICENSE.md](LICENSE.md).
+

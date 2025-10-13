@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Header from './Header';
 
 describe('Header', () => {
+    const onOpenPrivacy = vi.fn();
     const mockFetch = vi.fn();
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
@@ -17,14 +18,14 @@ describe('Header', () => {
             json: () => Promise.resolve({ email: 'test@example.com' }),
         });
 
-        render(<Header />);
+        render(<Header onOpenPrivacy={onOpenPrivacy} />);
         expect(screen.getByAltText('NOVA Logo')).toBeInTheDocument();
     });
 
     it('handles fetch error gracefully', async () => {
         mockFetch.mockRejectedValueOnce(new Error('Network error'));
 
-        render(<Header />);
+        render(<Header onOpenPrivacy={onOpenPrivacy} />);
         expect(screen.getByAltText('NOVA Logo')).toBeInTheDocument();
 
         await waitFor(() => {
@@ -33,12 +34,12 @@ describe('Header', () => {
     });
 
     it('renders the NOVA logo', () => {
-        render(<Header />);
+        render(<Header onOpenPrivacy={onOpenPrivacy} />);
         expect(screen.getByAltText('NOVA Logo')).toBeInTheDocument();
     });
 
     it('renders the UserMenu component', () => {
-        render(<Header />);
+        render(<Header onOpenPrivacy={onOpenPrivacy} />);
         expect(screen.getByLabelText('account of current user')).toBeInTheDocument();
     });
 });
