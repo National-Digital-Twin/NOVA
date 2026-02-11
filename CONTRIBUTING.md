@@ -12,7 +12,7 @@ The National Digital Twin Programme (NDTP) develops and maintains this repositor
 NDTP follows an **open-source governance model** where all code is **publicly available** under open-source licences, and collaboration is invited from **approved 
 partners**. Contributions from the general public are not currently accepted, but **feedback, issue reporting, and documentation suggestions are encouraged**.  
 
-If you want to see which suppliers and organisations have contributed to this repository in the past, refer to [ACKNOWLEDGEMENTS.md](./ACKNOWLEDGEMENTS.md) and the GitHub contributor insights page at [Contributors]((https://github.com/National-Digital-Twin/iris-api/graphs/contributors).
+If you want to see which suppliers and organisations have contributed to this repository in the past, refer to [ACKNOWLEDGEMENTS.md](./ACKNOWLEDGEMENTS.md) and the GitHub contributor insights page at [Contributors](https://github.com/National-Digital-Twin/NOVA/graphs/contributors).
 
 ---
 
@@ -37,7 +37,7 @@ For details on repository maintainers and how to contact them, refer to [MAINTAI
 
 If you encounter a bug, error, or inconsistency, please follow these steps:  
 
-1. Check for an existing issue under [Issues](https://github.com/National-Digital-Twin/iris-api/issues).  
+1. Check for an existing issue under [Issues](https://github.com/National-Digital-Twin/NOVA/issues).  
 2. Open a new issue if no one has reported it yet. Use one of the provided issue templates.  
 3. Provide a clear, detailed description of the issue, including steps to reproduce it if applicable.  
 4. Label the issue appropriately (bug, documentation, enhancement, etc.).  

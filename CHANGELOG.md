@@ -1,19 +1,19 @@
 # Changelog 
 
 **Repository:** `NOVA`  
-**Description:** `Tracks all notable changes, version history, and roadmap toward 1.0.0 following Semantic Versioning.`  
+**Description:** `Tracks all notable changes, version history, and roadmap toward 1.0.0 following Semantic Versioning.`
+**SPDX-License-Identifier:** `OGL-UK-3.0`
 
 All notable changes to this repository will be documented in this file.
 
 This project follows **Semantic Versioning (SemVer)** ([semver.org](https://semver.org/)), using the format:
 
 
-`[MAJOR].[MINOR].[PATCH]` 
-- **MAJOR** (`X.0.0`) – Incompatible API/feature changes that break backward compatibility. 
-- **MINOR** (`0.X.0`) – Backward-compatible new features, enhancements, or functionality changes. 
-- **PATCH** (`0.0.X`) – Backward-compatible bug fixes, security updates, or minor corrections. 
-- **Pre-release versions** – Use suffixes such as `-alpha`, `-beta`, `-rc.1` (e.g., `2.1.0-beta.1`). 
-- **Build metadata** – If needed, use `+build` (e.g., `2.1.0+20250314`). 
+- **MAJOR** (`X.0.0`) – Incompatible API/feature changes that break backward compatibility.
+- **MINOR** (`0.X.0`) – Backward-compatible new features, enhancements, or functionality changes.
+- **PATCH** (`0.0.X`) – Backward-compatible bug fixes, security updates, or minor corrections.
+- **Pre-release versions** – Use suffixes such as `-alpha`, `-beta`, `-rc.1` (e.g., `2.1.0-beta.1`).
+- **Build metadata** – If needed, use `+build` (e.g., `2.1.0+20250314`).
 
 ---
 
@@ -91,11 +91,8 @@ Once `1.0.0` is reached, future versions will follow **strict SemVer rules**.
 
 ---
 
-**Maintained by the National Digital Twin Programme (NDTP).** 
-
-© Crown Copyright 2025. This work has been developed by the National Digital Twin Programme and is legally attributed to the Department for Business and Trade (UK) as the governing entity.
-
-Licensed under the NDTP InnerSource Licence – Version 1.0.
-
-For full licensing terms, see [LICENSE.md](LICENSE.md).
+**Maintained by the National Digital Twin Programme (NDTP).**  
+© Crown Copyright 2025. This work has been developed by the National Digital Twin Programme and is legally attributed to the Department for Business and Trade (UK) as the governing entity.  
+Licensed under the Open Government Licence v3.0.  
+For full licensing terms, see [OGL_LICENSE.md](OGL_LICENSE.md).
 
