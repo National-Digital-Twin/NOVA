@@ -10,8 +10,8 @@ global.fetch = vi.fn();
 
 describe('substationsApi', () => {
     const mockCoordinates = [
-        parseFloat((Math.random() * 360 - 180).toFixed(6)), // longitude
-        parseFloat((Math.random() * 180 - 90).toFixed(6)), // latitude
+        Number.parseFloat((Math.random() * 360 - 180).toFixed(6)), // longitude
+        Number.parseFloat((Math.random() * 180 - 90).toFixed(6)), // latitude
     ];
     const mockLocation = {
         geometry: {

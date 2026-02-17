@@ -16,11 +16,13 @@ let mockStore = {
     polygonStatus: 'none',
 };
 
+const createEmptyFeatureCollection = () => ({ type: 'FeatureCollection', features: [] });
+
 vi.mock('../../stores/useMapStore', () => ({
     useMapStore: vi.fn().mockImplementation((selector) => selector(mockStore)),
 }));
 
-const setUseMapStoreMock = (polygonStatus: string, cachedHeatmap: any = { type: 'FeatureCollection', features: [] }) => {
+const setUseMapStoreMock = (polygonStatus: string, cachedHeatmap: any = createEmptyFeatureCollection()) => {
     mockStore.polygonStatus = polygonStatus;
     mockStore.cachedHeatmap = cachedHeatmap;
 };

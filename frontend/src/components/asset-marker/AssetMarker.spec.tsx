@@ -22,14 +22,15 @@ vi.mock('react-map-gl/maplibre', async () => {
             children: React.ReactNode;
             onDragEnd?: (e: any) => void;
         }) => (
-            <div
+            <button
+                type="button"
                 data-testid="mock-marker"
                 data-lng={longitude}
                 data-lat={latitude}
                 onMouseUp={() => onDragEnd?.({ lngLat: { lng: longitude + 0.01, lat: latitude + 0.01 } })}
             >
                 {children}
-            </div>
+            </button>
         ),
     };
 });

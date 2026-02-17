@@ -17,7 +17,7 @@ export class EnvConfig {
     constructor() {
         // Server configuration
         this.nodeEnv = process.env.NODE_ENV || 'development';
-        this.port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+        this.port = process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000;
         this.identityApiUrl = process.env.IDENTITY_API_URL || 'http://localhost:3001';
         this.landingPageUrl = process.env.LANDING_PAGE_URL || 'http://localhost:3002';
     }

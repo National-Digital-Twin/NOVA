@@ -106,7 +106,7 @@ export default function GridConnectFooterPanel({ selectedSubstation }: GridConne
 
     const getRandomInRange = (range: Range): number => {
         const raw = Math.random() * (range.max - range.min) + range.min;
-        return range.decimals !== undefined ? parseFloat(raw.toFixed(range.decimals)) : raw;
+        return range.decimals !== undefined ? Number.parseFloat(raw.toFixed(range.decimals)) : raw;
     };
 
     const stats = useMemo((): AssetStats => {

@@ -10,9 +10,15 @@ import * as mapStore from '../../stores/useMapStore';
 vi.mock('./AssetMarker', () => ({
     __esModule: true,
     default: ({ longitude, latitude, onDragEnd }: any) => (
-        <div data-testid="mock-marker" data-lng={longitude} data-lat={latitude} onClick={() => onDragEnd(longitude + 1, latitude + 1)}>
+        <button
+            type="button"
+            data-testid="mock-marker"
+            data-lng={longitude}
+            data-lat={latitude}
+            onClick={() => onDragEnd(longitude + 1, latitude + 1)}
+        >
             AssetMarker
-        </div>
+        </button>
     ),
 }));
 

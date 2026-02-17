@@ -223,7 +223,7 @@ const LayerControlPanel = ({ mapRef, drawRef, resetLayers, setResetLayers }: Lay
         if (!currentLayer) return;
         const txt = tempLayerSettings[currentLayer][label];
         const num = Number(txt);
-        const final = isNaN(num) ? '' : String(num);
+        const final = Number.isNaN(num) ? '' : String(num);
         setTempLayerSettings((prev) => ({
             ...prev,
             [currentLayer]: {
