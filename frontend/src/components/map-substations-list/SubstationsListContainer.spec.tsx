@@ -16,10 +16,7 @@ describe('SubstationsListContainer', () => {
     const longitude = 12.34;
     const latitude = 56.78;
 
-    const mockCoordinates = [
-        Number.parseFloat((Math.random() * 360 - 180).toFixed(6)), // longitude
-        Number.parseFloat((Math.random() * 180 - 90).toFixed(6)), // latitude
-    ];
+    const mockCoordinates = [-1.234567, 51.234567];
     const mockItems = [
         { id: 0, name: 'Test Substation 1', distanceFromTurbine: '150', coordinates: mockCoordinates },
         { id: 1, name: 'Test Substation 2', distanceFromTurbine: '250', coordinates: mockCoordinates },

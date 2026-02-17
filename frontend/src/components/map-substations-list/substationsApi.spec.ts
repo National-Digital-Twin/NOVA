@@ -9,10 +9,7 @@ import type { Point } from 'geojson';
 global.fetch = vi.fn();
 
 describe('substationsApi', () => {
-    const mockCoordinates = [
-        Number.parseFloat((Math.random() * 360 - 180).toFixed(6)), // longitude
-        Number.parseFloat((Math.random() * 180 - 90).toFixed(6)), // latitude
-    ];
+    const mockCoordinates = [-1.234567, 51.234567];
     const mockLocation = {
         geometry: {
             type: 'Point',
