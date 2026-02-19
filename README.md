@@ -75,14 +75,16 @@ This builds both workspaces (frontend and api).
   - Full-screen 2D/3D map (MapLibre GL), layers, asset visualisation, searches, analysis tools
   - React 19 + Vite 6 toolchain, testing with Vitest and Testing Library
 - API
-  - Express 5 + TypeScript, Swagger OpenAPI 3 docs at /api/docs
+  - Express 5 + TypeScript, Swagger OpenAPI 3 docs at /api/docs (non-production only)
   - Endpoints for health, auth, UI data (layers, assets), GeoJSON processing, and location/asset analysis
   - Configurable via environment variables; CORS enabled for local dev
 
 ## API Documentation
 
-When the API is running, Swagger UI is available at:
+When the API is running in local/dev mode, Swagger UI is available at:
 - http://localhost:3000/api/docs
+
+In production (`NODE_ENV=production`), the Swagger route is disabled.
 
 Illustrative routes (mounted under /api):
 - GET /health – service health
