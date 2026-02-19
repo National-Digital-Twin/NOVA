@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // © Crown Copyright 2026. This work has been developed by the National Digital Twin Programme and is legally attributed to the Department for Business and Trade (UK) as the governing entity.
 
-import express, { Application, Router, Request, Response, NextFunction } from "express";
+import express, { Application, Router, Request, Response } from "express";
 import cors from "cors";
 import { healthRoutes } from "./routes/health.routes";
 import { uiRoutes } from "./routes/ui.routes";
