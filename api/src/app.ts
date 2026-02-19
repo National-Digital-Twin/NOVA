@@ -3,7 +3,6 @@
 
 import express, { Application, Router, Request, Response, NextFunction } from "express";
 import cors from "cors";
-import { SwaggerConfig } from "./config/swagger";
 import { healthRoutes } from "./routes/health.routes";
 import { uiRoutes } from "./routes/ui.routes";
 import { errorMiddleware } from "./middleware/error.middleware";
@@ -65,6 +64,13 @@ export class App {
      * Initialize Swagger
      */
     private initializeSwagger(): void {
+        if (process.env.NODE_ENV === "production") {
+            return;
+        }
+
+        // Load Swagger tooling only outside production to keep runtime image lean.
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { SwaggerConfig } = require("./config/swagger");
         const swaggerConfig = new SwaggerConfig();
         swaggerConfig.setup(this.app);
     }
