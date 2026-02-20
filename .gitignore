@@ -15,3 +15,8 @@
 node_modules
 dist/
 /api/coverage/
+
+# Secrets
+*.env
+frontend/.env*
+!frontend/.env-example

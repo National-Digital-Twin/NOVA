@@ -6,7 +6,7 @@
 
 ## Overview
 
-NOVA is an early-stage digital twin demonstrator designed to model and optimise the integration of renewable energy generation and storage on the Isle of Wight. It functions as a digital shadow (see Digital Twin definition for more information), enabling stakeholders to simulate, assess, and refine different energy deployment strategies.
+NOVA is an early-stage digital twin demonstrator designed to model and optimise the integration of renewable energy generation and storage. It functions as a digital twin (see Digital Twin definition for more information), enabling stakeholders to simulate, assess, and refine different energy deployment strategies.
 
 This repository is part of the National Digital Twin Programme (NDTP). It provides a geospatial web frontend for interactive 2D/3D map visualisation and analysis. It also provides REST styled endpoints to serve geospatial data processing, asset/layer access, and location analysis.
 
@@ -146,7 +146,7 @@ This repository contains both source code and documentation, which are covered b
 - **Code:** Originally developed by Coefficient Systems and Informed Solutions, now maintained by National Digital Twin Programme. Licensed under the Apache License 2.0.
 - **Documentation:** Licensed under the Open Government Licence v3.0.
 
-See `LICENSE.md`, `OGL_LICENCE.md`, and `NOTICE.md` for details.
+See `LICENSE.md`, `OGL_LICENSE.md`, and `NOTICE.md` for details.
 
 ## Security and Responsible Disclosure
 
