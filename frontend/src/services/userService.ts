@@ -14,7 +14,7 @@ export interface LogoutResponse {
 
 export const userService = {
     async getUserData(): Promise<UserData> {
-        const USER_DATA_URL = import.meta.env.VITE_USER_DATA_URL;
+        const USER_DATA_URL = import.meta.env.VITE_USER_DATA_URL || '/api/auth/user';
 
         try {
             const response = await fetch(USER_DATA_URL);
@@ -33,7 +33,7 @@ export const userService = {
     },
 
     async logout(): Promise<LogoutResponse> {
-        const LOGOUT_URL = import.meta.env.VITE_LOGOUT_URL;
+        const LOGOUT_URL = import.meta.env.VITE_LOGOUT_URL || '/api/auth/logout';
 
         try {
             const response = await fetch(LOGOUT_URL);
