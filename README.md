@@ -10,6 +10,8 @@ NOVA is an early-stage digital twin demonstrator designed to model and optimise 
 
 This repository is part of the National Digital Twin Programme (NDTP). It provides a geospatial web frontend for interactive 2D/3D map visualisation and analysis. It also provides REST styled endpoints to serve geospatial data processing, asset/layer access, and location analysis.
 
+For guidance using NOVA, refer to the **[NOVA User Guide](docs/user-guide/NOVA-Demonstrator-User-Guide.pdf)**.
+
 ## Prerequisites
 
 Before using this repository, ensure you have the following dependencies installed:
