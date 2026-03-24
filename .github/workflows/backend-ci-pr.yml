@@ -33,7 +33,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "23.x"
+          node-version: "24.x"
 
       - name: Install Dependencies
         run: npm ci
@@ -81,6 +81,7 @@ jobs:
           scan-ref: api
           format: "table"
           exit-code: "1"
+          trivyignores: api/.trivyignore
           ignore-unfixed: true
           severity: "CRITICAL,HIGH"
 
@@ -99,7 +100,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "23.x"
+          node-version: "24.x"
 
       - name: Install Dependencies
         run: npm ci
@@ -124,6 +125,7 @@ jobs:
           image-ref: "nova/api:latest"
           format: "table"
           exit-code: "1"
+          trivyignores: api/.trivyignore
           ignore-unfixed: true
           vuln-type: "os,library"
           severity: "CRITICAL,HIGH"
