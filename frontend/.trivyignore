@@ -1,7 +1,4 @@
-CVE-2025-48174
-CVE-2024-25062
-CVE-2024-56171
-CVE-2025-24928
-CVE-2025-27113
-CVE-2025-32414
-CVE-2025-32415
+# Going to accept the following vulnerabilities in the base debian image as we are not immediately vulnerable to these and a fix is eventually going to be pushed up to the main nginx container.
+# TODO: update image when fix is published
+
+CVE-2026-22184 #zlib
