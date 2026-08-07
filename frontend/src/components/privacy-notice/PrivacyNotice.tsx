@@ -48,7 +48,7 @@ export default function PrivacyNotice({ onClose }: Readonly<Props>) {
                         height: 'auto !important',
                         transform: 'translateX(var(--pn-logo-shift))',
                         mb: 1,
-                        ml: 4
+                        ml: 4,
                     }}
                 />
             </Box>
@@ -180,7 +180,7 @@ export default function PrivacyNotice({ onClose }: Readonly<Props>) {
   Tel: 0303 123 1113
 </address>
 
-          `
+          `,
                 }}
             />
         </Box>
