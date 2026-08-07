@@ -180,7 +180,7 @@ export default function PrivacyNotice({ onClose }: Readonly<Props>) {
   Tel: 0303 123 1113
 </address>
 
-          `,
+          `
                 }}
             />
         </Box>
