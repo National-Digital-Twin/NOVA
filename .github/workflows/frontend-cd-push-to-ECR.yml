@@ -90,7 +90,7 @@ jobs:
                   -f ./Dockerfile.frontend .
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
         with:
           role-to-assume: arn:aws:iam::${{ inputs.aws_account_number }}:role/ecr-access-for-github
           aws-region: eu-west-2
