@@ -19,9 +19,8 @@ This project follows **Semantic Versioning (SemVer)** ([semver.org](https://semv
 
 ## [0.90.2] - 2026-08-13
 
-### Bugfix
-
-- Update privacy notice
+### Changes
+- Update privacy notice.
 
 ## [0.90.0] - 2026-02-18
 
