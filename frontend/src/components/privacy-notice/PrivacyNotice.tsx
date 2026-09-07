@@ -39,7 +39,7 @@ export default function PrivacyNotice({ onClose }: Readonly<Props>) {
 
                 <Box
                     component="img"
-                    src="/DBT_logo_black.svg"
+                    src="/bist-logo-black.png"
                     alt="Department for Business & Trade"
                     sx={{
                         display: 'block',
@@ -48,6 +48,7 @@ export default function PrivacyNotice({ onClose }: Readonly<Props>) {
                         height: 'auto !important',
                         transform: 'translateX(var(--pn-logo-shift))',
                         mb: 1,
+                        ml: 4,
                     }}
                 />
             </Box>
@@ -79,25 +80,25 @@ export default function PrivacyNotice({ onClose }: Readonly<Props>) {
                     __html: `
             <h1>Privacy Notice – NOVA</h1>
 
-<p>This privacy notice explains how the Department for Business and Trade (DBT) and the National Digital
+<p>This privacy notice explains how the Department for Business, Innovation, Science and Trade (BIST) and the National Digital
   Twin Programme (NDTP), as a 'data controller', process personal data for the NOVA demonstrator.</p>
-<p>This notice supplements our main privacy notice, which provides further information on how DBT processes
+<p>This notice supplements our main privacy notice, which provides further information on how BIST processes
   personal data and sets out your rights regarding that personal data.</p>
 
-<h2>Personal data DBT will collect as part of the demonstrator</h2>
-<p>DBT will collect the following categories of personal data:</p>
+<h2>Personal data BIST will collect as part of the demonstrator</h2>
+<p>BIST will collect the following categories of personal data:</p>
 <ul>
   <li><strong>Identifying data:</strong> name, username</li>
   <li><strong>Contact details:</strong> email address</li>
   <li><strong>Online identifiers:</strong> IP address, cookies, location data</li>
 </ul>
 
-<h2>Why DBT asks for this information</h2>
-<p>DBT collects this data to facilitate your access to the NOVA prototype and to gain insights into its usage patterns.
+<h2>Why BIST asks for this information</h2>
+<p>BIST collects this data to facilitate your access to the NOVA prototype and to gain insights into its usage patterns.
   The tool refers to a browser-based geospatial modelling platform called NOVA, which explores renewable energy
   integration and system flexibility in regional contexts.</p>
 <p>Your participation and provision of this information greatly assist us in refining and optimising the prototype.
-  DBT places a strong emphasis on safeguarding your data and strictly adheres to data protection regulations.
+  BIST places a strong emphasis on safeguarding your data and strictly adheres to data protection regulations.
   We utilise this information exclusively to enhance your experience with our prototype tool and do not employ it for any other purposes.</p>
 <p>We will use the data only for the specific purposes for which it was collected, such as user authentication,
   providing support and assistance, optimising the prototype, conducting usage analysis, and facilitating effective user communication.</p>
@@ -108,18 +109,18 @@ export default function PrivacyNotice({ onClose }: Readonly<Props>) {
   <li>Personal Data (Article 6(1) UK GDPR): (e) Processing is necessary for a task carried out in the public
     interest or in the exercise of official authority vested in the controller.</li>
 </ul>
-<p>DBT will not collect any Special Category Data or Criminal Conviction Data as part of our data collection process.</p>
+<p>BIST will not collect any Special Category Data or Criminal Conviction Data as part of our data collection process.</p>
 <p>In some instances, we may process your data further for a compatible purpose and/or on other legal bases. For example,
   your data may be used for archiving, research, and/or statistical purposes. These are compatible purposes for further
   processing under UK GDPR, and your data will be subject to appropriate safeguards if used for such purposes.</p>
 
-<h2>How DBT processes personal data it receives</h2>
+<h2>How BIST processes personal data it receives</h2>
 <p>Once we receive your personal data, we are committed to handling it with care and responsibility, and our processing
   procedures are designed to ensure the protection of your privacy and the security of your information.</p>
 <p>Upon receipt, your data will be securely stored within:</p>
 <ul>
-  <li>DBT – SharePoint site</li>
-  <li>Informed Solutions Cloud solution – infrastructure managed on behalf of DBT</li>
+  <li>BIST – SharePoint site</li>
+  <li>Informed Solutions Cloud solution – infrastructure managed on behalf of BIST</li>
 </ul>
 <p>Where necessary, your data will be encrypted to prevent unauthorised access.</p>
 <p>Your privacy and data security are our top priorities, and we are dedicated to maintaining the confidentiality and integrity
@@ -128,7 +129,7 @@ export default function PrivacyNotice({ onClose }: Readonly<Props>) {
 
 <h2>Third Party Processors</h2>
 <p>We work with a trusted third-party processor, Informed Solutions, which manages the infrastructure on our behalf.
-  Any data stored with third-party processors remains subject to comparable data handling techniques that we follow within DBT.</p>
+  Any data stored with third-party processors remains subject to comparable data handling techniques that we follow within BIST.</p>
 <p>These partnerships are founded on robust contractual agreements that mandate adherence to stringent security standards
   and uphold the confidentiality of your data. They are prohibited from utilising your data for any purpose beyond the
   scope of their contracted services, ensuring that your information remains protected and confidential.</p>
@@ -142,8 +143,8 @@ export default function PrivacyNotice({ onClose }: Readonly<Props>) {
   <li>With third-party data processors as governed by contract</li>
 </ul>
 
-<h2>How long will DBT hold your data for</h2>
-<p>DBT will only retain your personal data until <strong>30 April 2026</strong> to fulfil the purposes of the
+<h2>How long will BIST hold your data for</h2>
+<p>BIST will only retain your personal data until <strong>30 April 2027</strong> to fulfil the purposes of the
   demonstrator, including satisfying any legal, accounting, or reporting requirements.</p>
 <p>If we decide that we need to process your personal data for a reason which is incompatible with the purposes for which
   we collected it, we will contact you to explain why we are doing this and why it is lawful to do so.</p>
@@ -163,7 +164,7 @@ export default function PrivacyNotice({ onClose }: Readonly<Props>) {
   <li>The right not to be subject to a decision based solely on automated data processing</li>
 </ul>
 
-<p>You can contact DBT's Data Protection Officer for further information about how your data has been processed by the department
+<p>You can contact BIST's Data Protection Officer for further information about how your data has been processed by the department
   or to make a complaint about how your data has been used. Please contact:
   <a href="mailto:data.protection@businessandtrade.gov.uk" class="privacy-notice-link">data.protection@businessandtrade.gov.uk</a>.
 </p>
